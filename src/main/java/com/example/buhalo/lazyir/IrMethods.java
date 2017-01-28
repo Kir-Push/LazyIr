@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Created by buhalo on 08.01.17.
  */
-//test
+//dada
 public class IrMethods {
     private static String SamsungPowerOffOn = "0000 006d 0022 0003 00a9 00a8 0015 003f 0015 003f 0015 003f 0015 " +
             "0015 0015 0015 0015 0015 0015 0015 " +
