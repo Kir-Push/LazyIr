@@ -1,0 +1,7 @@
+#Sat Jan 28 01:59:18 EET 2017
+base.0=/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_6305293e31778caadb6e0a70369531b537a3f3dd
+renamed.1=classes.dex
+renamed.0=classes2.dex
+file.1=/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_60fd2af404b00fc460c94bcd86321ec5c2f68d5f/classes.dex
+base.1=/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_60fd2af404b00fc460c94bcd86321ec5c2f68d5f
+file.0=/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_6305293e31778caadb6e0a70369531b537a3f3dd/classes.dex

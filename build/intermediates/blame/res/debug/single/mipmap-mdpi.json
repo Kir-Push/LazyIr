@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-mdpi/ic_launcher.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-mdpi/myapp.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-mdpi/myapp.png"
+    }
+]

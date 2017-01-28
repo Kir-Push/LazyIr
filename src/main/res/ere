@@ -1,0 +1,146 @@
+package com.example.buhalo.lazyir;
+
+/**
+ * Created by buhalo on 08.01.17.
+ */
+
+import android.hardware.ConsumerIrManager;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+package com.example.buhalo.lazyir;
+
+import android.content.Context;
+import android.hardware.ConsumerIrManager;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+
+    ConsumerIrManager irManager = null;
+
+    private String powerOffOn = "0000 006d 0022 0003 00a9 00a8 0015 003f 0015 003f 0015 003f 0015 " +
+            "0015 0015 0015 0015 0015 0015 0015 " +
+            "0015 0015 0015 003f 0015 003f 0015 003f 0015 0015 0015 0015 0015 0015 0015 0015" +
+            " 0015 0015 0015 0015 0015 003f 0015 0015 0015 " +
+            "0015 0015 0015 " +
+            "0015 0015 0015 0015 0015 0015 0015 0040 0015 0015 0015 003f 0015 003f 0015 003f " +
+            "0015 003f 0015 003f 0015 003f 0015 0702 00a9 00a8 0015 0015 0015 0e6e";
+
+    private String tt = "0000 006d 0022 0003 00a9 00a8 0015 003f 0015 003f 0015 003f 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 003f 0015 003f 0015 003f 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 003f 0015 003f 0015 003f 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 003f 0015 003f 0015 003f 0015 003f 0015 003f 0015 0702 00a9 00a8 0015 0015 0015 0e6e";
+    private String ss = "0000 006D 0000 0022 00AC 00AB 0015 0041 0015 0041 0015 0041 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0041 0015 0041 0015 0041 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0041 0015 0041 0015 0041 0015 0041 0015 0041 0015 0041 0015 0041 0015 0041 0015 0016 0015 0689";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+        irManager= (ConsumerIrManager)getSystemService(CONSUMER_IR_SERVICE);
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    public void processClickButton(View view)
+    {
+        System.out.println("yeap");
+        if(irManager != null && irManager.hasIrEmitter())
+        {
+            System.out.println("you phone has ir, GOOD");
+        }
+        else
+            return;
+        List<String> list;
+//        list= new ArrayList<String>(Arrays.asList(powerOffOn.split(" ")));
+//        list.remove(0); // dummy
+//       list.remove(0); // seq1
+//
+//        list.remove(0); // seq2
+//        list.remove(0);
+        String data = hex2dec(tt);
+        if (data != null) {
+            String values[] = data.split(",");
+            int[] pattern = new int[values.length - 1];
+
+            for (int i = 0; i < pattern.length; i++) {
+                pattern[i] = Integer.parseInt(values[i + 1]);
+            }
+
+            irManager.transmit(Integer.parseInt(values[0]), pattern);
+        }
+
+
+
+    }
+
+    protected String hex2dec(String irData) {
+        List<String> list = new ArrayList<String>(Arrays.asList(irData
+                .split(" ")));
+        list.remove(0); // dummy
+        int frequency = Integer.parseInt(list.remove(0), 16); // frequency
+        list.remove(0); // seq1
+        list.remove(0); // seq2
+
+        for (int i = 0; i < list.size(); i++) {
+            list.set(i, Integer.toString(Integer.parseInt(list.get(i), 16)));
+        }
+
+        frequency = (int) (1000000 / (frequency * 0.241246));
+        list.add(0, Integer.toString(frequency));
+
+        irData = "";
+        for (String s : list) {
+            irData += s + ",";
+        }
+        return irData;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+}
