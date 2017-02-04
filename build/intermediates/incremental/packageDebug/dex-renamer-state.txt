@@ -1,4 +1,4 @@
-#Sat Jan 28 01:59:18 EET 2017
+#Sat Feb 04 16:04:50 EET 2017
 base.0=/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_6305293e31778caadb6e0a70369531b537a3f3dd
 renamed.1=classes.dex
 renamed.0=classes2.dex

@@ -1,8 +1,10 @@
 package com.example.buhalo.lazyir;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.ConsumerIrManager;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -15,6 +17,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by buhalo on 08.01.17.
@@ -124,7 +127,23 @@ public class IrMethods {
     {
 
         getSocket task = new getSocket();
-        task.execute(new String[] { "PlaceHolder" });
+        task.execute(new String[] { "ShutDown" });
+
+    }
+
+    public static void increaseVolume(View view,Context context)
+    {
+        getSocket task = new getSocket();
+        task.setView(context);
+        task.execute(new String[] { "Volume+" });
+    }
+
+    public static void decreaseVolume(View view,Context context)
+    {
+
+        getSocket task = new getSocket();
+        task.setView(context);
+    task.execute(new String[] { "Volume-" });
 
     }
 }
