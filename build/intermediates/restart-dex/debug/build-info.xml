@@ -5,19 +5,19 @@
     density="xxxhdpi"
     format="8"
     plugin-version="2.2.3"
-    timestamp="7069377441203"
+    timestamp="7374432872131"
     token="2228066701280279150"
     verifier="COLD_SWAP_REQUESTED" >
 
     <task
         name="javac"
-        duration="118" />
+        duration="65" />
     <task
         name="instant-run-dex"
         duration="0" />
     <task
         name="instant-run-transform"
-        duration="7" />
+        duration="5" />
     <task
         name="verifier"
         duration="0" />
@@ -34,7 +34,7 @@
             type="MAIN" />
     </build>
     <build
-        timestamp="7069377441203"
+        timestamp="7374432872131"
         verifier="COLD_SWAP_REQUESTED" >
         <artifact
             location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/5/slice_1/classes.dex"
