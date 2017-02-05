@@ -129,6 +129,7 @@ public class PageFragment extends Fragment {
                             rpl.setX(event.getX()-receivedButton.getWidth()/2);
                             rpl.setY(event.getY()-receivedButton.getHeight()/2);
                             System.out.println(("!!!!!!!!!!!!FIAL!!!!!!!!!!!prefs X=" + String.valueOf(event.getX()) + " / Y=" + String.valueOf(event.getY())));
+                            layout.addView(rpl);
                             buttons.add(rpl);
                             break;
 
@@ -150,20 +151,15 @@ public class PageFragment extends Fragment {
             }
             if(buttons != null && buttons.size()>0)
             {
-                System.out.println("tut jest");
                 for(int i = 0;i<buttons.size();i++)
                 {
+                    System.out.println("Sozdaju button " + i);
                     Button temp =   buttons.get(i);
                     Button rpl = new Button(((Button)vv.getChildAt(0)).getContext());
                     rpl.setText(temp.getText());
                     rpl.setId(View.generateViewId());
-//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(temp.getLayoutParams());
-//                    marginParams.setMargins(temp.getLeft(), temp.getTop(), 0, 0);
-//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
                     rpl.setY(temp.getY());
                     rpl.setX(temp.getX());
-              //     rpl.setLayoutParams(layoutParams);
-//                    rpl.setLayoutParams(temp.getLayoutParams());
                     layout.addView(rpl);
                 }
 
@@ -172,8 +168,6 @@ public class PageFragment extends Fragment {
         else
         {
             view = inflater.inflate(R.layout.fragment_page2, container, false);
-           // TextView textView = (TextView) view;
-           // textView.setText(R.string.configure);
         }
 
         return view;
