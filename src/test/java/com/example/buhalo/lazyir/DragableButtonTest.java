@@ -28,7 +28,7 @@ public class DragableButtonTest extends AndroidTestCase {
         values.put(DragableButton.Button.COLUMN_NAME_TEXT, "dada");
         long newRowId;
         newRowId = db.insert(
-                DragableButton.Button.TABLE_NAME,
+                DragableButton.Button.TABLE_NAME_BUTTON,
                 null,
                 values);
 
@@ -37,7 +37,7 @@ public class DragableButtonTest extends AndroidTestCase {
                 DragableButton.Button.COLUMN_NAME_TEXT
         };
         Cursor c = db.query(
-                DragableButton.Button.TABLE_NAME,  // The table to query
+                DragableButton.Button.TABLE_NAME_BUTTON,  // The table to query
                 projection,                               // The columns to return
                 null,                                // The columns for the WHERE clause
                 null,                            // The values for the WHERE clause
