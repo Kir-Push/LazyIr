@@ -5,40 +5,33 @@
     density="xxxhdpi"
     format="8"
     plugin-version="2.2.3"
-    timestamp="7374432872131"
+    timestamp="25296695377992"
     token="2228066701280279150"
-    verifier="COLD_SWAP_REQUESTED" >
+    verifier="FULL_BUILD_REQUESTED" >
 
     <task
         name="javac"
-        duration="65" />
+        duration="226" />
     <task
         name="instant-run-dex"
         duration="0" />
     <task
         name="instant-run-transform"
-        duration="5" />
+        duration="96" />
     <task
         name="verifier"
-        duration="0" />
+        duration="7" />
 
     <artifact
-        location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/5/slice_1/classes.dex"
-        type="DEX" />
+        location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/outputs/apk/app-debug.apk"
+        type="MAIN" />
 
     <build
-        timestamp="6775865609842"
+        timestamp="25296695377992"
         verifier="FULL_BUILD_REQUESTED" >
         <artifact
             location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/outputs/apk/app-debug.apk"
             type="MAIN" />
-    </build>
-    <build
-        timestamp="7374432872131"
-        verifier="COLD_SWAP_REQUESTED" >
-        <artifact
-            location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/transforms/dex/debug/folders/1000/5/slice_1/classes.dex"
-            type="DEX" />
     </build>
 
 </instant-run>

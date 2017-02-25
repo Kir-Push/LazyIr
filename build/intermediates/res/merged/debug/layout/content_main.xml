@@ -66,4 +66,15 @@
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true" />
 
+    <Button
+        android:text="Broadcast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button7"
+        android:layout_alignParentStart="true"
+        android:onClick="processBroadcast"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="25dp"
+        android:id="@+id/button9" />
+
 </RelativeLayout>

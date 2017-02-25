@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.TRANSMIT_IR" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission-sdk-23 android:name="string"
         android:maxSdkVersion="23" />
     <uses-feature android:name="android.hardware.ConsumerIrManager" />
@@ -15,7 +17,8 @@
         android:icon="@mipmap/myapp"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".AppBoot">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -26,6 +29,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.BackgroundService"/>
+
+
+        <receiver android:name=".service.NetworkChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <!--<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />-->
+            </intent-filter>
+        </receiver>
+
+
 
         <receiver android:name="layout.IrWidg">
             <intent-filter>
