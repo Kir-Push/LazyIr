@@ -1,19 +1,17 @@
-package com.example.buhalo.lazyir;
+package com.example.buhalo.lazyir.service;
 
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 /**
  * Created by buhalo on 19.02.17.

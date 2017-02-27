@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir;
+package com.example.buhalo.lazyir.service;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

@@ -20,6 +20,13 @@
 
     <uses-feature android:name="android.hardware.ConsumerIrManager" />
 
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
+
     <application
         android:name="com.example.buhalo.lazyir.AppBoot"
         android:allowBackup="true"

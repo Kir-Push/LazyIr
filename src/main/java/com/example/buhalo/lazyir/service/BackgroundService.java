@@ -7,8 +7,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
-import com.example.buhalo.lazyir.TcpConnectionManager;
-import com.example.buhalo.lazyir.UdpBroadcastManager;
 
 
 /**

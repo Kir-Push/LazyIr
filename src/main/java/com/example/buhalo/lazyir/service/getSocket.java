@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir;
+package com.example.buhalo.lazyir.service;
 
 import android.app.Activity;
 import android.content.Context;

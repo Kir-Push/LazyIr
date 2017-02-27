@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <instant-run
-    abi="armeabi-v7a,armeabi"
-    api-level="23"
-    density="xxxhdpi"
+    abi="x86"
+    api-level="25"
+    density="420dpi"
     format="8"
     plugin-version="2.2.3"
-    timestamp="25296695377992"
+    timestamp="7082662712435"
     token="2228066701280279150"
     verifier="FULL_BUILD_REQUESTED" >
 
     <task
         name="javac"
-        duration="226" />
+        duration="1175" />
     <task
         name="instant-run-dex"
         duration="0" />
     <task
         name="instant-run-transform"
-        duration="96" />
+        duration="311" />
     <task
         name="verifier"
-        duration="7" />
+        duration="10" />
 
     <artifact
         location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/outputs/apk/app-debug.apk"
         type="MAIN" />
 
     <build
-        timestamp="25296695377992"
+        timestamp="7082662712435"
         verifier="FULL_BUILD_REQUESTED" >
         <artifact
             location="/home/buhalo/AndroidStudioProjects/LazyIr/app/build/outputs/apk/app-debug.apk"

@@ -9,6 +9,8 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.DbClasses.DragableButton;
+import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 /**
@@ -54,5 +56,6 @@ public class AppBoot extends Application {
         };
 
         bindService(intent, sConn,  BIND_AUTO_CREATE);
+
     }
 }

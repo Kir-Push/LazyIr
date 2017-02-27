@@ -1,28 +1,22 @@
 package com.example.buhalo.lazyir;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.ConsumerIrManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.StrictMode;
 import android.view.View;
-import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+import com.example.buhalo.lazyir.service.TcpConnectionManager;
+import com.example.buhalo.lazyir.service.getSocket;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by buhalo on 08.01.17.

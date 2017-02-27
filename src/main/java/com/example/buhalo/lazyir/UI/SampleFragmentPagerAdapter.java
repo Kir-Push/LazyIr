@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir;
+package com.example.buhalo.lazyir.UI;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;

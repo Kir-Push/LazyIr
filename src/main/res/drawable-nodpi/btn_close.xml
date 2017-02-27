@@ -15,9 +15,9 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="true" android:drawable="@drawable/detele64" />
-    <item android:state_window_focused="false" android:state_enabled="false" android:drawable="@drawable/detele64" />
+    <item android:state_window_focused="false" android:state_enabled="true" android:drawable="@drawable/delete48" />
+    <item android:state_window_focused="false" android:state_enabled="false" android:drawable="@drawable/delete48" />
     <item android:state_pressed="true" android:drawable="@drawable/delete48" />
-    <item android:state_focused="true" android:state_enabled="true" android:drawable="@drawable/delete52" />
-    <item android:drawable="@drawable/detele64" />
+    <item android:state_focused="true" android:state_enabled="true" android:drawable="@drawable/delete48" />
+    <item android:drawable="@drawable/delete48" />
 </selector>

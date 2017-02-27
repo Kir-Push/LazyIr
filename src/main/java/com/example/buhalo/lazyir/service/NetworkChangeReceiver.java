@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.AppBoot;
-import com.example.buhalo.lazyir.UdpBroadcastManager;
 
 /**
  * Created by buhalo on 19.02.17.
