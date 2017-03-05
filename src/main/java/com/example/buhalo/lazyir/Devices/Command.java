@@ -1,5 +1,8 @@
 package com.example.buhalo.lazyir.Devices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by buhalo on 26.02.17.
  */
@@ -78,4 +81,5 @@ public class Command {
                 "command_name='" + command_name + '\'' +
                 '}';
     }
+
 }

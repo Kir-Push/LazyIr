@@ -20,8 +20,8 @@
 
     <style name="Theme.AppCompat.Light.NoActionBar.Light.NoActionBar" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="baba" parent="Theme.AppCompat.NoActionBar" />
+    <style name="baba" parent="Theme.AppCompat" />
 
-    <style name="Theme.baba.NoActionBar" parent="Theme.AppCompat" />
+    <style name="Theme.baba.NoActionBar" parent="Theme.AppCompat.NoActionBar" />
 
 </resources>

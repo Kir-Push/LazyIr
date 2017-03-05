@@ -5,14 +5,13 @@ package com.example.buhalo.lazyir;
  */
 
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.RelativeLayout;
 
 import com.example.buhalo.lazyir.UI.SampleFragmentPagerAdapter;
+import com.example.buhalo.lazyir.old.IrMethods;
 
 
 public class MainActivity extends AppCompatActivity {

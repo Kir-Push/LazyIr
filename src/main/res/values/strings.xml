@@ -4,4 +4,11 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="cntxMenuOk">OK</string>
+    <string name="cntxMenuAdd">Add</string>
+    <string name="cntxMenuDelete">Delete</string>
+    <string name="tab1">Execute</string>
+    <string name="tab2">Hz ewe</string>
+    <string name="tab3">Buttons</string>
+    <string name="tab4">Executor Edit</string>
 </resources>

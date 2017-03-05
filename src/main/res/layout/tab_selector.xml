@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tabSelectTab">
 
     <Button
-        android:text="1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_height="60dp"
+        android:layout_marginStart="35dp"
+        android:id="@+id/button"
+        android:background="@mipmap/andrr"
+        android:tag="@mipmap/andrr"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="29dp"
-        android:layout_marginTop="26dp"
-        android:id="@+id/button1" />
+        android:layout_marginTop="84dp"
+        android:layout_width="60dp"
+        android:scaleX="1"
+        android:scaleY="1"/>
 
     <Button
-        android:text="2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/button1"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignTop="@+id/button"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="65dp"
-        android:id="@+id/button2" />
+        android:layout_marginEnd="71dp"
+        android:id="@+id/hzbtn"
+        android:tag="@mipmap/irbtn"
+        android:background="@mipmap/irbtn"
+        android:scaleX="1"
+        android:scaleY="1"/>
+
+
 </RelativeLayout>

@@ -37,7 +37,7 @@
         android:layout_alignParentStart="true">
 
         <Button
-            android:text="OK"
+            android:text="@string/cntxMenuOk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/cnts_btn_ok"
@@ -52,7 +52,7 @@
             app:layout_constraintHorizontal_bias="0.61" />
 
         <Button
-            android:text="Add"
+            android:text="@string/cntxMenuAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/const_bt_add"
@@ -69,7 +69,7 @@
             app:layout_constraintHorizontal_bias="0.61" />
 
         <Button
-            android:text="Delete"
+            android:text="@string/cntxMenuDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/const_bt_rmv"

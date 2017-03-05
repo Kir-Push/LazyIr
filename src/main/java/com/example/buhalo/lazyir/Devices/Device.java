@@ -1,5 +1,10 @@
 package com.example.buhalo.lazyir.Devices;
 
+import android.content.Context;
+
+import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.modules.ModuleFactory;
+
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -13,16 +18,21 @@ import java.util.Map;
 
 public class Device {
     public static Map<String,Device> connectedDevices = new HashMap<>();
+    private Context context;
     private Socket socket;
     private String id;
     private String name;
     private InetAddress ip;
-    private boolean paired;
+    private volatile boolean paired;
     private BufferedReader in;
     private PrintWriter out;
-    private boolean listening;
+    private volatile boolean listening;
+    private volatile boolean pinging;
+    private volatile boolean answer;
+    private HashMap<String,Module> enabledMdules = new HashMap<>();
 
-    public Device(Socket socket, String id, String name, InetAddress ip,BufferedReader in,PrintWriter out) {
+
+    public Device(Socket socket, String id, String name, InetAddress ip, BufferedReader in, PrintWriter out,Context context) {
         this.socket = socket;
         this.id = id;
         this.name = name;
@@ -31,6 +41,12 @@ public class Device {
         this.out = out;
         this.in = in;
         this.listening = false;
+        this.pinging = false;
+        this.answer = false;
+        this.context = context;
+        for (Class registeredModule : ModuleFactory.registeredModules) { // todo only for testing, after you create some menu where user can select module which he want to work!!
+            enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // todo it's enabled standart module which enabled by default;
+        }
     }
 
     public static Map<String, Device> getConnectedDevices() {
@@ -104,5 +120,44 @@ public class Device {
 
     public void setListening(boolean listening) {
         this.listening = listening;
+    }
+
+    public boolean isPinging() {
+        return pinging;
+    }
+
+    public void setPinging(boolean pinging) {
+        this.pinging = pinging;
+    }
+
+    public boolean isAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(boolean answer) {
+        this.answer = answer;
+    }
+
+    public void disableModules()
+    {
+        enabledMdules.clear();
+    }
+
+    public void enableModule(String name)
+    {
+       enabledMdules.put(name,ModuleFactory.instantiateModuleByName(this,name));
+    }
+
+    public HashMap<String,Module> getEnabledModules()
+    {
+        return enabledMdules;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 }

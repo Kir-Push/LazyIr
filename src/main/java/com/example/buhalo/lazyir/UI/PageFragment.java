@@ -1,7 +1,10 @@
 package com.example.buhalo.lazyir.UI;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
@@ -19,16 +22,19 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.example.buhalo.lazyir.DbClasses.DragableButton;
+import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
+import com.example.buhalo.lazyir.MainActivity;
+import com.example.buhalo.lazyir.modules.shareManager.ShareActivity;
 import com.example.buhalo.lazyir.R;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import static com.example.buhalo.lazyir.Executors.ButtonExecutor.executeButtonCommands;
 
 
 /**
@@ -39,29 +45,15 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     public static final String ARG_PAGE = "ARG_PAGE";
 
-    public static List<Button> buttons = new ArrayList<>();
-
-    public static Map<Integer,Button> buttonMap = new HashMap<>();
-
     private int mPage;
 
     private  TabLayout tabLayout;
 
-    private Activity activity;
-
-    private View rootView;
-
     private  RelativeLayout layout;
-
-    private Button tempBtn;
 
     private  ConstraintLayout commandLayout;
 
-    private static String textt;
-
-    private static TabLayout.Tab removedTab;
-
-    private static Set<String> buttonCommandsSet;
+    private Set<String> buttonCommandsSet;
 
     private ListView commandList;
 
@@ -84,12 +76,8 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = null;
-        View viewTouch = null;
-        rootView = inflater.inflate(R.layout.activity_main,container,false);
-        activity = (Activity) rootView.getContext();
-        tabLayout = (TabLayout) activity.findViewById(R.id.sliding_tabs);
-        viewTouch = inflater.inflate(R.layout.content_main, container, false);
+        View view;
+        tabLayout = (TabLayout)  ((Activity) getContext()).findViewById(R.id.sliding_tabs);
         view = inflater.inflate(R.layout.fragment_page, container, false);
         layout = (RelativeLayout) view.findViewById(R.id.fr_pg);
         hideCommandLayout();
@@ -97,12 +85,51 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
         if(mPage == 1)
         {
-            DragableButton dragableButton = new DragableButton();
-            DragableButton.DbHelper dragB = dragableButton.new DbHelper(getContext());
-            List<Button> buttonList = dragB.getButtons("1",activity);
-            for(Button button : buttonList)
+            List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
+            for(final Button button : buttonList)
             {
                 layout.addView(button);
+                button.setBackgroundResource(findResourceId(button.getTag()));
+                button.setScaleX(1);
+                button.setScaleY(1);
+                button.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(v,
+                                        "scaleX", 0.8f);
+                                ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(v,
+                                        "scaleY", 0.8f);
+                                scaleDownX.setDuration(500);
+                                scaleDownY.setDuration(500);
+
+                                AnimatorSet scaleDown = new AnimatorSet();
+                                scaleDown.play(scaleDownX).with(scaleDownY);
+
+                                scaleDown.start();
+
+                                break;
+
+                            case MotionEvent.ACTION_UP:
+                                ObjectAnimator scaleDownX2 = ObjectAnimator.ofFloat(
+                                        v, "scaleX", 1f);
+                                ObjectAnimator scaleDownY2 = ObjectAnimator.ofFloat(
+                                        v, "scaleY", 1f);
+                                scaleDownX2.setDuration(500);
+                                scaleDownY2.setDuration(500);
+
+                                AnimatorSet scaleDown2 = new AnimatorSet();
+                                scaleDown2.play(scaleDownX2).with(scaleDownY2);
+
+                                scaleDown2.start();
+                                mainButtonOnclick(v.getId());
+                                v.setEnabled(true);
+                                break;
+                        }
+                        return true;
+                    }
+                });
             }
         }
         else if(mPage == 3)
@@ -111,26 +138,28 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             ViewGroup vv4 = (ViewGroup) view;
             for(int i=0;i< vv4.getChildCount();i++)
             {
-                tempBtn = (Button)vv4.getChildAt(i);
+
+                Button tempBtn = (Button) vv4.getChildAt(i);
                 tempBtn.setOnTouchListener(this);
             }
 
         }
         else if(mPage == 4)
         {
-            DragableButton dragableButton = new DragableButton();
-            DragableButton.DbHelper dragB = dragableButton.new DbHelper(getContext());
-            List<Button> buttonList = dragB.getButtons("1",activity);
+            List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
             for(Button button : buttonList)
             {
                 layout.addView(button);
+                button.setBackgroundResource(findResourceId(button.getTag()));
                 button.setOnLongClickListener(this);
                 button.setOnClickListener(this);
             }
         }
         else if (mPage == 2)
         {
-         //   view = inflater.inflate(R.layout.tab_selector, container, false);
+        // view = inflater.inflate(R.layout.share_page, container, false);
+            Intent intent = new Intent(getActivity(), ShareActivity.class);
+            startActivity(intent);
         }
 
         return view;
@@ -164,21 +193,20 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         {
             case DragEvent.ACTION_DROP:
             {
-                Button nButton = new Button(activity);
+                Button nButton = new Button(getContext());
                 Button receivedButton = (Button)event.getLocalState();
                 nButton.setId(receivedButton.getId());
                 nButton.setText(receivedButton.getText());
                 nButton.setX(event.getX()-receivedButton.getWidth()/2);
                 nButton.setY(event.getY()-receivedButton.getHeight()/2);
-                nButton.setWidth(receivedButton.getWidth());
-                nButton.setHeight(receivedButton.getHeight());
+                nButton.setLayoutParams(new RelativeLayout.LayoutParams(receivedButton.getLayoutParams().width,receivedButton.getLayoutParams().height));
+                nButton.setTag(receivedButton.getTag());
+                nButton.setBackgroundResource(findResourceId(receivedButton.getTag()));
                 ImageButton imgButton = (ImageButton)layout.findViewById(R.id.imageButton4);
                 if(nButton.getY()+nButton.getHeight() >= imgButton.getY() && imgButton.getY()>0)
                 {
 
-                        DragableButton dragableButton = new DragableButton();
-                        DragableButton.DbHelper dragB = dragableButton.new DbHelper(getContext());
-                        dragB.removeButton(String.valueOf(nButton.getId()));  //TODO sdelatj uldaenie button commands vsmeste s button!!
+                        DBHelper.getInstance(getContext()).removeButton(String.valueOf(nButton.getId()));
                         layout.removeView(nButton);
                 }
                 else
@@ -187,15 +215,13 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                     nButton.setOnLongClickListener(this);
                     nButton.setOnClickListener(this);
                         layout.addView(nButton);
-                        DragableButton dragableButton = new DragableButton();
-                        DragableButton.DbHelper dragB = dragableButton.new DbHelper(getContext());
                   if( event.getClipData().getItemAt(0).getText().equals("update"))
                     {
-                        dragB.updateButton(nButton,"1");
+                        DBHelper.getInstance(getContext()).updateButton(nButton,"1");
                     }
                     else
                   {
-                      dragB.saveButton(nButton,"1");
+                      DBHelper.getInstance(getContext()).saveButton(nButton,"1");
                   }
                 }
                 imgButton.setVisibility(View.INVISIBLE);
@@ -203,6 +229,25 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             }
         }
         return true;
+    }
+
+    private int findResourceId(Object tag) {
+        if(tag == null)
+        {
+            return -1;
+        }
+        String path = (String) tag;
+        for (Field field : R.mipmap.class.getDeclaredFields()) {
+            if(path.endsWith(field.getName()+".png"))
+            {
+                try {
+                    return field.getInt(null);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -227,7 +272,6 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             if(commandLayout.getVisibility() != View.VISIBLE)
             {
                 commandLayout.setVisibility(View.VISIBLE);
-                commandLayout.bringToFront(); // TODO test only
               hideButtons();
                 fillCommandLayout(String.valueOf(v.getId()));
             }
@@ -239,6 +283,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
 
         }
+
     }
 
 
@@ -255,20 +300,19 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         Set<String> commands = new HashSet<>();
         buttonCommandsSet = getCommands(id);
 
-        DragableButton dragableButton = new DragableButton();
-        DragableButton.DbHelper dragB = dragableButton.new DbHelper(activity); // only for test
-        List<Command> command = dragB.getCommand(null);
+        // only for test
+        List<Command> command =   DBHelper.getInstance(getContext()).getCommand(null);
         for(Command command1 : command)
         {
             commands.add(command1.getCommand_name());
         }
 
         commandList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        commandAdapter = new ArrayAdapter<String>(activity,android.R.layout.simple_list_item_multiple_choice,new ArrayList<>(commands));
+        commandAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice,new ArrayList<>(commands));
         commandList.setAdapter(commandAdapter);
 
         buttonCommandList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        buttonCommandAdapter = new ArrayAdapter<String>(activity,android.R.layout.simple_list_item_multiple_choice, new ArrayList<>(buttonCommandsSet));
+        buttonCommandAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice, new ArrayList<>(buttonCommandsSet));
         buttonCommandList.setAdapter(buttonCommandAdapter);
 
         add.setOnClickListener(new View.OnClickListener() {
@@ -356,9 +400,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     private Set<String> getCommands(String id)
     {
-        DragableButton dragableButton = new DragableButton();
-        DragableButton.DbHelper dragB = dragableButton.new DbHelper(activity);
-        List<Command> btnCommands = dragB.getBtnCommands(id);
+        List<Command> btnCommands =   DBHelper.getInstance(getContext()).getBtnCommands(id);
         Set<String> set = new HashSet<>();
         for(Command cmd : btnCommands)
         {
@@ -368,21 +410,24 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     }
 
     private void addCommand(String id,Set<String> commands) {
-        DragableButton dragableButton = new DragableButton();
-        DragableButton.DbHelper dragB = dragableButton.new DbHelper(activity);
         for(String cmd : commands)
         {
-            dragB.saveBtnCommand(cmd,id);
+            DBHelper.getInstance(getContext()).saveBtnCommand(cmd,id);
         }
     }
 
     private void removeCommand(String id,List<String> commands)
     {
-        DragableButton dragableButton = new DragableButton();
-        DragableButton.DbHelper dragB = dragableButton.new DbHelper(activity);
         for(String cmd : commands)
         {
-            dragB.removeCommandBtn(id,cmd);
+            DBHelper.getInstance(getContext()).removeCommandBtn(id,cmd);
         }
     }
+
+    private void mainButtonOnclick(int id)
+    {
+        executeButtonCommands(getContext(),String.valueOf(id), MainActivity.selected_id);
+    }
+
+
 }
