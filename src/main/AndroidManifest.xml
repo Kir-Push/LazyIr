@@ -46,7 +46,8 @@
             android:theme="@style/baba">
         </activity>
 
-        <service android:name=".service.BackgroundService" />
+        <service android:name=".service.BackgroundService"
+            android:enabled="true"/>
         <!--<service android:name=".service.SheluderService"-->
             <!--android:permission="android.permission.BIND_JOB_SERVICE"/>-->
 

@@ -5,12 +5,10 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.StrictMode;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.Exception.ParseError;
-import com.example.buhalo.lazyir.MainActivity;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -18,6 +16,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by buhalo on 19.02.17.
@@ -40,7 +39,7 @@ public class UdpBroadcastManager  {
     private volatile static boolean sending;
     private static UdpBroadcastManager instance;
 
-    public static ArrayList<String> neighboors = new ArrayList<>();
+    public static HashMap<String,InetAddress> neighboors = new HashMap<>();
 
     private UdpBroadcastManager() {
         try {
@@ -65,7 +64,6 @@ public class UdpBroadcastManager  {
     {
         if(instance == null)
         {
-            System.out.println("i create new isntance udp");
             instance = new UdpBroadcastManager();
         }
         return instance;
@@ -127,7 +125,6 @@ public class UdpBroadcastManager  {
             Log.d("udp","No Wifi network -- listener not started");
           return;
         }
-            neighboors = new ArrayList<>();
             try {
                 server = new DatagramSocket(port);
                 server.setReuseAddress(true);
@@ -145,24 +142,21 @@ public class UdpBroadcastManager  {
                     final int bufferSize = 1024 * 5;
                     byte[] data = new byte[bufferSize];
                     while (listening) {
-                        Log.d("Udp","listening Iteration");
-
                         DatagramPacket packet = new DatagramPacket(data, bufferSize);
                         try {
                             server.receive(packet);
-                            broadcastReceived(packet,context);
-                            data = new byte[bufferSize];
-                        } catch (Exception e) {
+                        } catch (IOException e) {
                             Log.e("Udp", "UdpReceive exception + " + e.toString());
                             listening = false; //todo handle exception and think about restart listening
-                            stopSending();
-                            if(!server.isClosed())
+                            if(!server.isConnected())
                             {
                                 server.close();
                             }
                             break;
                             //   sendBroadcast(context);
                         }
+                        udpReceived(packet,context);
+                        data = new byte[bufferSize];
                     }
                     Log.d("Udp", "Stopping UDP listener");
                     server.close();
@@ -175,7 +169,7 @@ public class UdpBroadcastManager  {
 
 
 
-    public void broadcastReceived(DatagramPacket packet,Context context)
+    public void udpReceived(DatagramPacket packet, Context context)
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
         NetworkPackage np = new NetworkPackage();
@@ -187,11 +181,11 @@ public class UdpBroadcastManager  {
         else if(np.getType().equals(BROADCAST_INTRODUCE))
         {
             Log.d("Udp","Broadcast data received: " + np.getData());
-            neighboors.add(packet.getAddress().toString()); // todo attention here !!
+            neighboors.put(np.getId(),packet.getAddress()); // todo attention here !!
             Log.d("Udp","full package is + " + pck);
             Log.d("Udp","Id is " + np.getId() + " and name is" + np.getName());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
-                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress().toString().substring(1), BackgroundService.port, np.getId(), np.getName(),context);
+                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress().toString().substring(1), BackgroundService.port, np,context);
             }
         }
     }
@@ -204,25 +198,14 @@ public class UdpBroadcastManager  {
         server.close();
     }
 
-    public void onNetworkChange(Context context,int port)
-    {
-        Log.d("Udp","OnNetworkChange method start");
-        startUdpListener(context,port);
-        sendBroadcast(context,BROADCAST_INTRODUCE_MSG,port);
-    }
-
-
-
 
     public synchronized void startSendingTask(final Context context, final int port) {
 
         if(!exitedFromSend)
         {
             sending = true;
-            System.out.println("!!!!!!!Sendtind booleans is " + isSending());
             return;
         }
-        System.out.println("Sendtind booleans is " + isSending());
         startSending();
         exitedFromSend = false;
         NetworkPackage np = new NetworkPackage();
@@ -239,17 +222,16 @@ public class UdpBroadcastManager  {
                 int count = 0;
                     while (isSending()) {
                         sendBroadcast(context, message, port);
-                        System.out.println(count);
                         try {
                             count++;
                             Thread.sleep(getSend_period());
-                            if(count == 10)
-                            {
-                              setSend_period(send_period*2);
-                            }else if(count == 15)
-                            {
-                                stopSending(); // todo start udp listening in this place!
-                            }
+//                            if(count == 25)
+//                            {
+//                              setSend_period(send_period*2);
+//                            }else if(count == 50)
+//                            {
+//                                setSend_period(send_period*2);
+//                            }
 
                         } catch (InterruptedException e) {
                             Log.e("Udp", "Error in sending loop");
@@ -262,6 +244,7 @@ public class UdpBroadcastManager  {
         }).start();
         } catch (ParseError parseError) {
             Log.e("Udp",parseError.getMessage()); // if parse error not start sending task // todo pridumaj 4tonibudj bljatj
+            //todo start udp listener here
         }
         catch (SocketException e)
         {

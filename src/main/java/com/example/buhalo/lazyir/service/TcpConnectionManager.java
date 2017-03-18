@@ -54,10 +54,6 @@ public class TcpConnectionManager {
         return instance;
     }
 
-    private Socket createSocket() // for future testing purposes
-    {
-        return new Socket();
-    }
 
     public void startListening(final int port, final Context context) {
         new Thread(new Runnable() {
@@ -84,7 +80,7 @@ public class TcpConnectionManager {
                     Socket socket;
                     try {
                         socket = myServerSocket.accept();
-
+                        socket.setKeepAlive(true);
 
                     } catch (IOException e) {
                         Log.e("Tpc","Exception on accept connection ignoring + " + e.toString());
@@ -92,7 +88,6 @@ public class TcpConnectionManager {
                             ServerOn = false;
                         continue;
                     }
-                    UdpBroadcastManager.stopSending(); // todo for testing
                     ConnectionThread connection = new ConnectionThread(socket,context);
                     connection.start();
                 }
@@ -115,6 +110,10 @@ public class TcpConnectionManager {
         } catch (IOException e) {
             Log.e("Tcp","Error in close serverSocket " + e.toString());
         }
+    }
+
+    public void receivedUdpIntroduce(String substring, int port,NetworkPackage np, Context context) {
+ //todo sdelaj
     }
 
 
@@ -140,6 +139,10 @@ public class TcpConnectionManager {
                 out = new PrintWriter(
                         new OutputStreamWriter(connection.getOutputStream()));
 
+                if(Device.getConnectedDevices().size() == 0) //if first connection set periods of broadcast 3 times less often
+                {
+               //     UdpBroadcastManager.getInstance().setSend_period(UdpBroadcastManager.getInstance().getSend_period()*3);
+                }
                 while (connectionRun)
                 {
                     String clientCommand = in.readLine();
@@ -161,7 +164,7 @@ public class TcpConnectionManager {
                     determineWhatTodo(np);
                 }
 
-            }catch (IOException e)
+            }catch (Exception e)
             {
                 Log.e("Tcp","Error in tcp out + " + e.toString());
             }
@@ -170,6 +173,10 @@ public class TcpConnectionManager {
                     in.close();
                     out.close();
                     connection.close();
+                    if(Device.getConnectedDevices().size() == 0) //return to normal frequency
+                    {
+                        UdpBroadcastManager.getInstance().setSend_period(10000);
+                    }
                     Log.d("Tcp","Stopped connection");
                 }catch (IOException e)
                 {
@@ -187,6 +194,12 @@ public class TcpConnectionManager {
                     break;
                 case TCP_PING:
                     Device.connectedDevices.get(deviceId).setAnswer(true);
+                    try {
+                     String msgf=   np.createFromTypeAndData(TCP_PING,TCP_PING);
+                        sendCommandToServer(deviceId,msgf);
+                    } catch (Exception parseError) {
+                        parseError.printStackTrace();
+                    }
                     break;
                 default:
                     Device.connectedDevices.get(deviceId).setAnswer(true);
@@ -206,21 +219,10 @@ public class TcpConnectionManager {
                     MainActivity.selected_id = deviceId;
                 }
                 sendIntroduce();
-                startPingPong(deviceId);
+              //  startPingPong(deviceId);
             }
         }
 
-        public void ping(NetworkPackage np)
-        {
-            NetworkPackage p = new NetworkPackage();
-            try {
-                String msg = p.createFromTypeAndData(TCP_PING,TCP_PING);
-                out.println(msg);
-                out.flush();
-            } catch (ParseError parseError) {
-                Log.e("Tcp",parseError.toString());
-            }
-        }
 
         private void sendIntroduce() {
             NetworkPackage networkPackage = new NetworkPackage();
@@ -228,7 +230,7 @@ public class TcpConnectionManager {
                 out.println(networkPackage.createFromTypeAndData(TCP_INTRODUCE,TCP_INTRODUCE_MSG));
                 out.flush();
             } catch (ParseError parseError) {
-                parseError.printStackTrace();
+                Log.d("Tcp",parseError.toString());
             }
         }
 
@@ -239,115 +241,6 @@ public class TcpConnectionManager {
         }
     }
 
-    public synchronized void receivedUdpIntroduce(final String address, final int port, final String id, final String name, final Context context) {
-
-        if(checkForOpenConnection(id))
-        {
-            return;
-        }
-        try {
-
-            final Socket socket = createSocket();
-            InetAddress inetAddress = null;
-            final BufferedReader in;
-            PrintWriter out;
-            String idTemp = id;
-            inetAddress = InetAddress.getByName(address);
-            Log.d("Tcp", "I'm start connect via tcp to " + inetAddress);
-            // socket.setSoTimeout(10000);
-            socket.setKeepAlive(true);
-            socket.connect(new InetSocketAddress(address, port), 10000);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream());
-            final Device dv = new Device(socket, id, name, inetAddress, in, out, context);
-            dv.setListening(true);
-            Device.connectedDevices.put(id, dv);
-            NetworkPackage networkPackage = new NetworkPackage();
-            try {
-                out.println(networkPackage.createFromTypeAndData(TCP_INTRODUCE,TCP_INTRODUCE_MSG));
-            } catch (ParseError parseError) {
-                parseError.printStackTrace();
-            }
-            MainActivity.selected_id = id; // only for testing;
-            UdpBroadcastManager.getInstance().stopSending();       // todo only for testing
-   //         UdpBroadcastManager.getInstance().stopUdpListener();   // todo only for testing
-            startPingPong(id);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String answer;
-                        while (dv.isListening()) {
-                            Log.d("Tcp", "I'w try to read from socket tcp " + Thread.currentThread().getName());
-                            if (!socket.isConnected() || socket.isClosed()) {
-                                break;
-                            }
-                            answer = in.readLine();
-                            if (answer == null || answer.isEmpty()) {
-                                break;
-                            }
-                            proceedAnswerFromServer(answer, id, dv);
-                        }
-                        Log.d("Tcp", "I'w end socket reading!! for + " + id);
-
-                    } catch (IOException e) {
-                        Log.e("Tcp", "you have error in tcp connection + " + e);
-
-                    } finally {
-                        StopListening(id); // todo// create some check if dv user other connection or not , and not delete if use (or not delete it from connected in this method) , basically i think create in device array in which storage opened connections(create some class connection or so)
-                        //todo// and if connection closed or lost delete from it,and when open connection add, and check if no connection's delete device, also try to reestablish listeing, and so.
-                        UdpBroadcastManager.getInstance().startSendingTask(context,5667);       // todo only for testing
-                  //      UdpBroadcastManager.getInstance().stopUdpListener();
-                    }
-                }
-            }).start();
-        }catch (IOException e)
-        {
-            Log.e("Tcp",e.toString());
-        }
-
-    }
-
-    private boolean checkForOpenConnection(String id) {
-        Device dv = Device.connectedDevices.get(id);
-        if(dv == null)
-        {
-            return false;
-        }
-        if( dv.getSocket() == null || !dv.getSocket().isConnected() || dv.getSocket().isClosed() || !dv.isListening())
-        {
-            StopListening(id);
-            return false;
-        }
-        return true;
-    }
-
-    private synchronized void proceedAnswerFromServer(String answer, String id,Device dv) {
-        if(dv == null || Device.connectedDevices.get(id) == null)
-        {
-            return;
-        }
-        if(answer.trim().equals("pong pong ping:" + id))
-        {
-            Log.d("Tcp","ping pong received for " + id);
-            dv.setAnswer(true);
-            return;
-        }
-        Log.d("Tcp","answer from tcp " + id + " is " + answer.trim());
-
-        NetworkPackage np = new NetworkPackage();
-        np.parsePackage(answer);
-        np.setDv(dv);
-
-        if(np.getType().equals(TCP_PING))
-        {
-            Log.d("Tcp","ping pong received for " + id);
-            dv.setAnswer(true);
-            return;
-        }
-
-        ModuleExecutor.executePackage(np);
-    }
 
 
     public synchronized boolean sendCommandToServer(final String id, final String command) throws TcpError
@@ -362,7 +255,7 @@ public class TcpConnectionManager {
                 {
                     Log.d("Tcp","Error in output for socket");
                     StopListening(id);
-                    TryConnect(device);
+                   // TryConnect(device);
                     throw new TcpError("error in connection");
                 }
                 if(!device.isPaired())
@@ -386,22 +279,6 @@ public class TcpConnectionManager {
         return true;
     }
 
-    public synchronized void sendCommandsToServerSeparateThread(final String id, final List<String> commands)
-    {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for(String command : commands)
-                {
-                    try {
-                        sendCommandToServer(id,command);
-                    } catch (TcpError tcpError) {
-                        tcpError.printStackTrace(); // todo handle exceptions
-                    }
-                }
-            }
-        }).start();
-    }
 
     public void StopListening(String id) {
         if(!Device.connectedDevices.containsKey(id))

@@ -8,6 +8,7 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.Exception.ParseError;
 import com.example.buhalo.lazyir.Exception.TcpError;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.List;
@@ -19,19 +20,24 @@ import java.util.List;
 public class SendCommand extends Module {
     public static final String SEND_COMMAND = "SendCommand";
     public static final String RECEIVED_COMMAND = "receivedCommand";
-
+    public static final String EXECUTE = "execute";
 
     @Override
-    public void execute(NetworkPackage np) {
-        List<String> args = np.getArgs();
-        if(np.getData().equals(SEND_COMMAND))
-        {
-            sendCommands(np);
-        }
-        else if(np.getData().equals(RECEIVED_COMMAND))
-        {
-           saveCommand(args);
-        }
+    public void execute(final NetworkPackage np) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final List<String> args = np.getArgs();
+                if(np.getData().equals(EXECUTE))
+                {
+                    sendCommands(np);
+                }
+                else if(np.getData().equals(RECEIVED_COMMAND))
+                {
+                    saveCommand(args);
+                }
+            }
+        }).start();
     }
 
     private void sendCommands(NetworkPackage np)

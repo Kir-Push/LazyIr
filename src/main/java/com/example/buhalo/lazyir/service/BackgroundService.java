@@ -147,6 +147,18 @@ public class BackgroundService extends Service {
         context.startService(tempIntent);
     }
 
+    public static void startExternalCustomMethod(Context context,int... backgroundCommand)
+    {
+        Intent tempIntent = new Intent(context.getApplicationContext(), BackgroundService.class);
+        ArrayList<Integer> list = new ArrayList<>();
+        for(int i = 0;i<backgroundCommand.length;i++)
+        {
+            list.add(backgroundCommand[i]);
+        }
+        tempIntent.putIntegerArrayListExtra("Commands", list);
+        context.startService(tempIntent);
+    }
+
     public static void stopExternalMethod(Context context)
     {
         Intent tempIntent = new Intent(context.getApplicationContext(),BackgroundService.class);

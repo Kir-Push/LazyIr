@@ -15,6 +15,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
@@ -54,23 +55,23 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
         pcFileList = (ListView) findViewById(R.id.pc_file_list);
         android_list = (ListView) findViewById(R.id.file_list);
         tabs.addOnTabSelectedListener(this);
-       module = (ShareModule) Device.connectedDevices.get(MainActivity.selected_id).getEnabledModules().get(ShareModule.class.getSimpleName()); // todo only for test
-      //  module = new ShareModule(); // todo only for test
+        Device device = Device.connectedDevices.get(MainActivity.selected_id);
+        if(device != null)
+        module = (ShareModule) device.getEnabledModules().get(ShareModule.class.getSimpleName()); // todo only for test
+        if(module == null || device == null)
+        {
+            CharSequence text = "No connection!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+            toast.show();
+            return;
+        }
         List<FileWrap> filesList = module.getFilesList(module.getRootPath());
         List<FileWrap> serverFilesList = module.getFilesListFromServer("root");
-//        setCurrPaths(module.getRootPathFromServer());
-
-     //   List<FileWrap> toAdapter = new ArrayList<>();
         lastPath = module.getRootPath();
         currPath = lastPath;
         lastPathS = "/"; // todo for test
         currPaths = lastPathS;
-//        toAdapter.add("....");
-//        for(File f : filesList)
-//        {
-//            toAdapter.add(new FileWrap(false,));
-//        }
-       // android_adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_checked,toAdapter);
         android_adapter = new FolderAdater(this,filesList);
         android_list.setAdapter(android_adapter);
         server_adapter = new FolderAdater(this,serverFilesList);
@@ -79,10 +80,6 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
        // android_list.setOnItemLongClickListener(this);
         android_list.setOnItemClickListener(this);
         pcFileList.setOnItemClickListener(new ServerClickListener());
-        System.out.println("i'here2");
-
-     //   android_list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-       // android_list.setMultiChoiceModeListener(this);
         registerForContextMenu(pcFileList);
         registerForContextMenu(android_list);
         tabs.getTabAt(0).select();

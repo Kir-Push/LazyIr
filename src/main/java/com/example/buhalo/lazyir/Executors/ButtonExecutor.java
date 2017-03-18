@@ -35,7 +35,7 @@ public class ButtonExecutor {
         }
         NetworkPackage npPc = new NetworkPackage();
         npPc.setType(SendCommand.class.getSimpleName());
-        npPc.setData(SendCommand.SEND_COMMAND);
+        npPc.setData(SendCommand.EXECUTE);
         npPc.setArgs(pc);
         npPc.setDv(Device.connectedDevices.get(dvId));
         NetworkPackage npIr = new NetworkPackage();
