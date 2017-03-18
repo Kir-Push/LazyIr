@@ -44,7 +44,7 @@ public class Device {
         this.pinging = false;
         this.answer = false;
         this.context = context;
-        for (Class registeredModule : ModuleFactory.registeredModules) { // todo only for testing, after you create some menu where user can select module which he want to work!!
+        for (Class registeredModule : ModuleFactory.getRegisteredModules()) { // todo only for testing, after you create some menu where user can select module which he want to work!!
             enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // todo it's enabled standart module which enabled by default;
         }
     }

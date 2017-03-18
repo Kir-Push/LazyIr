@@ -29,5 +29,25 @@
         android:scaleX="1"
         android:scaleY="1"/>
 
+    <Button
+        android:id="@+id/file_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/button"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="47dp"
+        android:tag="@mipmap/file_icn"
+        android:background="@mipmap/file_icn" />
+
+    <Button
+        android:id="@+id/folder_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignEnd="@+id/hzbtn"
+        android:layout_alignTop="@+id/file_icn"
+        android:layout_marginEnd="15dp"
+        android:tag="@mipmap/folder_icn"
+        android:background="@mipmap/folder_icn" />
+
 
 </RelativeLayout>

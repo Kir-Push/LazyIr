@@ -17,7 +17,7 @@ import java.util.List;
  */
 
 public class SendCommand extends Module {
-    public static final String SEND_COMMAND = "sendCommand";
+    public static final String SEND_COMMAND = "SendCommand";
     public static final String RECEIVED_COMMAND = "receivedCommand";
 
 

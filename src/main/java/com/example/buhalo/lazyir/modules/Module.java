@@ -15,15 +15,17 @@ public abstract class Module {
 
     protected  Context context;
 
-  public   void setDevice(Device dv)
+    public   void setDevice(Device dv)
     {
         this.device = dv;
     }
 
-  public  void setContext(Context context)
+    public  void setContext(Context context)
     {
         this.context = context;
     }
 
     public abstract void execute(NetworkPackage np);
+
+
 }

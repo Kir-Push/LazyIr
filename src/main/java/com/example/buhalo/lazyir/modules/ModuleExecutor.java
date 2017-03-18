@@ -1,6 +1,10 @@
 package com.example.buhalo.lazyir.modules;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.modules.SendIr.SendIr;
 
 /**
  * Created by buhalo on 05.03.17.
@@ -9,19 +13,25 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 public class ModuleExecutor {
 
 
-    public static void executePackage(final NetworkPackage np)
+    public static void executePackage(final NetworkPackage np) // todo create handle exptions when no connection
     {
         String type = np.getType();
         final Module module = np.getDv().getEnabledModules().get(type);
         if(module == null)
             return;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
                 module.execute(np);
-            }
-        }).start();
+    }
+
+    public static void executePackageIrOffline(final NetworkPackage np, Context context)
+    {
+        if(np.getDv() == null) // if null maybe it's only ir command? trying to do
+        {
+            Log.d("ModuleExecutor","Start ir executore offline");
+            SendIr ir = new SendIr();
+            ir.setContext(context);
+            ir.execute(np);
+        }
     }
 
 }

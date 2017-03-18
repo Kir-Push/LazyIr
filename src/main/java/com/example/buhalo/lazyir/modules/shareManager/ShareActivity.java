@@ -31,7 +31,8 @@ import java.util.List;
 public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener,AdapterView.OnItemLongClickListener,AdapterView.OnItemClickListener,AbsListView.MultiChoiceModeListener {
 
     private ShareModule module;
-    private  ArrayAdapter<String> android_adapter;
+    private  FolderAdater android_adapter;
+    private FolderAdater server_adapter;
     private ListView android_list;
 
     private ListView pcFileList;
@@ -41,6 +42,10 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     private  String currPath;
 
+    private String lastPathS;
+
+    private String currPaths;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,23 +54,34 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
         pcFileList = (ListView) findViewById(R.id.pc_file_list);
         android_list = (ListView) findViewById(R.id.file_list);
         tabs.addOnTabSelectedListener(this);
-//        module = (ShareModule) Device.connectedDevices.get(MainActivity.selected_id).getEnabledModules().get(ShareModule.class.getSimpleName()); // todo only for test
-        module = new ShareModule();
-        List<File> filesList = module.getFilesList(module.getRootPath());
-        List<String> toAdapter = new ArrayList<>();
+       module = (ShareModule) Device.connectedDevices.get(MainActivity.selected_id).getEnabledModules().get(ShareModule.class.getSimpleName()); // todo only for test
+      //  module = new ShareModule(); // todo only for test
+        List<FileWrap> filesList = module.getFilesList(module.getRootPath());
+        List<FileWrap> serverFilesList = module.getFilesListFromServer("root");
+//        setCurrPaths(module.getRootPathFromServer());
+
+     //   List<FileWrap> toAdapter = new ArrayList<>();
         lastPath = module.getRootPath();
         currPath = lastPath;
-        toAdapter.add("....");
-        for(File f : filesList)
-        {
-            toAdapter.add(f.getName());
-        }
-        android_adapter = new ArrayAdapter<String>(this,android.R.layout.simple_selectable_list_item,toAdapter);
+        lastPathS = "/"; // todo for test
+        currPaths = lastPathS;
+//        toAdapter.add("....");
+//        for(File f : filesList)
+//        {
+//            toAdapter.add(new FileWrap(false,));
+//        }
+       // android_adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_checked,toAdapter);
+        android_adapter = new FolderAdater(this,filesList);
         android_list.setAdapter(android_adapter);
+        server_adapter = new FolderAdater(this,serverFilesList);
+        pcFileList.setAdapter(server_adapter);
+        findViewById(R.id.share_ok).setVisibility(View.INVISIBLE);
        // android_list.setOnItemLongClickListener(this);
         android_list.setOnItemClickListener(this);
+        pcFileList.setOnItemClickListener(new ServerClickListener());
         System.out.println("i'here2");
 
+     //   android_list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
        // android_list.setMultiChoiceModeListener(this);
         registerForContextMenu(pcFileList);
         registerForContextMenu(android_list);
@@ -73,9 +89,34 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
     }
 
     @Override
+    public boolean onContextItemSelected(MenuItem item) {
+       //     android_list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE); // todo
+        android_adapter.setCbSend(true);
+        server_adapter.setCbSend(true);
+        findViewById(R.id.share_ok).setVisibility(View.VISIBLE);
+        android_adapter.notifyDataSetChanged();
+        server_adapter.notifyDataSetChanged();
+       android_list.setOnItemClickListener(null);
+        return super.onContextItemSelected(item);
+    }
+
+    public void onOkclick(View view)
+    {
+        System.out.println("dada");
+        List<FileWrap> checked = server_adapter.getChecked();
+        System.out.println(checked);
+        android_adapter.notifyDataSetChanged();
+        server_adapter.notifyDataSetChanged();
+        android_list.setOnItemClickListener(this);
+        module.startDownloading(getCurrPath(),getCurrPaths(),checked);
+        server_adapter.setCbSend(false);
+        android_adapter.setCbSend(false);
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-        menu.setHeaderTitle(android_adapter.getItem(info.position));
+    //    menu.setHeaderTitle(android_adapter.getFile(info.position).getPath());
         String[] menuItems = {"Send","Select"};
         for (int i = 0; i<menuItems.length; i++) {
             menu.add(Menu.NONE, i, i, menuItems[i]);
@@ -134,14 +175,14 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String item = android_adapter.getItem(position);
+        FileWrap item = android_adapter.getFile(position);
         android_adapter.clear();
-        String temp = getCurrPath()+"/"+item;
+        String temp = getCurrPath()+"/"+item.getPath();
         if(position == 0)
         {
             System.out.println(position + "  Position");
             setCurrPath(getLastPath());
-            if(!getLastPath().equals(module.getRootPath()))
+            if(getLastPathS() != null && !getLastPath().equals(module.getRootPath()))
             {
                 int i = getLastPath().lastIndexOf("/");
                 String substring = getLastPath().substring(0, i);
@@ -160,14 +201,8 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
             setCurrPath(temp);
         }
 
-        List<File> fileList = module.getFilesList(getCurrPath());
-        List<String> toAdapter = new ArrayList<>();
-        toAdapter.add("....");
-        for(File f : fileList)
-        {
-            toAdapter.add(f.getName());
-        }
-        android_adapter.addAll(toAdapter);
+        List<FileWrap> fileList = module.getFilesList(getCurrPath());
+        android_adapter.setFileWrapList(fileList);
         android_adapter.notifyDataSetChanged();
     }
 
@@ -194,5 +229,67 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     public void onDestroyActionMode(ActionMode mode) {
 
+    }
+
+    public String getLastPathS() {
+        return lastPathS;
+    }
+
+    public void setLastPathS(String lastPathS) {
+        this.lastPathS = lastPathS;
+    }
+
+    public String getCurrPaths() {
+        return currPaths;
+    }
+
+    public void setCurrPaths(String currPaths) {
+        this.currPaths = currPaths;
+    }
+
+
+    public class ServerClickListener implements AdapterView.OnItemClickListener
+    {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            System.out.println("dadada");
+            FileWrap item = server_adapter.getFile(position);
+            server_adapter.clear();
+            String temp = getCurrPaths()+"/"+item.getPath();
+            if(position == 0)
+            {
+                System.out.println(position + "  Position");
+                setCurrPaths(getLastPathS());
+                if(getLastPathS() != null && !getLastPathS().equals(module.getRootPathFromServer()))
+                {
+                    int i = getLastPathS().lastIndexOf("/");
+                    String substring;
+                    if(i > 1) {
+                        substring = getLastPathS().substring(0, i);
+                    }
+                    else
+                    {
+                        substring = "/";
+                    }
+                    System.out.println("Substing path " + substring);
+                    setLastPathS(substring);
+                }
+
+            }
+            else if(item.isFile())
+            {
+                //   setCurrPath(getLastPath());
+            }
+            else
+            {
+                setLastPathS(getCurrPaths());
+                setCurrPaths(temp);
+            }
+
+            List<FileWrap> fileList = module.getFilesListFromServer(getCurrPaths());
+            server_adapter.setFileWrapList(fileList);
+            server_adapter.notifyDataSetChanged();
+        }
     }
 }

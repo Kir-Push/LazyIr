@@ -158,8 +158,15 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         else if (mPage == 2)
         {
         // view = inflater.inflate(R.layout.share_page, container, false);
-            Intent intent = new Intent(getActivity(), ShareActivity.class);
-            startActivity(intent);
+            Button share = new Button(getContext());
+            share.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), ShareActivity.class);
+                    startActivity(intent);
+                }
+            });
+            layout.addView(share);
         }
 
         return view;

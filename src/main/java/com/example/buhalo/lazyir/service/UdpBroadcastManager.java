@@ -32,10 +32,12 @@ public class UdpBroadcastManager  {
     private InetAddress broadcastAddress;
     private String android_id;
     private String android_name;
+    private int send_period = 10000;
 
 
-    public static boolean listening = false;
-    public static boolean sending = false;
+    private volatile static boolean listening = false;
+    public volatile static boolean exitedFromSend = true;
+    private volatile static boolean sending;
     private static UdpBroadcastManager instance;
 
     public static ArrayList<String> neighboors = new ArrayList<>();
@@ -63,6 +65,7 @@ public class UdpBroadcastManager  {
     {
         if(instance == null)
         {
+            System.out.println("i create new isntance udp");
             instance = new UdpBroadcastManager();
         }
         return instance;
@@ -104,7 +107,7 @@ public class UdpBroadcastManager  {
         return InetAddress.getByAddress(quads);
     }
 
-    public void startUdpListener(final Context context,int port)
+    public synchronized void startUdpListener(final Context context,int port)
     {
 
         if(listening)
@@ -133,7 +136,7 @@ public class UdpBroadcastManager  {
                 Log.e("Udp",e.toString());
                 return;
             }
-            listening = true;
+            listening = true; //todo handle variable in threads
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -152,10 +155,12 @@ public class UdpBroadcastManager  {
                         } catch (Exception e) {
                             Log.e("Udp", "UdpReceive exception + " + e.toString());
                             listening = false; //todo handle exception and think about restart listening
+                            stopSending();
                             if(!server.isClosed())
                             {
                                 server.close();
                             }
+                            break;
                             //   sendBroadcast(context);
                         }
                     }
@@ -175,7 +180,7 @@ public class UdpBroadcastManager  {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
         NetworkPackage np = new NetworkPackage();
         np.parsePackage(pck);
-        if(np.getId().equals(android.provider.Settings.Secure.ANDROID_ID))
+        if(np.getId().equals(android.os.Build.SERIAL))
         {
             return; // ignore my own packets
         }
@@ -183,6 +188,7 @@ public class UdpBroadcastManager  {
         {
             Log.d("Udp","Broadcast data received: " + np.getData());
             neighboors.add(packet.getAddress().toString()); // todo attention here !!
+            Log.d("Udp","full package is + " + pck);
             Log.d("Udp","Id is " + np.getId() + " and name is" + np.getName());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
                 TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress().toString().substring(1), BackgroundService.port, np.getId(), np.getName(),context);
@@ -208,9 +214,17 @@ public class UdpBroadcastManager  {
 
 
 
-    public void startSendingTask(final Context context, final int port) {
+    public synchronized void startSendingTask(final Context context, final int port) {
 
-        sending = true;
+        if(!exitedFromSend)
+        {
+            sending = true;
+            System.out.println("!!!!!!!Sendtind booleans is " + isSending());
+            return;
+        }
+        System.out.println("Sendtind booleans is " + isSending());
+        startSending();
+        exitedFromSend = false;
         NetworkPackage np = new NetworkPackage();
         try {
             final String message  = np.createFromTypeAndData(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
@@ -222,15 +236,28 @@ public class UdpBroadcastManager  {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                    while (sending) {
+                int count = 0;
+                    while (isSending()) {
                         sendBroadcast(context, message, port);
+                        System.out.println(count);
                         try {
-                            Thread.sleep(10000);
+                            count++;
+                            Thread.sleep(getSend_period());
+                            if(count == 10)
+                            {
+                              setSend_period(send_period*2);
+                            }else if(count == 15)
+                            {
+                                stopSending(); // todo start udp listening in this place!
+                            }
+
                         } catch (InterruptedException e) {
                             Log.e("Udp", "Error in sending loop");
                             break;
                         }
                     }
+                    stopSending();
+                exitedFromSend = true;
                 }
         }).start();
         } catch (ParseError parseError) {
@@ -241,9 +268,20 @@ public class UdpBroadcastManager  {
             Log.e("Udp",e.toString());
         }
     }
+    public static boolean isSending() {return sending;}
 
-    public void stopSending()
+    public static void startSending() {sending = true;}
+
+    public static void stopSending()
     {
         sending = false;
+    }
+
+    public int getSend_period() {
+        return send_period;
+    }
+
+    public void setSend_period(int send_period) {
+        this.send_period = send_period;
     }
 }

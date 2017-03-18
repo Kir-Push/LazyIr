@@ -1,8 +1,11 @@
 package com.example.buhalo.lazyir.Devices;
 
+import android.provider.Settings;
+
 import com.example.buhalo.lazyir.Exception.ParseError;
 import com.example.buhalo.lazyir.Exception.TcpError;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,6 +23,7 @@ public class NetworkPackage {
 
 
     public NetworkPackage() {
+        args = new ArrayList<>();
     }
 
     public NetworkPackage(String type, String id, String name, String data, List<String> args) {
@@ -37,7 +41,7 @@ public class NetworkPackage {
 
        for(int i = 0;i<array.length;i++)
        {
-           if(array.length > 5 && i > 4)
+           if(array.length > 4 && i > 3)
            {
                addArg(array[i]);
            }
@@ -72,7 +76,7 @@ public class NetworkPackage {
         }
         if(id == null || id.isEmpty() || name == null || name.isEmpty())
         {
-            setId(android.provider.Settings.Secure.ANDROID_ID);
+            setId(android.os.Build.SERIAL);
             setName(android.os.Build.MODEL);
         }
         StringBuilder buffer = new StringBuilder();
@@ -83,8 +87,8 @@ public class NetworkPackage {
         buffer.append(name);
         buffer.append("::");
         buffer.append(data);
-        buffer.append("::");
         if(args != null) {
+            buffer.append("::");
             buffer.append(args.size());
 
             for (String arg : args) {
@@ -99,7 +103,7 @@ public class NetworkPackage {
     {
         setType(type);
         setData(data);
-        setId(android.provider.Settings.Secure.ANDROID_ID);
+        setId(android.os.Build.SERIAL);
         setName(android.os.Build.MODEL);
 
         return createMessage();

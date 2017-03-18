@@ -144,7 +144,10 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 //  button.setId((int)newRowId);
                 Log.d("DB", "!!!!!!!!!!!!!!!!!!!!!update BUTTON ID: " + button.getId());
                 int i = 0;
-                removeLayoutBtn(String.valueOf(button.getId()));
+//                removeLayoutBtn(String.valueOf(button.getId()));
+                String selectionD= COLUMN_NAME_ENTRY_ID + " LIKE ?";
+                String[] selectionArgsD = {String.valueOf(button.getId())};
+                db.delete(TABLE_NAME_LAYOUT, selectionD, selectionArgsD);
                 for (int rule : params.getRules()) {
                     layout_values.put(COLUMN_NAME_ENTRY_ID, newRowId);
                     layout_values.put(COLUMN_NAME_LAYOUT_PARAMS, i);
@@ -337,6 +340,13 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 String selelection = COLUMN_NAME_ENTRY_ID + " LIKE ?";
                 String[] selectionArgs = {id};
                 db.delete(TABLE_NAME_COMMANDS_BTN, selelection, selectionArgs);
+            }
+        }
+
+        public void removeCommandsAll()
+        {
+            try (SQLiteDatabase db = getWritableDatabase()) {
+                db.delete(TABLE_NAME_COMMANDS_BTN, null, null);
             }
         }
 

@@ -1,5 +1,7 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
+import com.example.buhalo.lazyir.R;
+
 import java.io.File;
 
 /**
@@ -9,18 +11,27 @@ import java.io.File;
 public class FileWrap {
     private boolean received; // 0 false 1 true;
     private boolean file; // 0 folder 1 file;
+    private int res_id;
     private String path;
+    private boolean checked;
 
     public FileWrap(boolean received, boolean file, String path) {
         this.received = received;
         this.file = file;
         this.path = path;
+        this.checked = false;
+        if(file)
+        {
+            res_id = R.mipmap.file_icn;
+        }
+        else
+        {
+            res_id = R.mipmap.folder_icn;
+        }
     }
 
     public FileWrap(String path) {
-        this.path = path;
-        this.received = false;
-        this.file = false;
+        this(false,false,path);
     }
 
     public String getPath() {
@@ -45,5 +56,21 @@ public class FileWrap {
 
     public void setReceived(boolean received) {
         this.received = received;
+    }
+
+    public int getRes_id() {
+        return res_id;
+    }
+
+    public void setRes_id(int res_id) {
+        this.res_id = res_id;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 }

@@ -1,13 +1,12 @@
 package com.example.buhalo.lazyir.service;
 
 import android.app.Service;
-import android.app.job.JobParameters;
-import android.app.job.JobService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
@@ -19,14 +18,14 @@ import java.util.ArrayList;
  * Created by buhalo on 21.02.17.
  */
 
-public class BackgroundService extends JobService {
+public class BackgroundService extends Service {
 
     final String LOG_TAG = "BackGroundService";
 
     BackgroundBinder binder = new BackgroundBinder();
 
-    public final static int startListeningUdp = 1;
-    public final static int stopListeningUdp = -1;
+    public final static int startListeningTcp = 1;
+    public final static int stopListeningTcp = -1;
     public final static int startSendingPeriodicallyUdp = 2;
     public final static int stopSendingPeriodicallyUdp = -2;
     public final static int eraseAllTcpConnectons = 666;
@@ -37,21 +36,7 @@ public class BackgroundService extends JobService {
         super.onCreate();
     }
 
-    @Override
-    public boolean onStartJob(JobParameters params) {
-        startListeningUdp(port);
-        startSendingPeriodicallyUdp(port);
-        return true;
-    }
 
-    @Override
-    public boolean onStopJob(JobParameters params) {
-        stopListeningUdp();
-        stopSendingPeriodicallyUdp();
-        eraseAllTcpConnectons();
-        System.out.println("on stop job");
-        return true;
-    }
 
 //    public IBinder onBind(Intent arg0) {
 //        Log.d(LOG_TAG, "onBind");
@@ -65,10 +50,10 @@ public class BackgroundService extends JobService {
     }
 
 
-    public void stopListeningUdp()
+    public void stopListeningTcp()
     {
-        Log.d("Service","Stop listening udp");
-      UdpBroadcastManager.getInstance().stopUdpListener();
+        Log.d("Service","Stop listening tcp");
+      TcpConnectionManager.getInstance().stopListening();
     }
 
 
@@ -91,16 +76,27 @@ public class BackgroundService extends JobService {
         }
     }
 
+    public void startListeningTcp()
+    {
+        TcpConnectionManager.getInstance().startListening(port,this); //todo attention
+    }
+
     @Override
     public void onDestroy() {
-        stopListeningUdp();
+        stopListeningTcp();
         stopSendingPeriodicallyUdp();
         eraseAllTcpConnectons();
         super.onDestroy();
     }
 
+    @Nullable
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) { //todo check all code and call service , not directly stop in code, call startservice from other code
         if(intent!= null) {
             Bundle extras = intent.getExtras();
             if(extras != null) {
@@ -108,11 +104,11 @@ public class BackgroundService extends JobService {
                 if (commands != null) {
                     for (Integer command : commands) {
                         switch (command) {
-                            case startListeningUdp:
-                                startListeningUdp(port);
+                            case startListeningTcp:
+                                startListeningTcp();
                                 break;
-                            case stopListeningUdp:
-                                stopListeningUdp();
+                            case stopListeningTcp:
+                                stopListeningTcp();
                                 break;
                             case startSendingPeriodicallyUdp:
                                 startSendingPeriodicallyUdp(port);
@@ -137,5 +133,28 @@ public class BackgroundService extends JobService {
       public  BackgroundService getService() {
             return BackgroundService.this;
         }
+    }
+
+    //todo create send tcp command and something other
+
+    public static void startExternalMethod(Context context)
+    {
+        Intent tempIntent = new Intent(context.getApplicationContext(), BackgroundService.class);
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(BackgroundService.startListeningTcp);
+        list.add(BackgroundService.startSendingPeriodicallyUdp);
+        tempIntent.putIntegerArrayListExtra("Commands", list);
+        context.startService(tempIntent);
+    }
+
+    public static void stopExternalMethod(Context context)
+    {
+        Intent tempIntent = new Intent(context.getApplicationContext(),BackgroundService.class);
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(BackgroundService.stopSendingPeriodicallyUdp);
+        list.add(BackgroundService.stopListeningTcp);
+        list.add(BackgroundService.eraseAllTcpConnectons);
+        tempIntent.putIntegerArrayListExtra("Commands",list);
+        context.startService(tempIntent);
     }
 }

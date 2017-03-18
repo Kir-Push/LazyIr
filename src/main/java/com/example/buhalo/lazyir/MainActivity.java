@@ -17,7 +17,7 @@ import com.example.buhalo.lazyir.old.IrMethods;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static String selected_id;
+    public static String selected_id = "";
 
     final String LOG_TAG = "MainActivity";
 

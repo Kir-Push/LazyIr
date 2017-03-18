@@ -1,6 +1,8 @@
 package com.example.buhalo.lazyir.Executors;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
@@ -41,8 +43,18 @@ public class ButtonExecutor {
         npIr.setData(SendIr.SEND_IR_COMMAND);
         npIr.setArgs(ir);
         npIr.setDv(Device.connectedDevices.get(dvId));
-        ModuleExecutor.executePackage(npPc);
-        ModuleExecutor.executePackage(npIr);
+        Log.d("ButtonExecutor","Check For conenction");
+        if(Device.getConnectedDevices().get(dvId) == null)
+        {
+            Log.d("ButtonExecutor","No connection");
+            Toast.makeText(context,"No connection",Toast.LENGTH_SHORT).show();
+            ModuleExecutor.executePackageIrOffline(npIr,context);
+        }
+        else
+        {
+            ModuleExecutor.executePackage(npPc);
+            ModuleExecutor.executePackage(npIr);
+        }
         //todo zdesj kakto krivo potom podumaj kak uluchitj, nigde bolwe tak ne delaj
     }
 }

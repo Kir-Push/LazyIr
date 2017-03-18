@@ -16,15 +16,15 @@ import java.util.List;
 
 public class ModuleFactory {
 
-    public static List<Class> registeredModules = new ArrayList<>();
-    {
-        registeredModules.add(SendCommand.class);
-       registeredModules.add(SendIr.class);
-        registeredModules.add(ShareModule.class);
-    }
+
+    private static List<Class> registeredModules;
 
     public static Module instantiateModule(Device dv, Class registeredModule)
     {
+        if(registeredModules == null)
+        {
+            registerModulesInit();
+        }
         Module module = null;
         try {
             module = (Module)registeredModule.newInstance();
@@ -34,6 +34,13 @@ public class ModuleFactory {
             Log.e("ModuleFactory",e.toString());
         }
         return module;
+    }
+
+    private static void registerModulesInit() {
+        registeredModules = new ArrayList<>();
+        registeredModules.add(SendCommand.class);
+        registeredModules.add(SendIr.class);
+        registeredModules.add(ShareModule.class);
     }
 
     public static Module instantiateModuleByName(Device dv,String name)
@@ -46,6 +53,18 @@ public class ModuleFactory {
         }
         return null;
 
+    }
+
+    public static List<Class> getRegisteredModules() {
+        if(registeredModules == null)
+        {
+            registerModulesInit();
+        }
+        return registeredModules;
+    }
+
+    public static void setRegisteredModules(List<Class> registeredModules) {
+        ModuleFactory.registeredModules = registeredModules;
     }
 
 }
