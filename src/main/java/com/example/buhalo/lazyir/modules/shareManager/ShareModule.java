@@ -11,6 +11,8 @@ import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -47,7 +49,7 @@ public class ShareModule extends Module {
 
 
     private Socket fileSocket;
-    private InputStream in;
+    private DataInputStream in;
     private String serverPath;
     private String clientPath;
     private boolean waitingForServerAnswerForConnect = false;
@@ -112,7 +114,7 @@ public class ShareModule extends Module {
                     break;
                 }
                 System.out.println("SSSSSS " + responseList);
-                Thread.sleep(200);
+                Thread.sleep(1000);
                 count++;
             }
             waitResponse = false;
@@ -126,7 +128,7 @@ public class ShareModule extends Module {
                 responseList.add(new FileWrap(false,false,"....."));
             }
             return responseList;
-        } catch (ParseError | TcpError | InterruptedException Error) {
+        } catch (TcpError | InterruptedException Error) {
             Error.printStackTrace();
         }
         return null;
@@ -160,7 +162,7 @@ public class ShareModule extends Module {
         try {
             String fromTypeAndData = np.createFromTypeAndData(ShareModule.class.getSimpleName(), GET_PATH);
             TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),fromTypeAndData);
-        } catch (ParseError | TcpError error) {
+        } catch (TcpError error) {
            Log.e("ShareModule",error.getMessage());
         }
     }
@@ -216,7 +218,7 @@ public class ShareModule extends Module {
             np.setArgs(args);
             command = np.createFromTypeAndData(ShareModule.class.getSimpleName(),SEND_PATH);
             TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),command);
-        } catch (ParseError | TcpError error) {
+        } catch ( TcpError error) {
             Log.e("ShareModule",error.getMessage());
         }
     }
@@ -237,7 +239,9 @@ public class ShareModule extends Module {
             FileOutputStream out = new FileOutputStream(file);
             byte[] bytes = new byte[16*1024];
             int count;
-            while ((count = in.read(bytes)) > 0) {
+            String name = in.readUTF();
+            long fileSize = in.readLong();
+            while (fileSize > 0 && (count = in.read(bytes, 0, (int)Math.min(bytes.length, fileSize))) != -1) {
                 System.out.println("write " + count);
 
                     if(new String(bytes,0,count).equals("endFile!!!$$$!!!"))
@@ -248,6 +252,7 @@ public class ShareModule extends Module {
                     }
 
                 out.write(bytes, 0, count);
+                fileSize -= count;
             }
             System.out.println("I'm in download file jaja   " + path + "   " + fileName);
             out.close();
@@ -258,41 +263,47 @@ public class ShareModule extends Module {
         return file;
     }
 
-    public List<File> ParseDownload(NetworkPackage np) // if np.data == CONNECT_TO_ME_AND_RECEIVE_FILES
+    private List<File> fileList;
+
+    public List<File> ParseDownload(final NetworkPackage np) // if np.data == CONNECT_TO_ME_AND_RECEIVE_FILES
     {
-        List<String> args = np.getArgs();
+        final List<String> args = np.getArgs();
         if(args.size() < 3)
         {
             return null;
         }
  //todo create thread
-        int port = Integer.parseInt(args.get(1));
-        String secondArgFirst = args.get(0);
-        // todo handle this second arg;
-        List<FileWrap> fileWraps = new ArrayList<>();
-        for(int i = 2;i<args.size();i++)
-        {
-            String arg = args.get(i);
-            String[] split = arg.split(">>");
-            if(split.length > 1)
-            {
-                if(split[1].equals("file"))
-                fileWraps.add(new FileWrap(true,split[1].equals("file"),split[0]));
-            }
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int port = Integer.parseInt(args.get(1));
+                String secondArgFirst = args.get(0);
+                // todo handle this second arg;
+                List<FileWrap> fileWraps = new ArrayList<>();
+                for(int i = 2;i<args.size();i++)
+                {
+                    String arg = args.get(i);
+                    String[] split = arg.split(">>");
+                    if(split.length > 1)
+                    {
+                        if(split[1].equals("file"))
+                            fileWraps.add(new FileWrap(true,split[1].equals("file"),split[0]));
+                    }
+                }
 
-        String id = np.getId();
-        Device device = Device.getConnectedDevices().get(id);
-        List<File> fileList = null;
-        try {
-            fileSocket = new Socket(device.getIp(),port);
-            in = fileSocket.getInputStream();
-            fileList = downloadFiles(clientPath, fileWraps, null);
-            in.close();
-            fileSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                String id = np.getId();
+                Device device = Device.getConnectedDevices().get(id);
+                try {
+                    fileSocket = new Socket(device.getIp(),port);
+                    in = new DataInputStream(new BufferedInputStream(fileSocket.getInputStream()));
+                    fileList= downloadFiles(clientPath, fileWraps, null);
+                    in.close();
+                    fileSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
         // todo ай я спать;
         return fileList;
     }
@@ -341,7 +352,7 @@ public class ShareModule extends Module {
         try {
             String fromTypeAndData = np.createFromTypeAndData(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
             TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
-        } catch (ParseError|TcpError error) {
+        } catch (TcpError error) {
             Log.e("ShareModule",error.toString());
         }
         serverPath = currPaths;

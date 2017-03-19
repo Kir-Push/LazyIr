@@ -69,10 +69,10 @@ public class NetworkPackage {
         args.add(arg);
     }
 
-    public String createMessage() throws ParseError {
+    public String createMessage()  {
         if(type == null || type.isEmpty() || data == null || data.isEmpty())
         {
-            throw new ParseError("You have null or empty entries in message + type" + type + " data " + data);
+            return null;
         }
         if(id == null || id.isEmpty() || name == null || name.isEmpty())
         {
@@ -99,13 +99,12 @@ public class NetworkPackage {
         return buffer.toString();
     }
 
-    public String createFromTypeAndData(String type,String data) throws ParseError
+    public String createFromTypeAndData(String type,String data)
     {
         setType(type);
         setData(data);
         setId(android.os.Build.SERIAL);
         setName(android.os.Build.MODEL);
-
         return createMessage();
     }
 

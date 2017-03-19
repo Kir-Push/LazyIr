@@ -46,7 +46,7 @@ public class SendCommand extends Module {
         try {
             message = np.createMessage();
             TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),message);
-        } catch (ParseError | TcpError sendError) {
+        } catch (TcpError sendError) {
             Log.e("SendCommand",sendError.toString());
         }
     }

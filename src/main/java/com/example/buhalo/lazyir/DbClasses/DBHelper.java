@@ -42,6 +42,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             db.execSQL(SQL_CREATE_ENTRIES_LAYOUT);
             db.execSQL(SQL_CREATE_ENTRIES_COMMANDS);
             db.execSQL(SQL_CREATE_ENTRIES_BUTTON_COMMANDS);
+            db.execSQL(SQL_CREATE_PAIRED_DEVICES);
             Command command = new Command("Komanda 1", "please decrease my volume, Thank you", null, "pc");
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_TEXT, command.getCommand_name());
@@ -76,7 +77,30 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             db.execSQL(SQL_DELETE_ENTRIES_LAYOUT);
             db.execSQL(SQL_DELETE_ENTRIES_COMMANDS);
             db.execSQL(SQL_DELETE_ENTRIES_COMMANDS_BTN);
+            db.execSQL(SQL_DELETE_PAIRED_DEVICES);
             onCreate(db);
+        }
+
+        public void savePairedDevice(String dvId,String pairCode)
+        {
+            try(SQLiteDatabase db = getWritableDatabase())
+            {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NAME_DVID,dvId);
+                values.put(COLUMN_NAME_PAIRCODE,pairCode);
+                long newRowId = db.insert(TABLE_NAME_PAIRED_DEVICES,null,values);
+            }
+        }
+
+        public void updatePaired(String dvId,String pairCode)
+        {
+            try(SQLiteDatabase db = getWritableDatabase())
+            {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NAME_DVID,dvId);
+                values.put(COLUMN_NAME_PAIRCODE,pairCode);
+
+            }
         }
 
 

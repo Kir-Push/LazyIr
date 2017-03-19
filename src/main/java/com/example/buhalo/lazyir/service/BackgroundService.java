@@ -28,6 +28,8 @@ public class BackgroundService extends Service {
     public final static int stopListeningTcp = -1;
     public final static int startSendingPeriodicallyUdp = 2;
     public final static int stopSendingPeriodicallyUdp = -2;
+    public final static int startListeningUdp = 3;
+    public final static int stopListeningUdp = -3;
     public final static int eraseAllTcpConnectons = 666;
     public final static int port = 5667;
 
@@ -47,6 +49,12 @@ public class BackgroundService extends Service {
     {
         Log.d("Service","Start listening udp");
         UdpBroadcastManager.getInstance().startUdpListener(this,port);
+    }
+
+    public void stopListeningUdp()
+    {
+        Log.d("Service","Stop listening udp");
+        UdpBroadcastManager.getInstance().stopUdpListener();
     }
 
 
@@ -119,6 +127,12 @@ public class BackgroundService extends Service {
                             case eraseAllTcpConnectons:
                                 eraseAllTcpConnectons();
                                 break;
+                            case startListeningUdp:
+                                startListeningUdp(port);
+                                break;
+                            case stopListeningUdp:
+                                stopListeningUdp();
+                                break;
                             default:
                                 break;
                         }
@@ -141,7 +155,7 @@ public class BackgroundService extends Service {
     {
         Intent tempIntent = new Intent(context.getApplicationContext(), BackgroundService.class);
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(BackgroundService.startListeningTcp);
+        list.add(BackgroundService.startListeningUdp);
         list.add(BackgroundService.startSendingPeriodicallyUdp);
         tempIntent.putIntegerArrayListExtra("Commands", list);
         context.startService(tempIntent);
@@ -164,7 +178,7 @@ public class BackgroundService extends Service {
         Intent tempIntent = new Intent(context.getApplicationContext(),BackgroundService.class);
         ArrayList<Integer> list = new ArrayList<>();
         list.add(BackgroundService.stopSendingPeriodicallyUdp);
-        list.add(BackgroundService.stopListeningTcp);
+        list.add(BackgroundService.stopListeningUdp);
         list.add(BackgroundService.eraseAllTcpConnectons);
         tempIntent.putIntegerArrayListExtra("Commands",list);
         context.startService(tempIntent);

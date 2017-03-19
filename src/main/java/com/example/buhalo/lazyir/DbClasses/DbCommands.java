@@ -11,10 +11,13 @@ public interface DbCommands extends BaseColumns {
      String TABLE_NAME_LAYOUT = "layout";
      String TABLE_NAME_COMMANDS = "commands";
      String TABLE_NAME_COMMANDS_BTN = "commandsbtn";
+     String TABLE_NAME_PAIRED_DEVICES = "pairedDevices";
      String COLUMN_NAME_ENTRY_ID = "entryid";
      String COLUMN_NAME_COMMAND = "command";
      String COLUMN_NAME_COMMAND_TYPE = "type";
      String COLUMN_NAME_TEXT = "text";
+     String COLUMN_NAME_DVID = "dvid";
+     String COLUMN_NAME_PAIRCODE = "paircode";
      String COLUMN_NAME_COORD_X = "x";
      String COLUMN_NAME_COORD_Y = "y";
      String COLUMN_NAME_RES_ID = "resid";
@@ -61,6 +64,11 @@ public interface DbCommands extends BaseColumns {
                     COLUMN_NAME_COMMAND_TYPE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND + TEXT_TYPE + ")";
 
+     String SQL_CREATE_PAIRED_DEVICES =
+             "CREATE TABLE " + TABLE_NAME_PAIRED_DEVICES + " (" +
+                     _ID + " INTEGER PRIMARY KEY," +
+                     COLUMN_NAME_DVID + TEXT_TYPE + COMMA_SEP +
+                     COLUMN_NAME_PAIRCODE + TEXT_TYPE + ")";
 
      String SQL_DELETE_ENTRIES_BUTTON =
             "DROP TABLE IF EXISTS " + TABLE_NAME_BUTTON;
@@ -73,4 +81,7 @@ public interface DbCommands extends BaseColumns {
 
      String SQL_DELETE_ENTRIES_COMMANDS_BTN =
             "DROP TABLE IF EXISTS " + TABLE_NAME_COMMANDS_BTN;
+
+     String SQL_DELETE_PAIRED_DEVICES =
+             "DROP TABLE IF EXISTS " + TABLE_NAME_PAIRED_DEVICES;
 }

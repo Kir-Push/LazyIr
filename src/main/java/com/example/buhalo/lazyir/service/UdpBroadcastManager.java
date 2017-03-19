@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.Exception.ParseError;
 
@@ -31,7 +32,8 @@ public class UdpBroadcastManager  {
     private InetAddress broadcastAddress;
     private String android_id;
     private String android_name;
-    private int send_period = 10000;
+    private int send_period = 15000;
+    public int  count = 0;
 
 
     private volatile static boolean listening = false;
@@ -72,11 +74,8 @@ public class UdpBroadcastManager  {
 
     public void sendBroadcast(final Context context, final String message, final int port)
     {
-        Log.d("Udp","Start sending broadcast + " + Thread.currentThread().getName());
                 try {
-
                     broadcastAddress = getBroadcastAddress(context);
-                  //  String messageStr = message + "::" + android_id + "::" + android_name;
                     byte[] sendData = message.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
                     Log.d("Udp","Sending broadcast: "+ message);
@@ -180,12 +179,11 @@ public class UdpBroadcastManager  {
         }
         else if(np.getType().equals(BROADCAST_INTRODUCE))
         {
-            Log.d("Udp","Broadcast data received: " + np.getData());
             neighboors.put(np.getId(),packet.getAddress()); // todo attention here !!
-            Log.d("Udp","full package is + " + pck);
-            Log.d("Udp","Id is " + np.getId() + " and name is" + np.getName());
+            Log.d("Udp","received package  + " + pck);
+            Log.d("udp","number of connects " + Device.getConnectedDevices().size());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
-                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress().toString().substring(1), BackgroundService.port, np,context);
+                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.port, np,context);
             }
         }
     }
@@ -210,7 +208,7 @@ public class UdpBroadcastManager  {
         exitedFromSend = false;
         NetworkPackage np = new NetworkPackage();
         try {
-            final String message  = np.createFromTypeAndData(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
+            final String message  = np.createFromTypeAndData(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG); // todo handle null error
             if(socket == null) {
                 socket = new DatagramSocket();
                 socket.setReuseAddress(true);
@@ -219,19 +217,19 @@ public class UdpBroadcastManager  {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                int count = 0;
+                count = 0;
                     while (isSending()) {
                         sendBroadcast(context, message, port);
                         try {
                             count++;
                             Thread.sleep(getSend_period());
-//                            if(count == 25)
-//                            {
-//                              setSend_period(send_period*2);
-//                            }else if(count == 50)
-//                            {
-//                                setSend_period(send_period*2);
-//                            }
+                            if(count == 10)
+                            {
+                              setSend_period(send_period*2);
+                            }else if(count == 20)
+                            {
+                                setSend_period(send_period*2);
+                            }
 
                         } catch (InterruptedException e) {
                             Log.e("Udp", "Error in sending loop");
@@ -242,9 +240,6 @@ public class UdpBroadcastManager  {
                 exitedFromSend = true;
                 }
         }).start();
-        } catch (ParseError parseError) {
-            Log.e("Udp",parseError.getMessage()); // if parse error not start sending task // todo pridumaj 4tonibudj bljatj
-            //todo start udp listener here
         }
         catch (SocketException e)
         {

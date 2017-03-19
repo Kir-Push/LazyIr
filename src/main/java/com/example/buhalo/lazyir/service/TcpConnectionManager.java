@@ -112,8 +112,16 @@ public class TcpConnectionManager {
         }
     }
 
-    public void receivedUdpIntroduce(String substring, int port,NetworkPackage np, Context context) {
- //todo sdelaj
+    public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
+        try {
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(address,port),10000);
+            socket.setKeepAlive(true);
+            ConnectionThread connection = new ConnectionThread(socket,context);
+            connection.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -148,11 +156,6 @@ public class TcpConnectionManager {
                     String clientCommand = in.readLine();
                     Log.d("Tcp","Client says.. " + clientCommand);
 
-                    if(!ServerOn) {
-                        out.println("Server has already stopped");
-                        out.flush();
-                        connectionRun = false;
-                    }
 
                     if(clientCommand == null)
                     {
@@ -173,9 +176,11 @@ public class TcpConnectionManager {
                     in.close();
                     out.close();
                     connection.close();
+                    StopListening(deviceId);
                     if(Device.getConnectedDevices().size() == 0) //return to normal frequency
                     {
-                        UdpBroadcastManager.getInstance().setSend_period(10000);
+                        UdpBroadcastManager.getInstance().setSend_period(15000);
+                        UdpBroadcastManager.getInstance().count = 0;
                     }
                     Log.d("Tcp","Stopped connection");
                 }catch (IOException e)
@@ -194,18 +199,23 @@ public class TcpConnectionManager {
                     break;
                 case TCP_PING:
                     Device.connectedDevices.get(deviceId).setAnswer(true);
-                    try {
-                     String msgf=   np.createFromTypeAndData(TCP_PING,TCP_PING);
-                        sendCommandToServer(deviceId,msgf);
-                    } catch (Exception parseError) {
-                        parseError.printStackTrace();
-                    }
+                    ping(null);
                     break;
                 default:
                     Device.connectedDevices.get(deviceId).setAnswer(true);
                     commandFromClient(np);
                     break;
             }
+        }
+
+        public void ping(NetworkPackage np)
+        {
+            NetworkPackage p = new NetworkPackage();
+            //   Device.getConnectedDevices().get(deviceId).setAnswer(true);
+            String msg = p.createFromTypeAndData(TCP_PING,TCP_PING);
+            Log.d("Tcp","Send " + msg);
+            out.println(msg);
+            out.flush();
         }
 
         public void newConnectedDevice(NetworkPackage np) //todo create pairing in java server side and the of course
@@ -226,12 +236,8 @@ public class TcpConnectionManager {
 
         private void sendIntroduce() {
             NetworkPackage networkPackage = new NetworkPackage();
-            try {
                 out.println(networkPackage.createFromTypeAndData(TCP_INTRODUCE,TCP_INTRODUCE_MSG));
                 out.flush();
-            } catch (ParseError parseError) {
-                Log.d("Tcp",parseError.toString());
-            }
         }
 
         public void commandFromClient(NetworkPackage np)
@@ -300,65 +306,6 @@ public class TcpConnectionManager {
         }
     }
 
-    private void TryConnect(Device device) { // todo ?? create this class ??
-        //create some timer or so
-        if(device == null || device.getSocket() == null)
-        {
-            device = null;
-            return;
-        }
-        if(checkExistingConnection(device.getId()))
-        {
-            StopListening(device.getId());
-        }
-//        receivedUdpIntroduce(device.getSocket().getInetAddress().toString(),device.getSocket().getPort(),device.getId(),device.getName(),device.getContext());
-    }
-
-    private void startPingPong(final String id)
-    {
-        Device.getConnectedDevices().get(id).setPinging(true);
-        NetworkPackage np = new NetworkPackage();
-        String msg= null;
-        try {
-          msg = np.createFromTypeAndData(TCP_PING,TCP_PING);
-        } catch (ParseError parseError) {
-            parseError.printStackTrace();
-            return;
-        }
-        final String msgf = msg;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(Device.getConnectedDevices().get(id) != null  && Device.getConnectedDevices().get(id).isPinging())
-                {
-                    try {
-                        Device.getConnectedDevices().get(id).setAnswer(false);
-                        sendCommandToServer(id,msgf);
-                    } catch (TcpError tcpError) {
-                        Log.d("Tcp",tcpError.getMessage());
-                        break;
-                    }
-                    try {
-                        Thread.sleep(30000);
-                        Log.d("Tcp","ping pong after sleep " + Thread.currentThread().getName());
-                        if(Device.getConnectedDevices().get(id) == null || !Device.getConnectedDevices().get(id).isAnswer())
-                        {
-                       //     TryConnect(Device.getConnectedDevices().get(id));
-                            StopListening(id);
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        Log.d("Tcp",e.toString());
-                        break;
-                    }
-                }
-                if(Device.getConnectedDevices().get(id) != null)
-                {
-                    Device.getConnectedDevices().get(id).setPinging(false);
-                }
-            }
-        }).start();
-    }
 
     public boolean checkExistingConnection(String dvId)
     {
