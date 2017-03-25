@@ -29,7 +29,7 @@ public class ButtonExecutor {
         for(Command cmd : btnCommands)
         {
             if(cmd.getType().equals("pc"))
-                pc.add(cmd.getCommand());
+                pc.add(cmd.getCommand_name()); //send command on server and here determine which execute diferrence by os
             else if(cmd.getType().equals("ir"))
                 ir.add(cmd.getCommand());
         }

@@ -56,7 +56,7 @@ public interface DbCommands extends BaseColumns {
                     COLUMN_NAME_COMMAND_TYPE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND + TEXT_TYPE + ")";
 
-     String SQL_CREATE_ENTRIES_BUTTON_COMMANDS =
+     String SQL_CREATE_ENTRIES_BUTTON_COMMANDS = //TODO create unique name index !!!
             "CREATE TABLE " + TABLE_NAME_COMMANDS_BTN + " (" +
                     _ID + " INTEGER PRIMARY KEY," +
                     COLUMN_NAME_ENTRY_ID + INTEGER_TYPE + COMMA_SEP +

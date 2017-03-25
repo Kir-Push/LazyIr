@@ -19,14 +19,18 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
+import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.shareManager.ShareActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -85,7 +89,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
         if(mPage == 1)
         {
-            List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
+            List<Button> buttonList =   DBHelper.getInstance(getContext().getApplicationContext()).getButtons("1",getContext());
             for(final Button button : buttonList)
             {
                 layout.addView(button);
@@ -167,6 +171,51 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                 }
             });
             layout.addView(share);
+        }
+        else if(mPage == 5)
+        {
+            view = inflater.inflate(R.layout.connected_devices,container,false);
+            ConstraintLayout constraintLayout = (ConstraintLayout) view;
+            Button pair = (Button) constraintLayout.findViewById(R.id.pair);
+            pair.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(MainActivity.selected_id != null && !MainActivity.selected_id.equals(""))
+                    {
+                        TcpConnectionManager.getInstance().sendPairing(MainActivity.selected_id);
+                    }
+                }
+            });
+            Button unpair = (Button) constraintLayout.findViewById(R.id.unpair);
+            unpair.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(MainActivity.selected_id != null && !MainActivity.selected_id.equals(""))
+                    {
+                        TcpConnectionManager.getInstance().unpair(MainActivity.selected_id,getContext());
+                    }
+                }
+            });
+            LinearLayout linconn = (LinearLayout) constraintLayout.findViewById(R.id.lin_connection_layout);
+            RadioButton oneConnect = (RadioButton) linconn.findViewById(R.id.connection_line);
+            oneConnect.setVisibility(View.INVISIBLE);
+            for (Device device : Device.getConnectedDevices().values()) {
+
+                    final RadioButton rd = new RadioButton(getContext());
+                    rd.setText(device.getName());
+                rd.setId(View.generateViewId());
+                    rd.setTag(device.getId());
+                    rd.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MainActivity.selected_id = (String)rd.getTag();
+                        }
+                    });
+                    linconn.addView(rd);
+
+            }
+            //todo this is for test create good;
+
         }
 
         return view;
@@ -338,7 +387,8 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                 buttonCommandAdapter.clear();
                 buttonCommandAdapter.addAll(buttonCommandsSet);
                 buttonCommandAdapter.notifyDataSetChanged();
-                addCommand(id,buttonCommandsSet);
+
+                addCommand(id,buttonCommandsSet); //todo remember bug if you add it add whenever if there already one
             }
         });
 

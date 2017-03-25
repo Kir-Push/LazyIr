@@ -3,6 +3,8 @@ package com.example.buhalo.lazyir.service;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.DbClasses.DBHelper;
+import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.Exception.ParseError;
@@ -20,6 +22,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.buhalo.lazyir.service.BackgroundService.port;
@@ -32,6 +35,12 @@ public class TcpConnectionManager {
     public final static String TCP_INTRODUCE = "tcpIntroduce";
     public final static  String TCP_INTRODUCE_MSG = "my name is";
     public final static String TCP_PING = "ping pong";
+    public final static String TCP_PAIR_RESULT = "pairedresult";
+    public final static String OK = "ok";
+    public final static String REFUSE = "refuse";
+    public final static String TCP_PAIR = "pair";
+    public final static String TCP_UNPAIR = "unpair";
+    public final static String TCP_SYNC = "sync";
     private static TcpConnectionManager instance;
 
     private static volatile boolean ServerOn = false;
@@ -133,9 +142,12 @@ public class TcpConnectionManager {
         private boolean connectionRun = true;
         BufferedReader in = null;
         PrintWriter out = null;
+        private boolean hasPaired = false;
+        private boolean waitAnswerPair = false;
 
         public ConnectionThread(Socket socket,Context context) {
             this.connection = socket;
+            this.context = context;
         }
 
         @Override
@@ -201,11 +213,39 @@ public class TcpConnectionManager {
                     Device.connectedDevices.get(deviceId).setAnswer(true);
                     ping(null);
                     break;
+                case TCP_PAIR_RESULT:
+                    pairResult(np);
+                    break;
+                case TCP_SYNC:
+                    receiveSync(np);
+                    break;
                 default:
                     Device.connectedDevices.get(deviceId).setAnswer(true);
                     commandFromClient(np);
                     break;
             }
+        }
+
+        private void receiveSync(NetworkPackage np) {
+            try {
+
+                List<String> args = np.getArgs();
+                List<Command> receivedCommands = new ArrayList<>();
+                for (int i = 1; i < args.size(); i++) {
+                    String arg = args.get(i);
+                    String[] split = arg.split(":;c:;");
+                    receivedCommands.add(new Command(split[0], split[1], null, "pc"));
+                }
+                DBHelper.getInstance(context).removeCommandsPcAll();
+                for (Command receivedCommand : receivedCommands) {
+                    DBHelper.getInstance(context).saveCommand(receivedCommand);
+                }
+            }catch (Exception e)
+            {
+                Log.e("Tcp",e.toString());
+            }
+
+
         }
 
         public void ping(NetworkPackage np)
@@ -218,6 +258,7 @@ public class TcpConnectionManager {
             out.flush();
         }
 
+
         public void newConnectedDevice(NetworkPackage np) //todo create pairing in java server side and the of course
         {
             if(deviceId == null) {
@@ -228,22 +269,62 @@ public class TcpConnectionManager {
                 {
                     MainActivity.selected_id = deviceId;
                 }
+
+                if(np.getArgs().size() > 1)
+                {
+                    String pairedCode = np.getArgs().get(1);
+                    List<String> savedPairedCode = DBHelper.getInstance(context).getPairedCode(deviceId);
+                    if(savedPairedCode.size() != 0 && savedPairedCode.get(0).equals(pairedCode))
+                    {
+                        hasPaired = true;
+                    }
+                }
                 sendIntroduce();
               //  startPingPong(deviceId);
             }
         }
 
+        public void pairResult(NetworkPackage np)
+        {
+            if(np.getArgs() != null && np.getArgs().size() > 1 && deviceId != null)
+            {
+                if(np.getArgs().get(1).equals(OK))
+                {
+
+                    if(np.getArgs().size() > 2)
+                    {
+                        DBHelper.getInstance(context).savePairedDevice(deviceId,np.getArgs().get(2)); // todo check if exist already
+                    }
+                    Device.getConnectedDevices().get(deviceId).setPaired(true);
+
+                }
+            }
+            hasPaired = false;
+        }
+
+
+
 
         private void sendIntroduce() {
             NetworkPackage networkPackage = new NetworkPackage();
+            if(hasPaired) {
+                List<String> args = new ArrayList<>();
+                args.add(String.valueOf(android.os.Build.SERIAL.hashCode()));
+                networkPackage.setArgs(args);
+            }
                 out.println(networkPackage.createFromTypeAndData(TCP_INTRODUCE,TCP_INTRODUCE_MSG));
                 out.flush();
         }
 
         public void commandFromClient(NetworkPackage np)
         {
-            Module module = Device.getConnectedDevices().get(np.getId()).getEnabledModules().get(np.getType());
-            module.execute(np);
+            try {
+                Module module = Device.getConnectedDevices().get(np.getId()).getEnabledModules().get(np.getType());
+                module.execute(np);
+            }catch (Exception e)
+            {
+                Log.e("Tcp",e.toString());
+            }
         }
     }
 
@@ -254,7 +335,7 @@ public class TcpConnectionManager {
                 Device device =  Device.connectedDevices.get(id);
                 if(device != null)
                  {
-                     device.setPaired(true);
+               //      device.setPaired(true);
                  }
                  // todo only for testing
                 if(device == null || device.getSocket() == null || !device.getSocket().isConnected() || device.getSocket().isClosed())
@@ -283,6 +364,31 @@ public class TcpConnectionManager {
                     throw new TcpError("error in open output for socket");
                 }
         return true;
+    }
+
+    public void sendPairing(String id)
+    {
+        NetworkPackage networkPackage = new NetworkPackage();
+        List<String> args = new ArrayList<>();
+        args.add(String.valueOf(android.os.Build.SERIAL.hashCode()));
+        networkPackage.setArgs(args);
+        Device device = Device.getConnectedDevices().get(id);
+        device.getOut().println(networkPackage.createFromTypeAndData(TCP_PAIR,TCP_PAIR));
+        device.getOut().flush();
+    }
+
+    public void unpair(String id,Context context)
+    {
+        NetworkPackage networkPackage = new NetworkPackage();
+        PrintWriter out = Device.getConnectedDevices().get(id).getOut();
+        DBHelper.getInstance(context).deletePaired(id);
+        String fromTypeAndData = networkPackage.createFromTypeAndData(TCP_UNPAIR, TCP_UNPAIR);
+        try {
+            sendCommandToServer(id,fromTypeAndData);
+        } catch (TcpError tcpError) {
+            Log.d("Tcp",tcpError.toString());
+        }
+        Device.getConnectedDevices().get(id).setPaired(false);
     }
 
 

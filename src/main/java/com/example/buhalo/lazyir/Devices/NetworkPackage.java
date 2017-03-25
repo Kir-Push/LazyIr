@@ -87,7 +87,7 @@ public class NetworkPackage {
         buffer.append(name);
         buffer.append("::");
         buffer.append(data);
-        if(args != null) {
+        if(args != null && args.size() > 0) {
             buffer.append("::");
             buffer.append(args.size());
 

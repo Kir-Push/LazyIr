@@ -11,4 +11,5 @@
     <string name="tab2">Hz ewe</string>
     <string name="tab3">Buttons</string>
     <string name="tab4">Executor Edit</string>
+    <string name="NotificationListen">NotificationListener</string>
 </resources>
