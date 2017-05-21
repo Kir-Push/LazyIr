@@ -1,12 +1,11 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.Exception.ParseError;
-import com.example.buhalo.lazyir.Exception.TcpError;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
@@ -14,22 +13,15 @@ import com.example.buhalo.lazyir.service.TcpConnectionManager;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by buhalo on 05.03.17.
  */
-// in sharemodule different format, first argumert is json data of folder
-    //todo create special parse in networkpackage for sharemodule, because json may contain :: itself, and you need check first letters to Sharemodule type and command  and parsing other string to json
-    // second TODO maybe create all network packages to json? it will be cool and good;
 public class ShareModule extends Module {
 
     public static final String SHARE_T = "ShareModule";
@@ -43,6 +35,7 @@ public class ShareModule extends Module {
     public static final String POST_FILE = "post file";
     public static final String GET_DIRECTORY = "get directory";
     public static final String POST_DIRECORY = "post directory";
+    public static final String PORT = "port";
 
 
     public static final String FIRST_ARG_NUMBER_OF_FILES ="nf {?,?}";// first ? wil be you curr file, second overral files ( which you need to receive
@@ -53,6 +46,9 @@ public class ShareModule extends Module {
     private String serverPath;
     private String clientPath;
     private boolean waitingForServerAnswerForConnect = false;
+    private static SftpServer sftpServer;
+    private static boolean sftServerOn = false;
+    private static int port = 0;
 
     private boolean waitResponse;
 
@@ -62,17 +58,44 @@ public class ShareModule extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
- //todo there is parse package // and actually think about threads
-        System.out.println("share module execute  " + np.getData() + " " + waitResponse);
         if(np.getData().equals(SEND_PATH))
         {
             responseList = receiveFromServer(np);
-            System.out.println("response list size " + responseList.size());
         }
         else if(np.getData().equals(CONNECT_TO_ME_AND_RECEIVE_FILES))
         {
             ParseDownload(np);
         }
+        else if(np.getData().equals(SETUP_SERVER_AND_SEND_ME_PORT))
+        {
+            setupSftp(np,context.getApplicationContext());
+        }
+    }
+
+    public static void setupSftp(NetworkPackage np, Context context) {
+        if (sftpServer == null) {
+            sftpServer = new SftpServer();
+        }
+        NetworkPackage pack = new NetworkPackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
+        if(!sftServerOn) {
+            port = sftpServer.setupSftpServer(context);
+            sftServerOn = true;
+        }
+        if(port == 0)
+            port = 9000;
+        pack.setValue(PORT,Integer.toString(port));
+        pack.setValue("userName",SftpServer.USER);
+        pack.setValue("pass",sftpServer.pass);
+        TcpConnectionManager.getInstance().sendCommandToServer(np.getId(),pack.getMessage());
+    }
+
+    public static void stopSftpServer()
+    {
+        if(sftpServer!= null)
+        {
+            sftpServer.stopSftpServer();
+        }
+        sftServerOn = false;
     }
 
     public List<FileWrap> getFilesList(String path)
@@ -96,25 +119,25 @@ public class ShareModule extends Module {
 
     public List<FileWrap> getFilesListFromServer(String path)
     {
-        NetworkPackage np = new NetworkPackage();
-        ArrayList<String> args = new ArrayList<>();
-        args.add(path);
-        np.setArgs(args);
+        NetworkPackage np = new NetworkPackage(SHARE_T, GET_PATH);
+        FileWrap fileWrap = new FileWrap(false,false,path);
+        FileWraps fileWraps = new FileWraps();
+        fileWraps.addCommand(fileWrap);
+        np.setObject(NetworkPackage.N_OBJECT,fileWraps);
         String fromTypeAndData;
         try {
-           fromTypeAndData = np.createFromTypeAndData(SHARE_T, GET_PATH);
-            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData); // todo doit it throught background service not to call directly blja and check for errors
+           fromTypeAndData = np.getMessage();
+            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
             responseList = null;
             waitResponse = true;
             int count =0;
-            while(responseList == null || responseList.size() == 0) //todo only FOR TESTING FUCKCCCC IT EROR BEEN
+            while(responseList == null || responseList.size() == 0)
             {
                 if(count > 10)
                 {
                     break;
                 }
-                System.out.println("SSSSSS " + responseList);
-                Thread.sleep(1000);
+                Thread.sleep(500);
                 count++;
             }
             waitResponse = false;
@@ -128,7 +151,7 @@ public class ShareModule extends Module {
                 responseList.add(new FileWrap(false,false,"....."));
             }
             return responseList;
-        } catch (TcpError | InterruptedException Error) {
+        } catch (InterruptedException Error) {
             Error.printStackTrace();
         }
         return null;
@@ -139,43 +162,20 @@ public class ShareModule extends Module {
         return Environment.getExternalStorageDirectory().toString();
     }
 
-    public String receivedPackage(NetworkPackage np) // todo you need handle buffer overflow if in folder to many files // or simly set limit on size and not load more, in future you create more better
+    public String receivedPackage(NetworkPackage np)
     {
 
         return "";
     }
-    public void sendGetPathToServer(FileWrap fw)
-    {
-        NetworkPackage np = new NetworkPackage();
-        ArrayList<String> strings = new ArrayList<>();
-        String fileorNot;
-        if(fw.isFile())
-        {
-            fileorNot = "file";
-        }
-        else
-        {
-            fileorNot = "dir";
-        }
-        strings.add(fw.getPath()+">>"+fileorNot);
-        np.setArgs(strings);
-        try {
-            String fromTypeAndData = np.createFromTypeAndData(ShareModule.class.getSimpleName(), GET_PATH);
-            TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),fromTypeAndData);
-        } catch (TcpError error) {
-           Log.e("ShareModule",error.getMessage());
-        }
-    }
 
-    public List<FileWrap> receiveFromServer(NetworkPackage np) // todo// when server send command file send ( or file request) client (and server) creates socket at other port , and receive or send file(eto pozvolit prinimatj fail v background i prodolzatj vipolnatj ostalnie komandi)
-                                                               //todo// tcpConnectionManager pustj zanimaetsa toljo priemom comand, novij socket pustj budet v etom module(eto isklju4itelnjo ego rabota) = no zapuskaj 4erez background service -- posilaj emu intent s classom (statservice or so) i komandoj, i
-                                                                //todo// on vizovet класс создаст поток и выйдет как работы из сервиса чтоб можно было работать в свернутом приложении!;
+
+    public List<FileWrap> receiveFromServer(NetworkPackage np)
     {
         List<FileWrap> fileWraps = new ArrayList<>();
-        List<String> args = np.getArgs();
+        List<FileWrap> args = np.getObject(NetworkPackage.N_OBJECT,FileWraps.class).getFiles();
         fileWraps.add(new FileWrap(false,false,"....."));
         int count=0;
-        for(String arg : args)
+        for(FileWrap arg : args)
         {
             count++;
             if(count == 1)
@@ -184,49 +184,17 @@ public class ShareModule extends Module {
             }
             if(count == 2)
             {
-                lastRootPathFromServer = arg;
+                lastRootPathFromServer = arg.getPath();
                 continue;
             }
-            String[] split = arg.split(">>");
-            if(split.length > 1)
-            {
-                fileWraps.add(new FileWrap(true,split[1].equals("file"),split[0]));
-            }
+            fileWraps.add(new FileWrap(true,arg.isFile(),arg.getPath()));
         }
         return fileWraps;
     }
 
-    public void sendPathToServer(List<FileWrap> sendFiles)
-    {
-        List<String> args = new ArrayList<>();
-        NetworkPackage np = new NetworkPackage();
-        for(FileWrap fw : sendFiles)
-        {
-            String fileDir = fw.getPath();
-            if(fw.isFile())
-            {
-                fileDir += ">>file";
-            }
-            else
-            {
-                fileDir += ">>dir";
-            }
-            args.add(fileDir);
-        }
-        String command = null;
-        try {
-            np.setArgs(args);
-            command = np.createFromTypeAndData(ShareModule.class.getSimpleName(),SEND_PATH);
-            TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),command);
-        } catch ( TcpError error) {
-            Log.e("ShareModule",error.getMessage());
-        }
-    }
 
-    public void serverWantPath(String path)
-    {
 
-    }
+
 
     public synchronized File downloadFile(String path,String fileName)
     {
@@ -256,7 +224,6 @@ public class ShareModule extends Module {
             }
             System.out.println("I'm in download file jaja   " + path + "   " + fileName);
             out.close();
-           // in.close();//todo you close it in outer method
         } catch (IOException e) {
            Log.e("ShareModule",e.toString());
         }
@@ -267,36 +234,27 @@ public class ShareModule extends Module {
 
     public List<File> ParseDownload(final NetworkPackage np) // if np.data == CONNECT_TO_ME_AND_RECEIVE_FILES
     {
-        final List<String> args = np.getArgs();
-        if(args.size() < 3)
-        {
-            return null;
-        }
- //todo create thread
+        final List<FileWrap> args = np.getObject(NetworkPackage.N_OBJECT,FileWraps.class).getFiles();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                int port = Integer.parseInt(args.get(1));
-                String secondArgFirst = args.get(0);
-                // todo handle this second arg;
-                List<FileWrap> fileWraps = new ArrayList<>();
-                for(int i = 2;i<args.size();i++)
-                {
-                    String arg = args.get(i);
-                    String[] split = arg.split(">>");
-                    if(split.length > 1)
-                    {
-                        if(split[1].equals("file"))
-                            fileWraps.add(new FileWrap(true,split[1].equals("file"),split[0]));
-                    }
-                }
+                int port = Integer.parseInt(np.getValue(PORT));
+                String secondArgFirst = args.get(0).getPath();
+//                List<FileWrap> fileWraps = new ArrayList<>();
+//                for(int i = 0;i<args.size();i++)
+//                {
+//                    String arg = args.get(i).getPath();
+//                        if(args.get(i).isFile()){
+//                            fileWraps.add(new FileWrap(true,args.get(i).isFile(),args.get(i).getPath()));
+//                    }
+//                }
 
                 String id = np.getId();
                 Device device = Device.getConnectedDevices().get(id);
                 try {
                     fileSocket = new Socket(device.getIp(),port);
                     in = new DataInputStream(new BufferedInputStream(fileSocket.getInputStream()));
-                    fileList= downloadFiles(clientPath, fileWraps, null);
+                    fileList= downloadFiles(clientPath, args, null);
                     in.close();
                     fileSocket.close();
                 } catch (IOException e) {
@@ -304,13 +262,12 @@ public class ShareModule extends Module {
                 }
             }
         }).start();
-        // todo ай я спать;
         return fileList;
     }
 
     public List<File> downloadFiles(String path,List<FileWrap> fileWraps,String externalPath)
     {
-        List<File> downloadedFiles = new ArrayList<>(); //todo dodelatj
+        List<File> downloadedFiles = new ArrayList<>();
 
 
         for(FileWrap fileWrap : fileWraps)
@@ -332,29 +289,18 @@ public class ShareModule extends Module {
     }
 
     public void startDownloading(String currPath, String currPaths, List<FileWrap> files) {
-        NetworkPackage np = new NetworkPackage();
-        List<String> args = new ArrayList<>();
-        args.add(currPaths);
+        NetworkPackage np = new NetworkPackage(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
+        List<FileWrap> args = new ArrayList<>();
+        args.add(new FileWrap(false,false,currPaths));
         for(FileWrap fileWrap : files)
         {
-            String fileOrNot;
-            if(fileWrap.isFile())
-            {
-                fileOrNot = "file";
-            }
-            else
-            {
-                fileOrNot = "dir";
-            }
-            args.add(fileWrap.getPath()+">>"+fileOrNot);
+
+            args.add(fileWrap);
         }
-        np.setArgs(args);
-        try {
-            String fromTypeAndData = np.createFromTypeAndData(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
-            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
-        } catch (TcpError error) {
-            Log.e("ShareModule",error.toString());
-        }
+        FileWraps fileWraps = new FileWraps(args);
+        np.setObject(NetworkPackage.N_OBJECT,fileWraps);
+        String fromTypeAndData = np.getMessage();
+        TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
         serverPath = currPaths;
         clientPath = currPath;
         waitingForServerAnswerForConnect = true;

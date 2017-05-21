@@ -57,7 +57,7 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
         tabs.addOnTabSelectedListener(this);
         Device device = Device.connectedDevices.get(MainActivity.selected_id);
         if(device != null)
-        module = (ShareModule) device.getEnabledModules().get(ShareModule.class.getSimpleName()); // todo only for test
+        module = (ShareModule) device.getEnabledModules().get(ShareModule.class.getSimpleName());
         if(module == null || device == null)
         {
             CharSequence text = "No connection!";
@@ -70,7 +70,7 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
         List<FileWrap> serverFilesList = module.getFilesListFromServer("root");
         lastPath = module.getRootPath();
         currPath = lastPath;
-        lastPathS = "/"; // todo for test
+        lastPathS = "/"; // todo for test (you need create windwos version
         currPaths = lastPathS;
         android_adapter = new FolderAdater(this,filesList);
         android_list.setAdapter(android_adapter);
@@ -87,7 +87,6 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-       //     android_list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE); // todo
         android_adapter.setCbSend(true);
         server_adapter.setCbSend(true);
         findViewById(R.id.share_ok).setVisibility(View.VISIBLE);

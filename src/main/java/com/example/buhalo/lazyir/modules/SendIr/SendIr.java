@@ -1,5 +1,7 @@
 package com.example.buhalo.lazyir.modules.SendIr;
 
+import com.example.buhalo.lazyir.Devices.Command;
+import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.old.IrMethods;
@@ -14,14 +16,19 @@ public class SendIr extends Module {
     public static final String SEND_IR_COMMAND = "sendIrCommand";
 
     @Override
-    public void execute(NetworkPackage np) {
-        if(np.getData().equals(SEND_IR_COMMAND))
-        {
-           transmitIr(np.getArgs());
-        }
+    public void execute(final NetworkPackage np) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(np.getData().equals(SEND_IR_COMMAND))
+                {
+                    transmitIr(np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands());
+                }
+            }
+        }).start();
     }
 
-    private void transmitIr(List<String> args)
+    private void transmitIr(List<Command> args)
     {
         if(args.size() < 1)
         {

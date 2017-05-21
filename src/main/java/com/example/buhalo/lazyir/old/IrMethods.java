@@ -10,12 +10,14 @@ import android.os.StrictMode;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -79,8 +81,8 @@ public class IrMethods {
     }
 
 
-    private static void transmit(String hexCode) {
-        String data = hex2dec(hexCode);
+    private static void transmit(String code) {
+        String data = hex2dec(code);
         if (data != null) {
             String values[] = data.split(",");
             int[] pattern = new int[values.length - 1];
@@ -89,7 +91,7 @@ public class IrMethods {
                 pattern[i] = Integer.parseInt(values[i + 1]);
             }
 
-            irManager.transmit(Integer.parseInt(values[0]), convertToToggleDuration(Integer.parseInt(values[0]), pattern));
+            irManager.transmit(Integer.parseInt(values[0]), convertToToggleDuration(Integer.parseInt(values[0]),pattern));
         }
 
     }
@@ -101,6 +103,7 @@ public class IrMethods {
         for(int i = 0;i<notConverted.length;i++)
         {
             converted[i] = (int)(notConverted[i] * pulse);
+            System.out.print(converted[i] + " ");
         }
         return converted;
     }
@@ -201,9 +204,9 @@ public class IrMethods {
 //        return connection;
 //    }
 
-    public static void processCommands(Context context,List<String> commands)
+    public static void processCommands(Context context,List<Command> commands)
     {
-        for(String command : commands)
+        for(Command command : commands)
         {
             if(irManager== null)
             {
@@ -216,7 +219,8 @@ public class IrMethods {
             }
             else
                 return;
-            transmit(command);
+            transmit(command.getCommand());
+         //   transmit(duration,);
         }
 
     }

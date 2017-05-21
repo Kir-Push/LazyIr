@@ -20,6 +20,15 @@ android {
             debuggable true
         }
     }
+    packagingOptions {
+        exclude 'META-INF/NOTICE' // will not include NOTICE file
+        exclude 'META-INF/LICENSE' // will not include LICENSE file
+        exclude 'META-INF/notice'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/DEPENDENCIES'
+    }
 }
 
 dependencies {
@@ -29,6 +38,13 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support:design:25.2.0'
+    compile 'org.apache.sshd:sshd-core:0.8.0'
+    compile 'org.apache.ftpserver:ftpserver-core:1.1.1'
+    compile (
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.6'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.6'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.6']
+    )
     testCompile 'junit:junit:4.12'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
 }

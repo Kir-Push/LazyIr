@@ -3,14 +3,20 @@ package com.example.buhalo.lazyir;
 import android.app.Application;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.modules.battery.Battery;
+import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
+import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.SheluderService;
 
@@ -31,19 +37,16 @@ public class AppBoot extends Application {
     boolean bound = false;
 
     @Override
-    public void onCreate() { //todo сделай отделньый service для scheludera и из него вызывай background serivce и методы в других местах чтоб напрмую не вызывали а через startservice или как там !!!!
-                            //todo дада
+    public void onCreate() {
 
-        super.onCreate(); // todo нах убери
-        if(checkWifiOnAndConnected(this))
+
+        super.onCreate();
+       if(checkWifiOnAndConnected(this))
         BackgroundService.startExternalMethod(this);
-//        JobScheduler js =
-//                (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-//        JobInfo job = new JobInfo.Builder(
-//                0,
-//                new ComponentName(this, SheluderService.class))
-//                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-//                .build();
-//        js.schedule(job);
+
+    }
+
+    private void testClass() {
+
     }
 }

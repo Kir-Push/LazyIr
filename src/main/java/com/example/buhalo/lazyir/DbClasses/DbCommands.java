@@ -26,6 +26,8 @@ public interface DbCommands extends BaseColumns {
      String COLUMN_NAME_HEIGH = "heigh";
      String COLUMN_NAME_LAYOUT_PARAMS = "layoutpar";
      String COLUMN_NAME_LAYOUT_VALUE = "value";
+     String COLUMN_NAME_COMAMND_VENDOR = "producer";
+     String COLUMT_NAME_COMMAND_DEVICE = "device";
      String TEXT_TYPE = " TEXT";
      String COMMA_SEP = ",";
      String INTEGER_TYPE = " INTEGER";
@@ -49,17 +51,21 @@ public interface DbCommands extends BaseColumns {
                     COLUMN_NAME_LAYOUT_VALUE + INTEGER_TYPE +
                     ")";
 
-     String SQL_CREATE_ENTRIES_COMMANDS = //TODO create unique name index !!!
+     String SQL_CREATE_ENTRIES_COMMANDS =
             "CREATE TABLE " + TABLE_NAME_COMMANDS + " (" +
                     _ID + " INTEGER PRIMARY KEY," +
+                    COLUMN_NAME_COMAMND_VENDOR + TEXT_TYPE + COMMA_SEP +
+                    COLUMT_NAME_COMMAND_DEVICE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_TEXT + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND_TYPE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND + TEXT_TYPE + ")";
 
-     String SQL_CREATE_ENTRIES_BUTTON_COMMANDS = //TODO create unique name index !!!
+     String SQL_CREATE_ENTRIES_BUTTON_COMMANDS =
             "CREATE TABLE " + TABLE_NAME_COMMANDS_BTN + " (" +
                     _ID + " INTEGER PRIMARY KEY," +
                     COLUMN_NAME_ENTRY_ID + INTEGER_TYPE + COMMA_SEP +
+                    COLUMN_NAME_COMAMND_VENDOR + TEXT_TYPE + COMMA_SEP +
+                    COLUMT_NAME_COMMAND_DEVICE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_TEXT + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND_TYPE + TEXT_TYPE + COMMA_SEP +
                     COLUMN_NAME_COMMAND + TEXT_TYPE + ")";

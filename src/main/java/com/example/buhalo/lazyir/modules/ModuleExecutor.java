@@ -13,7 +13,7 @@ import com.example.buhalo.lazyir.modules.SendIr.SendIr;
 public class ModuleExecutor {
 
 
-    public static void executePackage(final NetworkPackage np) // todo create handle exptions when no connection
+    public static void executePackage(final NetworkPackage np)
     {
         String type = np.getType();
         final Module module = np.getDv().getEnabledModules().get(type);

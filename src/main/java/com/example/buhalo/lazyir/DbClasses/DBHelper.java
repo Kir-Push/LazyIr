@@ -5,23 +5,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.RelativeLayout;
 import com.example.buhalo.lazyir.Devices.Command;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
-        private static final int DATABASE_VERSION = 14;
+        private static final int DATABASE_VERSION = 25;
+        private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;
+        private final Context mContext;
 
         public static synchronized DBHelper getInstance(Context context)
         {
@@ -34,50 +39,66 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
         private DBHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
+         //   DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+            DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
+            System.out.println(DB_PATH);
+            this.mContext = context;
+            createDataBase();
         }
+
+    private boolean checkDataBase()
+    {
+        File dbFile = new File(DB_PATH + DATABASE_NAME);
+        //Log.v("dbFile", dbFile + "   "+ dbFile.exists());
+        return dbFile.exists();
+    }
+
+    private void copyDataBase() throws IOException
+    {
+        InputStream mInput = mContext.getApplicationContext().getAssets().open(DATABASE_NAME);
+        String outFileName = DB_PATH + DATABASE_NAME;
+        OutputStream mOutput = new FileOutputStream(outFileName);
+        byte[] mBuffer = new byte[1024];
+        int mLength;
+        while ((mLength = mInput.read(mBuffer))>0)
+        {
+            mOutput.write(mBuffer, 0, mLength);
+        }
+        mOutput.flush();
+        mOutput.close();
+        mInput.close();
+    }
+
+    public void createDataBase()
+    {
+        //If the database does not exist, copy it from the assets.
+
+        boolean mDataBaseExist = checkDataBase();
+        if(!mDataBaseExist)
+        {
+            this.getReadableDatabase();
+            this.close();
+            try
+            {
+                //Copy the database from assests
+                copyDataBase();
+                Log.e("DB", "createDatabase database created");
+            }
+            catch (IOException mIOException)
+            {
+                throw new Error("ErrorCopyingDataBase");
+            }
+        }
+    }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(SQL_CREATE_ENTRIES_BUTTON);
-            db.execSQL(SQL_CREATE_ENTRIES_LAYOUT);
-            db.execSQL(SQL_CREATE_ENTRIES_COMMANDS);
-            db.execSQL(SQL_CREATE_ENTRIES_BUTTON_COMMANDS);
-            db.execSQL(SQL_CREATE_PAIRED_DEVICES);
-            Command command = new Command("Komanda 1", "please decrease my volume, Thank you", null, "pc");
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_NAME_TEXT, command.getCommand_name());
-            values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
-            values.put(COLUMN_NAME_COMMAND, command.getCommand());
-            long newRowId;
-            newRowId = db.insert(
-                    TABLE_NAME_COMMANDS,
-                    null,
-                    values);
-            command = new Command("Samsung TV Power", "0000 006d 0022 0003 00a9 00a8 0015 003f 0015 003f 0015 003f 0015 " +
-                    "0015 0015 0015 0015 0015 0015 0015 " +
-                    "0015 0015 0015 003f 0015 003f 0015 003f 0015 0015 0015 0015 0015 0015 0015 0015" +
-                    " 0015 0015 0015 0015 0015 003f 0015 0015 0015 " +
-                    "0015 0015 0015 " +
-                    "0015 0015 0015 0015 0015 0015 0015 0040 0015 0015 0015 003f 0015 003f 0015 003f " +
-                    "0015 003f 0015 003f 0015 003f 0015 0702 00a9 00a8 0015 0015 0015 0e6e", null, "ir");
-            values = new ContentValues();
-            values.put(COLUMN_NAME_TEXT, command.getCommand_name());
-            values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
-            values.put(COLUMN_NAME_COMMAND, command.getCommand());
-            newRowId = db.insert(
-                    TABLE_NAME_COMMANDS,
-                    null,
-                    values);
+
         }
 
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL(SQL_DELETE_ENTRIES_BUTTON);
-            db.execSQL(SQL_DELETE_ENTRIES_LAYOUT);
-            db.execSQL(SQL_DELETE_ENTRIES_COMMANDS);
-            db.execSQL(SQL_DELETE_ENTRIES_COMMANDS_BTN);
-            db.execSQL(SQL_DELETE_PAIRED_DEVICES);
             onCreate(db);
         }
 
@@ -179,7 +200,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             if (button == null) {
                 return;
             }
-            Log.d("DB", "!!!!!!!!!!!!!!!!!!!!! BEFORE update BUTTON ID: " + button.getId());
+            Log.d("DB", "BEFORE update BUTTON ID: " + button.getId());
             try (SQLiteDatabase db = getWritableDatabase()) {
                 ContentValues values = new ContentValues();
                 ContentValues layout_values = new ContentValues();
@@ -190,7 +211,6 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 values.put(COLUMN_NAME_TAB, tab);
                 values.put(COLUMN_NAME_WIDTH, button.getLayoutParams().width);
                 values.put(COLUMN_NAME_HEIGH, button.getLayoutParams().height);
-                System.out.println("BUtton size? on update " + button.getLayoutParams().width + "  " + button.getLayoutParams().height);
                 values.put(COLUMN_NAME_RES_ID,(String)button.getTag());
                 long newRowId;
                 String selelection = _ID + " LIKE ?";
@@ -198,15 +218,13 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                         TABLE_NAME_BUTTON,
                         values,
                         selelection, new String[]{String.valueOf(button.getId())});
-                //  button.setId((int)newRowId);
-                Log.d("DB", "!!!!!!!!!!!!!!!!!!!!!update BUTTON ID: " + button.getId());
+                Log.d("DB", "update BUTTON ID: " + button.getId());
                 int i = 0;
-//                removeLayoutBtn(String.valueOf(button.getId()));
                 String selectionD= COLUMN_NAME_ENTRY_ID + " LIKE ?";
                 String[] selectionArgsD = {String.valueOf(button.getId())};
                 db.delete(TABLE_NAME_LAYOUT, selectionD, selectionArgsD);
                 for (int rule : params.getRules()) {
-                    layout_values.put(COLUMN_NAME_ENTRY_ID, newRowId);
+                    layout_values.put(COLUMN_NAME_ENTRY_ID, button.getId());
                     layout_values.put(COLUMN_NAME_LAYOUT_PARAMS, i);
                     layout_values.put(COLUMN_NAME_LAYOUT_VALUE, rule);
                     db.insert(
@@ -222,6 +240,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             try (SQLiteDatabase db = getWritableDatabase()) {
                 ContentValues values = new ContentValues();
                 values.put(COLUMN_NAME_TEXT, command.getCommand_name());
+                values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
+                values.put(COLUMT_NAME_COMMAND_DEVICE,command.getDevice());
                 values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
                 values.put(COLUMN_NAME_COMMAND, command.getCommand());
                 long newRowId;
@@ -237,6 +257,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             try (SQLiteDatabase db = getReadableDatabase()) {
                 String[] projection = {
                         COLUMN_NAME_TEXT,
+                        COLUMN_NAME_COMAMND_VENDOR,
+                        COLUMT_NAME_COMMAND_DEVICE,
                         COLUMN_NAME_COMMAND_TYPE,
                         COLUMN_NAME_COMMAND
 
@@ -244,13 +266,62 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 String selection = null;
                 String[] selectionArgs = null;
                 if (command_name != null) {
-                    selection = COLUMN_NAME_TEXT + " LIKE ?";
-                    selectionArgs = new String[]{command_name};
+                    selection = COLUMN_NAME_TEXT + " LIKE ? AND " + COLUMN_NAME_COMMAND_TYPE + " LIKE ?";
+                    selectionArgs = new String[]{command_name,"pc"};
                 }
                 try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
                     while (c.moveToNext()) {
-                        Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                        Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR)), c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE)), c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
                         commands.add(command);
+                    }
+                }
+            }
+            return commands;
+        }
+
+    public synchronized List<Command> getCommandFull() {
+        List<Command> commands = new ArrayList<Command>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    COLUMN_NAME_TEXT,
+                    COLUMN_NAME_COMAMND_VENDOR,
+                    COLUMT_NAME_COMMAND_DEVICE,
+                    COLUMN_NAME_COMMAND_TYPE,
+                    COLUMN_NAME_COMMAND
+
+            };
+            String selection = null;
+            String[] selectionArgs = null;
+                selection =  COLUMN_NAME_COMMAND_TYPE + " LIKE ?";
+                selectionArgs = new String[]{"pc"};
+
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                while (c.moveToNext()) {
+                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR)), c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE)), c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                    commands.add(command);
+                }
+            }
+        }
+        return commands;
+    }
+
+        public synchronized List<String> getCommandsPc()
+        {
+            List<String> commands = new ArrayList<String>();
+            try (SQLiteDatabase db = getReadableDatabase()) {
+                String[] projection = {
+                        COLUMN_NAME_TEXT,
+                        COLUMN_NAME_COMAMND_VENDOR,
+                        COLUMT_NAME_COMMAND_DEVICE,
+                        COLUMN_NAME_COMMAND_TYPE,
+                        COLUMN_NAME_COMMAND
+
+                };
+                String selection = COLUMN_NAME_COMMAND_TYPE + " LIKE ?";
+                String[] selectionArgs =new String[]{"pc"};
+                try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                    while (c.moveToNext()) {
+                        commands.add( c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)));
                     }
                 }
             }
@@ -266,6 +337,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 for (Command command : commands) {
                     ContentValues values = new ContentValues();
                     values.put(COLUMN_NAME_TEXT, command.getCommand_name());
+                    values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
+                    values.put(COLUMT_NAME_COMMAND_DEVICE,command.getDevice());
                     values.put(COLUMN_NAME_ENTRY_ID, Integer.parseInt(id));
                     values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
                     values.put(COLUMN_NAME_COMMAND, command.getCommand());
@@ -283,6 +356,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             try (SQLiteDatabase db = getReadableDatabase()) {
                 String[] projection = {
                         COLUMN_NAME_ENTRY_ID,
+                        COLUMN_NAME_COMAMND_VENDOR,
+                        COLUMT_NAME_COMMAND_DEVICE,
                         COLUMN_NAME_TEXT,
                         COLUMN_NAME_COMMAND_TYPE,
                         COLUMN_NAME_COMMAND
@@ -295,7 +370,15 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
                 try (Cursor c = db.query(TABLE_NAME_COMMANDS_BTN, projection, selection, selectionArgs, null, null, null)) {
                     while (c.moveToNext()) {
-                        Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), String.valueOf(c.getInt(c.getColumnIndex(COLUMN_NAME_ENTRY_ID))), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                        String vendor = c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR));
+                        String device = c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE));
+                        String command_name = "";
+                        if((vendor != null && !vendor.equals("")) || (device != null && !device.equals("")) )
+                        {
+                            command_name = vendor + "_" + device + "_";
+                        }
+                        command_name = command_name + c.getString(c.getColumnIndex(COLUMN_NAME_TEXT));
+                        Command command = new Command(vendor, device,command_name, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), String.valueOf(c.getInt(c.getColumnIndex(COLUMN_NAME_ENTRY_ID))), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
                         commands.add(command);
                     }
                 }
@@ -385,11 +468,21 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             }
         }
 
-        public synchronized void removeCommandBtn(String id, String commandName) {
+        public synchronized void removeCommandBtn(String id, String commandName) { //todo test here
             try (SQLiteDatabase db = getWritableDatabase()) {
                 String selelection = COLUMN_NAME_ENTRY_ID + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ?";
-                String[] selectionArgs = {id, commandName};
-                db.delete(TABLE_NAME_COMMANDS_BTN, selelection, selectionArgs);
+                String[] split = commandName.split("_");
+                if(split.length < 3)
+                {
+                    String[] selectionArgs = {id, commandName};
+                    db.delete(TABLE_NAME_COMMANDS_BTN, selelection, selectionArgs);
+                }else
+                {
+                    selelection = COLUMN_NAME_ENTRY_ID + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ? AND " + COLUMT_NAME_COMMAND_DEVICE + " LIKE ? AND " + COLUMN_NAME_COMAMND_VENDOR + " LIKE ?";
+                    String[] selectionArgs = {id, split[2],split[1],split[0]};
+                    db.delete(TABLE_NAME_COMMANDS_BTN, selelection, selectionArgs);
+                }
+
             }
         }
 
@@ -418,4 +511,129 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             }
         }
 
+    public List<String> getProducerList() {
+        Set<String> set = new HashSet<>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    COLUMN_NAME_COMAMND_VENDOR,
+
+            };
+            String selection = COLUMN_NAME_COMMAND_TYPE + " LIKE ?";
+            String[] selectionArgs = new String[]{"ir"};
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                while (c.moveToNext()) {
+                    String string = c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR));
+                    if(string != null)
+                    set.add(string);
+                }
+            }
+        }
+        return new ArrayList<>(set);
     }
+
+    public List<String> getTypeByProducer(String entry) {
+        Set<String> set = new HashSet<>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    COLUMT_NAME_COMMAND_DEVICE,
+
+            };
+            String selection = null;
+            String[] selectionArgs = null;
+            if (entry != null) {
+                selection = COLUMN_NAME_COMAMND_VENDOR + " LIKE ?";
+                selectionArgs = new String[]{entry};
+            }
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                while (c.moveToNext()) {
+                    String string = c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE));
+                    if(string != null)
+                        set.add(string);
+                }
+            }
+        }
+        return new ArrayList<>(set);
+    }
+
+    public List<String> getCodeNamesByType(String deviceType,String producer) {
+        List<String> arrayList = new ArrayList<>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    COLUMN_NAME_TEXT,
+                    COLUMN_NAME_COMAMND_VENDOR,
+                    COLUMT_NAME_COMMAND_DEVICE
+
+            };
+            String selection = null;
+            String[] selectionArgs = null;
+            if (deviceType != null && producer != null) {
+                selection = COLUMN_NAME_COMAMND_VENDOR + " LIKE ? AND " + COLUMT_NAME_COMMAND_DEVICE + " LIKE ?";
+                selectionArgs = new String[]{producer,deviceType};
+            }
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                while (c.moveToNext()) {
+                    String string = c.getString(c.getColumnIndex(COLUMN_NAME_TEXT));
+                    if(string != null)
+                    arrayList.add(string);
+                }
+            }
+        }
+        return arrayList;
+    }
+
+    public void saveBtnCommandTemp(String thirdLevelAdapterItem, String secondLevel, String item,int btnId) {
+        Log.d("IrActivity", item);
+     List<Command> cmd  = getCommandIr(thirdLevelAdapterItem,secondLevel,item);
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            for (Command command : cmd) {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NAME_TEXT, command.getCommand_name());
+                values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
+                values.put(COLUMT_NAME_COMMAND_DEVICE,command.getDevice());
+                values.put(COLUMN_NAME_ENTRY_ID, btnId);
+                values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
+                values.put(COLUMN_NAME_COMMAND, command.getCommand());
+                long newRowId;
+                newRowId = db.insert(
+                        TABLE_NAME_COMMANDS_BTN,
+                        null,
+                        values);
+            }
+        }
+    }
+
+    private List<Command> getCommandIr(String thirdLevelAdapterItem, String secondLevel, String item) {
+        List<Command> commands = new ArrayList<Command>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    COLUMN_NAME_COMAMND_VENDOR,
+                    COLUMT_NAME_COMMAND_DEVICE,
+                    COLUMN_NAME_TEXT,
+                    COLUMN_NAME_COMMAND_TYPE,
+                    COLUMN_NAME_COMMAND
+
+            };
+            String selection = null;
+            String[] selectionArgs = null;
+            selection = COLUMN_NAME_COMAMND_VENDOR + " LIKE ? AND " + COLUMT_NAME_COMMAND_DEVICE + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ?";
+            selectionArgs = new String[]{secondLevel,item,thirdLevelAdapterItem};
+
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+                while (c.moveToNext()) {
+                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR)), c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE)), c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                    commands.add(command);
+                }
+            }
+        }
+        return commands;
+    }
+
+    public synchronized void deteleCommand(Command command) {
+        try(SQLiteDatabase db = getWritableDatabase())
+        {
+            String selection = COLUMN_NAME_COMMAND_TYPE + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ?";
+            String[] selectionArgs = {"pc",command.getCommand()};
+            db.delete(TABLE_NAME_COMMANDS, selection, selectionArgs);
+        }
+    }
+}

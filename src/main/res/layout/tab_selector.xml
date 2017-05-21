@@ -5,49 +5,65 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tabSelectTab">
 
-    <Button
-        android:layout_height="60dp"
-        android:layout_marginStart="35dp"
-        android:id="@+id/button"
-        android:background="@mipmap/andrr"
-        android:tag="@mipmap/andrr"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="84dp"
-        android:layout_width="60dp"
-        android:scaleX="1"
-        android:scaleY="1"/>
 
     <Button
+        android:id="@+id/volume_icn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_alignTop="@+id/button"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="71dp"
-        android:id="@+id/hzbtn"
-        android:tag="@mipmap/irbtn"
-        android:background="@mipmap/irbtn"
-        android:scaleX="1"
-        android:scaleY="1"/>
+        android:tag="@mipmap/volume_icon"
+        android:background="@mipmap/volume_icon"
+        android:layout_marginStart="12dp"
+        android:layout_alignParentTop="true" />
 
     <Button
-        android:id="@+id/file_icn"
+        android:id="@+id/up_icn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_below="@+id/button"
-        android:layout_marginStart="29dp"
-        android:layout_marginTop="47dp"
-        android:tag="@mipmap/file_icn"
-        android:background="@mipmap/file_icn" />
+        android:tag="@mipmap/up_icon"
+        android:background="@mipmap/up_icon"
+        android:layout_marginStart="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/volume_icn" />
 
     <Button
-        android:id="@+id/folder_icn"
+        android:id="@+id/down_icn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_alignEnd="@+id/hzbtn"
-        android:layout_alignTop="@+id/file_icn"
-        android:layout_marginEnd="15dp"
-        android:tag="@mipmap/folder_icn"
-        android:background="@mipmap/folder_icn" />
+        android:tag="@mipmap/down_icon"
+        android:background="@mipmap/down_icon"
+        android:layout_marginStart="25dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/up_icn" />
+
+    <Button
+        android:id="@+id/dv_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:tag="@mipmap/tv_icon"
+        android:background="@mipmap/tv_icon"
+        android:layout_alignBottom="@+id/power_icn"
+        android:layout_alignStart="@+id/up_icn"
+        android:layout_alignTop="@+id/power_icn" />
+
+    <Button
+        android:id="@+id/power_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:tag="@mipmap/power_icon"
+        android:background="@mipmap/power_icon"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/volume_icn"
+        android:layout_alignStart="@+id/volume_icn" />
+
+    <Button
+        android:id="@+id/music_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:tag="@mipmap/music_icon"
+        android:background="@mipmap/music_icon"
+        android:layout_marginStart="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/down_icn" />
 
 
 </RelativeLayout>

@@ -9,6 +9,8 @@ import java.util.List;
 
 public class Command {
 
+    private String producer;
+    private String device;
     private String command_name;
     private String command;
     private String owner_id;
@@ -20,7 +22,9 @@ public class Command {
     public Command() {
     }
 
-    public Command(String command_name, String command, String owner_id, String type) {
+    public Command(String producer, String device, String command_name, String command, String owner_id, String type) {
+        this.producer = producer;
+        this.device = device;
         this.command_name = command_name;
         this.command = command;
         this.owner_id = owner_id;
@@ -82,4 +86,19 @@ public class Command {
                 '}';
     }
 
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
+    }
+
+    public String getProducer() {
+        return producer;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
+    }
 }

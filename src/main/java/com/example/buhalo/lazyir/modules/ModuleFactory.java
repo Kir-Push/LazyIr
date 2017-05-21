@@ -5,7 +5,13 @@ import android.util.Log;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.modules.SendCommand.SendCommand;
 import com.example.buhalo.lazyir.modules.SendIr.SendIr;
+import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
+import com.example.buhalo.lazyir.modules.dbus.Mpris;
+import com.example.buhalo.lazyir.modules.notificationModule.Messengers;
+import com.example.buhalo.lazyir.modules.notificationModule.ShowNotification;
+import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
+import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +47,12 @@ public class ModuleFactory {
         registeredModules.add(SendCommand.class);
         registeredModules.add(SendIr.class);
         registeredModules.add(ShareModule.class);
+        registeredModules.add(SmsModule.class);
+        registeredModules.add(Mpris.class);
+        registeredModules.add(ClipBoard.class);
+        registeredModules.add(Messengers.class);
+        registeredModules.add(ShowNotification.class);
+        registeredModules.add(SynchroModule.class);
     }
 
     public static Module instantiateModuleByName(Device dv,String name)

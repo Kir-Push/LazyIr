@@ -12,14 +12,14 @@ import com.example.buhalo.lazyir.R;
  */
 
 public class SampleFragmentPagerAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 6;
+    final int PAGE_COUNT = 4;
     private Context context;
     private String tabTitles[];
 
     public SampleFragmentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.context = context;
-      tabTitles = new String[] { context.getString(R.string.tab1), context.getString(R.string.tab2), context.getString(R.string.tab3),context.getString(R.string.tab4) ,"yeap","dada"};
+      tabTitles = new String[] { context.getString(R.string.tab1), context.getString(R.string.tab2), context.getString(R.string.tab3),context.getString(R.string.tab4)};
     }
 
     @Override

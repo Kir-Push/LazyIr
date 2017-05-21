@@ -23,13 +23,13 @@ import java.util.List;
 
 public class FolderAdater extends BaseAdapter{
 
-    Context ctx;
+  //  Context ctx;
     LayoutInflater lInflater;
     List<FileWrap> fileWrapList;
     private boolean cbSendVisible;
 
     public FolderAdater(Context ctx, List<FileWrap> fileWrapList) {
-        this.ctx = ctx;
+     //   this.ctx = ctx;
         this.fileWrapList = fileWrapList;
         lInflater = (LayoutInflater) ctx
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

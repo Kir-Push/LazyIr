@@ -1,10 +1,15 @@
 package com.example.buhalo.lazyir.Devices;
 
 import android.provider.Settings;
+import android.util.Log;
 
-import com.example.buhalo.lazyir.Exception.ParseError;
-import com.example.buhalo.lazyir.Exception.TcpError;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,140 +19,142 @@ import java.util.List;
 
 //package spec's is type::id::name::data::nArgs::arg1::arg2::...
 public class NetworkPackage {
-    private String type;
-    private String id;
-    private String name;
-    private String data;
-    private List<String> args;
+    public final static String ID = "id";
+    public final static String NAME = "name";
+    public final static String TYPE = "type";
+    public final static String DATA = "data";
+    public final static String N_OBJECT = "object";
+
+
     private Device dv;
 
+    private String msg;
 
-    public NetworkPackage() {
-        args = new ArrayList<>();
+    JsonNodeFactory factory;
+    private ObjectNode idNode;
+
+    public ObjectNode getIdNode() {
+        return idNode;
     }
 
-    public NetworkPackage(String type, String id, String name, String data, List<String> args) {
-        this.type = type;
-        this.id = id;
-        this.name = name;
-        this.data = data;
-        this.args = args;
+    public void setIdNode(ObjectNode idNode) {
+        this.idNode = idNode;
     }
 
-    public void parsePackage(String received)
+    public NetworkPackage(String type, String data) {
+        // args = new ArrayList<>();
+        factory = JsonNodeFactory.instance;
+        idNode = factory.objectNode();
+        idNode.put(ID,getMyId());
+        idNode.put(NAME,getMyName());
+        idNode.put(TYPE,type);
+        idNode.put(DATA,data);
+    }
+
+    public NetworkPackage(String message)
     {
-        String trimmed = received.trim();
-        String[] array = trimmed.split("::");
-
-       for(int i = 0;i<array.length;i++)
-       {
-           if(array.length > 4 && i > 3)
-           {
-               addArg(array[i]);
-           }
-
-           switch (i)
-           {
-               case 0:
-                   type = array[i];
-                   break;
-               case 1:
-                   id = array[i];
-                   break;
-               case 2:
-                   name = array[i];
-                   break;
-               case 3:
-                   data = array[i];
-                   break;
-           }
-       }
+        this.msg = message;
+        parseMessage();
     }
 
-    public void addArg(String arg)
+    public void parseMessage()
     {
-        args.add(arg);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            idNode = (ObjectNode) mapper.readTree(msg);
+        } catch (IOException e) {
+            Log.e("NetworkPackage",e.toString());
+        }
     }
 
-    public String createMessage()  {
-        if(type == null || type.isEmpty() || data == null || data.isEmpty())
+    public void addStringArray(String key,List<String> list)
+    {
+        ArrayNode arrayNode = idNode.putArray(key);
+        for(String st : list)
         {
-            return null;
+            arrayNode.add(st);
         }
-        if(id == null || id.isEmpty() || name == null || name.isEmpty())
-        {
-            setId(android.os.Build.SERIAL);
-            setName(android.os.Build.MODEL);
-        }
-        StringBuilder buffer = new StringBuilder();
-        buffer.append(type);
-        buffer.append("::");
-        buffer.append(id);
-        buffer.append("::");
-        buffer.append(name);
-        buffer.append("::");
-        buffer.append(data);
-        if(args != null && args.size() > 0) {
-            buffer.append("::");
-            buffer.append(args.size());
+    }
 
-            for (String arg : args) {
-                buffer.append("::");
-                buffer.append(arg);
+    public String getMessage()
+    {
+        return idNode.toString();
+    }
+
+    public List<String> getStringArray(String key)
+    {
+        List<String> list = new ArrayList<>();
+        if(idNode.get(key).isArray())
+        {
+            for(JsonNode objNode: idNode.get(key))
+            {
+                if(objNode.isTextual())
+                    list.add(objNode.asText());
             }
         }
-        return buffer.toString();
+        return list;
     }
 
-    public String createFromTypeAndData(String type,String data)
+    public String getType()
     {
-        setType(type);
-        setData(data);
-        setId(android.os.Build.SERIAL);
-        setName(android.os.Build.MODEL);
-        return createMessage();
+        return getValue(TYPE);
     }
 
-
-    public String getType() {
-        return type;
+    public String getData()
+    {
+        return getValue(DATA);
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getValue(String key)
+    {
+        return idNode.get(key).textValue();
     }
 
-    public String getId() {
-        return id;
+    public void setValue(String key,String value)
+    {
+        idNode.put(key,value);
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public <T> void setObject(String key,T object)
+    {
+        JsonNode node = new ObjectMapper().convertValue(object, JsonNode.class);
+        idNode.set(key,node);
     }
 
-    public String getName() {
-        return name;
+    public <T> T getObject(String key,Class<T> tClass)
+    {
+        String typeName = idNode.get(TYPE).textValue();
+        JsonNode object = idNode.get(key);
+
+
+        try {
+            return new ObjectMapper().readValue(object.toString(),tClass);
+        } catch (Exception e) {
+            Log.e("NetworkPackage",e.toString());
+        }
+        return null;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getMyId()
+    {
+       return android.os.Build.SERIAL;
     }
 
-    public String getData() {
-        return data;
+    public String getMyName()
+    {
+        return android.os.Build.MODEL;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public String getId()
+    {
+        return idNode.get(ID).textValue();
     }
 
-    public List<String> getArgs() {
-        return args;
+    public String getName()
+    {
+        return idNode.get(NAME).textValue();
     }
 
-    public void setArgs(List<String> args) {
-        this.args = args;
-    }
 
     public Device getDv() {
         return dv;
@@ -156,4 +163,6 @@ public class NetworkPackage {
     public void setDv(Device dv) {
         this.dv = dv;
     }
+
 }
+

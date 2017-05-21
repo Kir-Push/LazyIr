@@ -9,15 +9,12 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.Exception.ParseError;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by buhalo on 19.02.17.
@@ -29,9 +26,6 @@ public class UdpBroadcastManager  {
     private static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
     private DatagramSocket socket;
     private  DatagramSocket server;
-    private InetAddress broadcastAddress;
-    private String android_id;
-    private String android_name;
     private int send_period = 15000;
     public int  count = 0;
 
@@ -40,8 +34,6 @@ public class UdpBroadcastManager  {
     public volatile static boolean exitedFromSend = true;
     private volatile static boolean sending;
     private static UdpBroadcastManager instance;
-
-    public static HashMap<String,InetAddress> neighboors = new HashMap<>();
 
     private UdpBroadcastManager() {
         try {
@@ -75,7 +67,7 @@ public class UdpBroadcastManager  {
     public void sendBroadcast(final Context context, final String message, final int port)
     {
                 try {
-                    broadcastAddress = getBroadcastAddress(context);
+                    InetAddress broadcastAddress = getBroadcastAddress(context);
                     byte[] sendData = message.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
                     Log.d("Udp","Sending broadcast: "+ message);
@@ -132,7 +124,7 @@ public class UdpBroadcastManager  {
                 Log.e("Udp",e.toString());
                 return;
             }
-            listening = true; //todo handle variable in threads
+            listening = true;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -146,7 +138,7 @@ public class UdpBroadcastManager  {
                             server.receive(packet);
                         } catch (IOException e) {
                             Log.e("Udp", "UdpReceive exception + " + e.toString());
-                            listening = false; //todo handle exception and think about restart listening
+                            listening = false;
                             if(!server.isConnected())
                             {
                                 server.close();
@@ -171,15 +163,13 @@ public class UdpBroadcastManager  {
     public void udpReceived(DatagramPacket packet, Context context)
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
-        NetworkPackage np = new NetworkPackage();
-        np.parsePackage(pck);
+        NetworkPackage np = new NetworkPackage(pck);
         if(np.getId().equals(android.os.Build.SERIAL))
         {
             return; // ignore my own packets
         }
         else if(np.getType().equals(BROADCAST_INTRODUCE))
         {
-            neighboors.put(np.getId(),packet.getAddress()); // todo attention here !!
             Log.d("Udp","received package  + " + pck);
             Log.d("udp","number of connects " + Device.getConnectedDevices().size());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
@@ -199,6 +189,18 @@ public class UdpBroadcastManager  {
 
     public synchronized void startSendingTask(final Context context, final int port) {
 
+        final ConnectivityManager connMgr = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        final android.net.NetworkInfo wifi =
+                connMgr.getActiveNetworkInfo();
+
+
+        if(wifi.getType() != ConnectivityManager.TYPE_WIFI && !wifi.isAvailable()) {
+            Log.d("udp","No Wifi network -- listener not started");
+            return;
+        }
+
         if(!exitedFromSend)
         {
             sending = true;
@@ -206,9 +208,9 @@ public class UdpBroadcastManager  {
         }
         startSending();
         exitedFromSend = false;
-        NetworkPackage np = new NetworkPackage();
+        NetworkPackage np = new NetworkPackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
         try {
-            final String message  = np.createFromTypeAndData(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG); // todo handle null error
+            final String message  = np.getMessage();
             if(socket == null) {
                 socket = new DatagramSocket();
                 socket.setReuseAddress(true);

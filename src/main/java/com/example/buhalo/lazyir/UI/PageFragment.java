@@ -2,6 +2,7 @@ package com.example.buhalo.lazyir.UI;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
@@ -9,6 +10,8 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.SparseBooleanArray;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -28,6 +31,10 @@ import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
+import com.example.buhalo.lazyir.modules.SendCommand.CommandActivity;
+import com.example.buhalo.lazyir.modules.SendIr.IrActivity;
+import com.example.buhalo.lazyir.modules.dbus.MediaRemoteActivity;
+import com.example.buhalo.lazyir.modules.shareManager.SftpServer;
 import com.example.buhalo.lazyir.modules.shareManager.ShareActivity;
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
@@ -38,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static android.app.Activity.RESULT_OK;
 import static com.example.buhalo.lazyir.Executors.ButtonExecutor.executeButtonCommands;
 
 
@@ -49,6 +57,8 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     public static final String ARG_PAGE = "ARG_PAGE";
 
+    private static final int ADDCODES = 1;
+
     private int mPage;
 
     private  TabLayout tabLayout;
@@ -59,9 +69,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     private Set<String> buttonCommandsSet;
 
-    private ListView commandList;
 
     private ListView buttonCommandList;
+
 
     public static PageFragment newInstance(int page) {
         Bundle args = new Bundle();
@@ -80,6 +90,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(MainActivity.selected_id);
         View view;
         tabLayout = (TabLayout)  ((Activity) getContext()).findViewById(R.id.sliding_tabs);
         view = inflater.inflate(R.layout.fragment_page, container, false);
@@ -89,144 +102,124 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
         if(mPage == 1)
         {
-            List<Button> buttonList =   DBHelper.getInstance(getContext().getApplicationContext()).getButtons("1",getContext());
-            for(final Button button : buttonList)
-            {
-                layout.addView(button);
-                button.setBackgroundResource(findResourceId(button.getTag()));
-                button.setScaleX(1);
-                button.setScaleY(1);
-                button.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN:
-                                ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(v,
-                                        "scaleX", 0.8f);
-                                ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(v,
-                                        "scaleY", 0.8f);
-                                scaleDownX.setDuration(500);
-                                scaleDownY.setDuration(500);
-
-                                AnimatorSet scaleDown = new AnimatorSet();
-                                scaleDown.play(scaleDownX).with(scaleDownY);
-
-                                scaleDown.start();
-
-                                break;
-
-                            case MotionEvent.ACTION_UP:
-                                ObjectAnimator scaleDownX2 = ObjectAnimator.ofFloat(
-                                        v, "scaleX", 1f);
-                                ObjectAnimator scaleDownY2 = ObjectAnimator.ofFloat(
-                                        v, "scaleY", 1f);
-                                scaleDownX2.setDuration(500);
-                                scaleDownY2.setDuration(500);
-
-                                AnimatorSet scaleDown2 = new AnimatorSet();
-                                scaleDown2.play(scaleDownX2).with(scaleDownY2);
-
-                                scaleDown2.start();
-                                mainButtonOnclick(v.getId());
-                                v.setEnabled(true);
-                                break;
-                        }
-                        return true;
-                    }
-                });
-            }
-        }
-        else if(mPage == 3)
-        {
-            view = inflater.inflate(R.layout.tab_selector, container, false);
-            ViewGroup vv4 = (ViewGroup) view;
-            for(int i=0;i< vv4.getChildCount();i++)
-            {
-
-                Button tempBtn = (Button) vv4.getChildAt(i);
-                tempBtn.setOnTouchListener(this);
-            }
-
-        }
-        else if(mPage == 4)
-        {
-            List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
-            for(Button button : buttonList)
-            {
-                layout.addView(button);
-                button.setBackgroundResource(findResourceId(button.getTag()));
-                button.setOnLongClickListener(this);
-                button.setOnClickListener(this);
-            }
+            createFirstPage();
         }
         else if (mPage == 2)
         {
-        // view = inflater.inflate(R.layout.share_page, container, false);
-            Button share = new Button(getContext());
-            share.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), ShareActivity.class);
-                    startActivity(intent);
-                }
-            });
-            layout.addView(share);
+           return createSecondPage(view,inflater,container);
         }
-        else if(mPage == 5)
+        else if(mPage == 3)
         {
-            view = inflater.inflate(R.layout.connected_devices,container,false);
-            ConstraintLayout constraintLayout = (ConstraintLayout) view;
-            Button pair = (Button) constraintLayout.findViewById(R.id.pair);
-            pair.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(MainActivity.selected_id != null && !MainActivity.selected_id.equals(""))
-                    {
-                        TcpConnectionManager.getInstance().sendPairing(MainActivity.selected_id);
-                    }
-                }
-            });
-            Button unpair = (Button) constraintLayout.findViewById(R.id.unpair);
-            unpair.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(MainActivity.selected_id != null && !MainActivity.selected_id.equals(""))
-                    {
-                        TcpConnectionManager.getInstance().unpair(MainActivity.selected_id,getContext());
-                    }
-                }
-            });
-            LinearLayout linconn = (LinearLayout) constraintLayout.findViewById(R.id.lin_connection_layout);
-            RadioButton oneConnect = (RadioButton) linconn.findViewById(R.id.connection_line);
-            oneConnect.setVisibility(View.INVISIBLE);
-            for (Device device : Device.getConnectedDevices().values()) {
-
-                    final RadioButton rd = new RadioButton(getContext());
-                    rd.setText(device.getName());
-                rd.setId(View.generateViewId());
-                    rd.setTag(device.getId());
-                    rd.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MainActivity.selected_id = (String)rd.getTag();
-                        }
-                    });
-                    linconn.addView(rd);
-
-            }
-            //todo this is for test create good;
-
+          return  createThirdPage(view,inflater,container);
         }
-
+        else if(mPage == 4)
+        {
+            createFourthPage(inflater,container);
+        }
         return view;
+    }
+
+    private View createFirstPage()
+    {
+        List<Button> buttonList =   DBHelper.getInstance(getContext().getApplicationContext()).getButtons("1",getContext());
+        for(final Button button : buttonList)
+        {
+            layout.addView(button);
+            button.setBackgroundResource(findResourceId(button.getTag()));
+            button.setScaleX(1);
+            button.setScaleY(1);
+            button.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(v,
+                                    "scaleX", 0.8f);
+                            ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(v,
+                                    "scaleY", 0.8f);
+                            scaleDownX.setDuration(500);
+                            scaleDownY.setDuration(500);
+
+                            AnimatorSet scaleDown = new AnimatorSet();
+                            scaleDown.play(scaleDownX).with(scaleDownY);
+
+                            scaleDown.start();
+
+                            break;
+
+                        case MotionEvent.ACTION_UP:
+                            ObjectAnimator scaleDownX2 = ObjectAnimator.ofFloat(
+                                    v, "scaleX", 1f);
+                            ObjectAnimator scaleDownY2 = ObjectAnimator.ofFloat(
+                                    v, "scaleY", 1f);
+                            scaleDownX2.setDuration(500);
+                            scaleDownY2.setDuration(500);
+
+                            AnimatorSet scaleDown2 = new AnimatorSet();
+                            scaleDown2.play(scaleDownX2).with(scaleDownY2);
+
+                            scaleDown2.start();
+                            mainButtonOnclick(v.getId());
+                            v.setEnabled(true);
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
+        return null; // return null because first page don't need view
+    }
+
+    private View createSecondPage(View vv,LayoutInflater inflater,final ViewGroup container)
+    {
+        vv = inflater.inflate(R.layout.page_two,container,false);
+        vv.findViewById(R.id.share_start_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ShareActivity.class);
+                startActivity(intent);
+            }
+        });
+        vv.findViewById(R.id.media_start_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), MediaRemoteActivity.class);
+                startActivity(intent);
+            }
+        });
+        return vv;
+    }
+
+    private View createThirdPage(View vv,LayoutInflater inflater,final ViewGroup container)
+    {
+        vv = inflater.inflate(R.layout.tab_selector, container, false);
+        ViewGroup vv4 = (ViewGroup) vv;
+        for(int i=0;i< vv4.getChildCount();i++)
+        {
+
+            Button tempBtn = (Button) vv4.getChildAt(i);
+            tempBtn.setOnTouchListener(this);
+        }
+        return vv;
+    }
+
+    private View createFourthPage(LayoutInflater inflater,final ViewGroup container)
+    {
+        List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
+        for(Button button : buttonList)
+        {
+            layout.addView(button);
+            button.setBackgroundResource(findResourceId(button.getTag()));
+            button.setOnLongClickListener(this);
+            button.setOnClickListener(this);
+        }
+        return null;
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
             if(event.getAction() == MotionEvent.ACTION_DOWN)
             {
-
                 if(mPage == 3)
                 {
                     tabLayout.getTabAt(3).select();
@@ -234,10 +227,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                     View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
                     v.startDrag(data, shadow, v, 0);
                 }
-
             }
-
-
             return false;
         }
 
@@ -322,7 +312,6 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     @Override
     public void onClick(View v) {
-
         if(commandLayout != null)
         {
             if(commandLayout.getVisibility() != View.VISIBLE)
@@ -336,10 +325,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                 commandLayout.setVisibility(View.INVISIBLE);
                 unhideButtons();
             }
-
-
         }
-
     }
 
 
@@ -348,50 +334,39 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     private void fillCommandLayout(final String id)
     {
-        commandList = (ListView) commandLayout.findViewById(R.id.all_comand_list);
         buttonCommandList = (ListView) commandLayout.findViewById(R.id.button_command_list);
         Button add = (Button) commandLayout.findViewById(R.id.const_bt_add);
         Button remove = (Button) commandLayout.findViewById(R.id.const_bt_rmv);
+        Button cmd = (Button) commandLayout.findViewById(R.id.const_bt_add_cmd);
 
-        Set<String> commands = new HashSet<>();
         buttonCommandsSet = getCommands(id);
-
-        // only for test
-        List<Command> command =   DBHelper.getInstance(getContext()).getCommand(null);
-        for(Command command1 : command)
-        {
-            commands.add(command1.getCommand_name());
-        }
-
-        commandList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        commandAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice,new ArrayList<>(commands));
-        commandList.setAdapter(commandAdapter);
-
+        //commandAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice,new ArrayList<>(commands));
         buttonCommandList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         buttonCommandAdapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice, new ArrayList<>(buttonCommandsSet));
         buttonCommandList.setAdapter(buttonCommandAdapter);
 
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SparseBooleanArray checkedItemPositions = commandList.getCheckedItemPositions();
-                for(int i =0;i<checkedItemPositions.size();i++)
-                {
-                    int key = checkedItemPositions.keyAt(i);
-                    if(checkedItemPositions.get(key))
-                    {
-                        buttonCommandsSet.add(commandAdapter.getItem(key));
-                        commandList.setItemChecked(i,false);
-                    }
-                }
-                buttonCommandAdapter.clear();
-                buttonCommandAdapter.addAll(buttonCommandsSet);
-                buttonCommandAdapter.notifyDataSetChanged();
+                Intent intent = new Intent(getActivity(), IrActivity.class);
+                Bundle b = new Bundle();
+                b.putInt("btnId", Integer.parseInt(id)); //Your id
+                intent.putExtras(b); //Put your id to your next Intent
+                startActivityForResult(intent, ADDCODES);
 
-                addCommand(id,buttonCommandsSet); //todo remember bug if you add it add whenever if there already one
             }
         });
-
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CommandActivity.class);
+                Bundle b = new Bundle();
+                b.putInt("btnId", Integer.parseInt(id)); //Your id
+                intent.putExtras(b); //Put your id to your next Intent
+                startActivityForResult(intent, ADDCODES);
+            }
+        });
         remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -416,6 +391,19 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             }
         });
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADDCODES) {
+            if (resultCode == RESULT_OK) {
+                buttonCommandsSet = getCommands(Integer.toString(data.getIntExtra("btnId",0)));
+                buttonCommandAdapter.clear();
+                buttonCommandAdapter.addAll(buttonCommandsSet);
+                buttonCommandAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
     private void hideButtons()
     {
         for(int i =0;i<layout.getChildCount();i++)
@@ -464,13 +452,6 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             set.add(cmd.getCommand_name());
         }
         return set;
-    }
-
-    private void addCommand(String id,Set<String> commands) {
-        for(String cmd : commands)
-        {
-            DBHelper.getInstance(getContext()).saveBtnCommand(cmd,id);
-        }
     }
 
     private void removeCommand(String id,List<String> commands)

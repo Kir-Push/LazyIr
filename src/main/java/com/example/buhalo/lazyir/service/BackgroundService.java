@@ -3,6 +3,7 @@ package com.example.buhalo.lazyir.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -10,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
+import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 
 import java.util.ArrayList;
 
@@ -31,7 +34,17 @@ public class BackgroundService extends Service {
     public final static int startListeningUdp = 3;
     public final static int stopListeningUdp = -3;
     public final static int eraseAllTcpConnectons = 666;
-    public final static int port = 5667;
+
+    public final static int startListeningClipBoard = 4;
+    public final static int removeClipBoardListener = -4;
+    public final static int registerBatteryReceiver = 5;
+    public final static int unRegisterBatteryRecever = -5;
+
+    public static int port = 5667;
+
+    private BatteryBroadcastReveiver mReceiver;
+
+    private static boolean batteryRegistered = false;
 
     @Override
     public void onCreate() {
@@ -86,7 +99,7 @@ public class BackgroundService extends Service {
 
     public void startListeningTcp()
     {
-        TcpConnectionManager.getInstance().startListening(port,this); //todo attention
+        TcpConnectionManager.getInstance().startListening(port,this);
     }
 
     @Override
@@ -104,7 +117,7 @@ public class BackgroundService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) { //todo check all code and call service , not directly stop in code, call startservice from other code
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent!= null) {
             Bundle extras = intent.getExtras();
             if(extras != null) {
@@ -133,6 +146,18 @@ public class BackgroundService extends Service {
                             case stopListeningUdp:
                                 stopListeningUdp();
                                 break;
+                            case startListeningClipBoard:
+                                startListeningClipBoard();
+                                break;
+                            case removeClipBoardListener:
+                                removeClipBoardListener();
+                                break;
+                            case registerBatteryReceiver:
+                                registerBatteryReceiver();
+                                break;
+                            case unRegisterBatteryRecever:
+                                unRegisterBatteryRecever();
+                                break;
                             default:
                                 break;
                         }
@@ -143,13 +168,40 @@ public class BackgroundService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    private void unRegisterBatteryRecever() {
+        if(batteryRegistered)
+        unregisterReceiver(mReceiver);
+        mReceiver = null;
+        batteryRegistered = false;
+    }
+
+    private void registerBatteryReceiver() {
+        if(mReceiver == null)
+        {
+            mReceiver = new BatteryBroadcastReveiver();
+        }
+        registerReceiver(mReceiver,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        batteryRegistered = true;
+    }
+
+    private void removeClipBoardListener() {
+        try {
+            ClipBoard.removeListener(this);
+        }catch (Exception e)
+        {
+            Log.d("Service",e.toString());
+        }
+    }
+
+    private void startListeningClipBoard() {
+        ClipBoard.setListener(this);
+    }
+
     public class BackgroundBinder extends Binder {
       public  BackgroundService getService() {
             return BackgroundService.this;
         }
     }
-
-    //todo create send tcp command and something other
 
     public static void startExternalMethod(Context context)
     {
@@ -157,6 +209,8 @@ public class BackgroundService extends Service {
         ArrayList<Integer> list = new ArrayList<>();
         list.add(BackgroundService.startListeningUdp);
         list.add(BackgroundService.startSendingPeriodicallyUdp);
+        list.add(BackgroundService.startListeningClipBoard);
+        list.add(BackgroundService.registerBatteryReceiver);
         tempIntent.putIntegerArrayListExtra("Commands", list);
         context.startService(tempIntent);
     }
@@ -179,6 +233,8 @@ public class BackgroundService extends Service {
         ArrayList<Integer> list = new ArrayList<>();
         list.add(BackgroundService.stopSendingPeriodicallyUdp);
         list.add(BackgroundService.stopListeningUdp);
+        list.add(BackgroundService.removeClipBoardListener);
+        list.add(BackgroundService.unRegisterBatteryRecever);
         list.add(BackgroundService.eraseAllTcpConnectons);
         tempIntent.putIntegerArrayListExtra("Commands",list);
         context.startService(tempIntent);

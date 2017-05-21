@@ -8,10 +8,6 @@
         "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/drawable-nodpi/detele64.png"
     },
     {
-        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/drawable-nodpi/example_appwidget_preview.png",
-        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/drawable-nodpi/example_appwidget_preview.png"
-    },
-    {
         "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/drawable-nodpi/delete52.png",
         "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/drawable-nodpi/delete52.png"
     }

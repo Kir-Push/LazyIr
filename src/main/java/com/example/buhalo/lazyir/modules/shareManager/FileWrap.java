@@ -15,6 +15,9 @@ public class FileWrap {
     private String path;
     private boolean checked;
 
+    public FileWrap() {
+    }
+
     public FileWrap(boolean received, boolean file, String path) {
         this.received = received;
         this.file = file;

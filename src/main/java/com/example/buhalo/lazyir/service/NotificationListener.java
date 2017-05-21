@@ -1,78 +1,181 @@
 package com.example.buhalo.lazyir.service;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.Exception.TcpError;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.buhalo.lazyir.modules.notificationModule.Messengers;
+import com.example.buhalo.lazyir.modules.notificationModule.Notification;
+import com.example.buhalo.lazyir.modules.notificationModule.Notifications;
 
 /**
  * Created by buhalo on 21.03.17.
  */
 
 public class NotificationListener extends NotificationListenerService {
-    Context context;
+    public static NotificationListener notif;
+    public static final String SHOW_NOTIFICATION = "ShowNotification";
+    public static final String RECEIVE_NOTIFICATION = "receiveNotification";
+    public static final String DELETE_NOTOFICATION = "deleteNotification";
+    public static final String SMS_TYPE = "com.android.mms";
 
     @Override
     public void onCreate() {
 
         super.onCreate();
-        context = getApplicationContext();
+        notif = this;
 
     }
 
     @Override
-    public void onNotificationPosted(StatusBarNotification sbn) { // todo all of this only for test after you need create normal version !
+    public void onDestroy() {
+        super.onDestroy();
+        notif = null;
+    }
 
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        if(notif == null)
+            notif = this;
 
-        try {
-
-
-            String pack = sbn.getPackageName();
-            String text = "";
-            String title = "";
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                Bundle extras = extras = sbn.getNotification().extras;
-                text = extras.getCharSequence("android.text").toString(); // todo null pointer reference
-                title = extras.getString("android.title");
-            }
-            List<String> args = new ArrayList();
-            args.add(title);
-            args.add(text);
-            NetworkPackage np = new NetworkPackage();
-            np.setArgs(args);
-            String fromTypeAndData = np.createFromTypeAndData("ShowNotification", "receiveNotification");
-            for (Device dv : Device.getConnectedDevices().values()) {
-                try {
-                    TcpConnectionManager.getInstance().sendCommandToServer(dv.getId(), fromTypeAndData);
-                } catch (TcpError tcpError) {
-                    tcpError.printStackTrace();
-                }
-            }
-            Log.i("Package", pack);
-            Log.i("Title", title);
-            Log.i("Text", text);
-       //     Log.i("Ticker", sbn.getNotification().tickerText.toString());
-            for (StatusBarNotification statusBarNotification : getActiveNotifications()) {
-                Log.i("Notificiation", statusBarNotification.getNotification().extras.getCharSequence("android.text").toString());
-                System.out.println(statusBarNotification.getNotification().tickerText);
-            }
-        }catch (Exception e)
+        if(!messengersMessage(sbn))
         {
-            e.printStackTrace();
+            if(!smsMessage(sbn)) {
+                sendToserver(sbn, RECEIVE_NOTIFICATION);
+            }
         }
 
+    }
+ // i here add new methods after testing change old to new
+    private boolean messengersMessage(StatusBarNotification sbn) {
+        Bundle bundle = sbn.getNotification().extras;
+        Notification notification = castToMyNotification(sbn);
+        if(notification == null || notification.getPack() == null  || notification.getPack().equals("com.google.android.googlequicksearchbox"))
+        {
+            return true;
+        }
+        for (String key : bundle.keySet()) {
+            if("android.wearable.EXTENSIONS".equals(key)){
+
+                Messengers.pendingNotifs.put(notification.getPack()+":"+notification.getTitle(),sbn);
+                Messengers.sendToServer(notification);
+                return true;
+            }
+        }
+        if(Messengers.pendingNotifs.containsKey(notification.getPack()+":"+notification.getTitle()))
+        {
+            Messengers.sendToServer(notification);
+            return true;
+        }
+
+
+        return false;
+    }
+
+    private boolean smsMessage(StatusBarNotification sbn)
+    {
+        String pack = sbn.getPackageName();
+        return pack.equals(SMS_TYPE);
+    }
+    public static StatusBarNotification[] getAll()
+    {
+      return   notif.getActiveNotifications();
+    }
+
+    public Notification castToMyNotification(StatusBarNotification sbn)
+    {
+        String pack = sbn.getPackageName();
+        if(pack.equals(SMS_TYPE))
+            return null;
+        String text = "";
+        String title;
+        String ticker = "";
+        Bundle extras = sbn.getNotification().extras;
+        String txt = tryExtract(extras);
+        CharSequence charSequence = extras.getCharSequence("android.text");
+        CharSequence tickerText = sbn.getNotification().tickerText;
+        if(charSequence != null)
+        {
+            text = charSequence.toString();
+        }
+        if(txt != null)
+        {
+            text = txt;
+        }
+        if(tickerText != null)
+        {
+            ticker = tickerText.toString();
+        }
+        title = extras.getString("android.title");
+        if(pack.equals("com.whatsapp") && txt == null)
+        {
+            return null;
+        }
+        Notification notification = new Notification(text,title,pack,ticker, android.os.Build.MODEL);
+        Log.i(SHOW_NOTIFICATION,pack + "  " + title + "  " + text + "  " + ticker);
+        return notification;
+    }
+
+    private String tryExtract(Bundle extras)
+    {
+        CharSequence[] lines =
+                extras.getCharSequenceArray(android.app.Notification.EXTRA_TEXT_LINES);
+        if(lines != null && lines.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (CharSequence msg : lines)
+                if (!TextUtils.isEmpty(msg)) {
+                    sb.append(msg.toString());
+                    sb.append('\n');
+                }
+            return sb.toString().trim();
+        }
+        CharSequence chars =
+                extras.getCharSequence(android.app.Notification.EXTRA_BIG_TEXT);
+        if(!TextUtils.isEmpty(chars))
+            return chars.toString();
+        return null;
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
+        Notification notification = castToMyNotification(sbn);
+        if(notification != null || notification.getPack() != null)
+        {
+            if(Messengers.pendingNotifs.containsKey(notification.getPack()+":"+notification.getTitle()))
+            {
+                Messengers.pendingNotifs.remove(notification.getPack()+":"+notification.getTitle());
+                return;
+            }
+        }
+        sendToserver(sbn,DELETE_NOTOFICATION);
         Log.i("Msg","Notification was removed");
     }
+
+    private void sendToserver(StatusBarNotification sbn,String method)
+    {
+        try {
+            if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.KITKAT) {
+                return;
+            }
+            NetworkPackage np = new NetworkPackage(SHOW_NOTIFICATION,method);
+            Notification notification = castToMyNotification(sbn);
+            if(notification == null)
+                return;
+           np.setValue("title",notification.getTitle());
+            np.setValue("text",notification.getText());
+            np.setValue("pack",notification.getPack());
+            np.setValue("ticker",notification.getTicker());
+            String message = np.getMessage();
+            if(message != null && !message.equals(""))
+            TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+        }catch (Exception e)
+        {
+            Log.e(SHOW_NOTIFICATION,e.toString());
+        }
+    }
+
 }
