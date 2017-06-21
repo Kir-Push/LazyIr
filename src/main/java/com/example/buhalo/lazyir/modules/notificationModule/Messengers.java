@@ -57,14 +57,13 @@ public class Messengers extends Module {
 
                         Intent localIntent = new Intent();
                         localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        Bundle localBundle = bundle;
 
                         int i = 0;
                         for(RemoteInput remoteIn : remoteInputs){
                             remoteInputs[i] = remoteIn;
                             remoteInputs[i].getAllowFreeFormInput();
-                            localBundle.putCharSequence(remoteInputs[i].getResultKey(), answer);//This work, apart from Hangouts as probably they need additional parameter (notification_tag?)
-                            RemoteInput.addResultsToIntent(remoteInputs, localIntent, localBundle);
+                            bundle.putCharSequence(remoteInputs[i].getResultKey(), answer);//This work, apart from Hangouts as probably they need additional parameter (notification_tag?)
+                            RemoteInput.addResultsToIntent(remoteInputs, localIntent, bundle);
                             try {
                                 act.actionIntent.send(context.getApplicationContext(),0,localIntent);
                             } catch (PendingIntent.CanceledException e) {

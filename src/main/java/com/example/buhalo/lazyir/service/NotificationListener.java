@@ -158,7 +158,7 @@ public class NotificationListener extends NotificationListenerService {
     private void sendToserver(StatusBarNotification sbn,String method)
     {
         try {
-            if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.KITKAT) {
+            if (android.os.Build.VERSION.SDK_INT == android.os.Build.VERSION_CODES.KITKAT) {
                 return;
             }
             NetworkPackage np = new NetworkPackage(SHOW_NOTIFICATION,method);

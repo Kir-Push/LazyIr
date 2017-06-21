@@ -166,7 +166,6 @@ public class UdpBroadcastManager  {
         NetworkPackage np = new NetworkPackage(pck);
         if(np.getId().equals(android.os.Build.SERIAL))
         {
-            return; // ignore my own packets
         }
         else if(np.getType().equals(BROADCAST_INTRODUCE))
         {

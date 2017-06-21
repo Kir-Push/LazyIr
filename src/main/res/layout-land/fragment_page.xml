@@ -17,6 +17,7 @@
         <!--android:id="@+id/imageButton2" />-->
 
     <ImageButton
+        android:contentDescription="@string/removebtn"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:src="@drawable/btn_close"

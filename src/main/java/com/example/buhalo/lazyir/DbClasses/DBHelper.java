@@ -26,7 +26,6 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
         private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;
-        private final Context mContext;
 
         public static synchronized DBHelper getInstance(Context context)
         {
@@ -42,8 +41,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
          //   DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
             DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
             System.out.println(DB_PATH);
-            this.mContext = context;
-            createDataBase();
+            createDataBase(context);
         }
 
     private boolean checkDataBase()
@@ -53,9 +51,9 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
         return dbFile.exists();
     }
 
-    private void copyDataBase() throws IOException
+    private void copyDataBase(Context context) throws IOException
     {
-        InputStream mInput = mContext.getApplicationContext().getAssets().open(DATABASE_NAME);
+        InputStream mInput = context.getApplicationContext().getAssets().open(DATABASE_NAME);
         String outFileName = DB_PATH + DATABASE_NAME;
         OutputStream mOutput = new FileOutputStream(outFileName);
         byte[] mBuffer = new byte[1024];
@@ -69,7 +67,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
         mInput.close();
     }
 
-    public void createDataBase()
+    public void createDataBase(Context context)
     {
         //If the database does not exist, copy it from the assets.
 
@@ -81,7 +79,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             try
             {
                 //Copy the database from assests
-                copyDataBase();
+                copyDataBase(context);
                 Log.e("DB", "createDatabase database created");
             }
             catch (IOException mIOException)
@@ -437,7 +435,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                         }
                         button.setLayoutParams(layoutParams);
                     }
-                    ;
+
 
                 }
                 db.close();

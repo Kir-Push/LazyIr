@@ -2,7 +2,6 @@ package com.example.buhalo.lazyir.UI;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseBooleanArray;
 import android.view.DragEvent;
@@ -22,22 +20,17 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
-import com.example.buhalo.lazyir.modules.SendCommand.CommandActivity;
-import com.example.buhalo.lazyir.modules.SendIr.IrActivity;
+import com.example.buhalo.lazyir.modules.sendcommand.CommandActivity;
+import com.example.buhalo.lazyir.modules.sendIr.IrActivity;
 import com.example.buhalo.lazyir.modules.dbus.MediaRemoteActivity;
-import com.example.buhalo.lazyir.modules.shareManager.SftpServer;
 import com.example.buhalo.lazyir.modules.shareManager.ShareActivity;
 import com.example.buhalo.lazyir.R;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -106,11 +99,11 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         }
         else if (mPage == 2)
         {
-           return createSecondPage(view,inflater,container);
+           return createSecondPage(inflater,container);
         }
         else if(mPage == 3)
         {
-          return  createThirdPage(view,inflater,container);
+          return  createThirdPage(inflater,container);
         }
         else if(mPage == 4)
         {
@@ -170,9 +163,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         return null; // return null because first page don't need view
     }
 
-    private View createSecondPage(View vv,LayoutInflater inflater,final ViewGroup container)
+    private View createSecondPage(LayoutInflater inflater, final ViewGroup container)
     {
-        vv = inflater.inflate(R.layout.page_two,container,false);
+        View vv = inflater.inflate(R.layout.page_two, container, false);
         vv.findViewById(R.id.share_start_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,9 +183,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         return vv;
     }
 
-    private View createThirdPage(View vv,LayoutInflater inflater,final ViewGroup container)
+    private View createThirdPage(LayoutInflater inflater, final ViewGroup container)
     {
-        vv = inflater.inflate(R.layout.tab_selector, container, false);
+        View vv = inflater.inflate(R.layout.tab_selector, container, false);
         ViewGroup vv4 = (ViewGroup) vv;
         for(int i=0;i< vv4.getChildCount();i++)
         {

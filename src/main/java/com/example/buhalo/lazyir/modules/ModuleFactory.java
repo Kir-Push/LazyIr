@@ -3,8 +3,8 @@ package com.example.buhalo.lazyir.modules;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
-import com.example.buhalo.lazyir.modules.SendCommand.SendCommand;
-import com.example.buhalo.lazyir.modules.SendIr.SendIr;
+import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
+import com.example.buhalo.lazyir.modules.sendIr.SendIr;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.dbus.Mpris;
 import com.example.buhalo.lazyir.modules.notificationModule.Messengers;

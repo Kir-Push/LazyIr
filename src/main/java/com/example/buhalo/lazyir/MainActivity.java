@@ -4,12 +4,14 @@ package com.example.buhalo.lazyir;
  * Created by buhalo on 08.01.17.
  */
 
+import android.Manifest;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -46,14 +48,21 @@ public class MainActivity extends AppCompatActivity {
     final String LOG_TAG = "MainActivity";
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private List<String> baba;
     private ActionBarDrawerToggle mDrawerToggle;
     private DevicesAdapter adapter;
+
+    private static final int PERMISSION_STORAGE = 567;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                PERMISSION_STORAGE);
+
+
         setContentView(R.layout.activity_main);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -61,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setTitle(selected_id);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        baba = new ArrayList<>();
         adapter = new DevicesAdapter(this);
         mDrawerList.setAdapter(adapter);
 

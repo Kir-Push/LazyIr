@@ -10,15 +10,14 @@ import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.ModuleExecutor;
-import com.example.buhalo.lazyir.modules.SendCommand.SendCommand;
-import com.example.buhalo.lazyir.modules.SendIr.SendIr;
+import com.example.buhalo.lazyir.modules.sendIr.SendIr;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.buhalo.lazyir.modules.SendCommand.SendCommand.EXECUTE;
-import static com.example.buhalo.lazyir.modules.SendCommand.SendCommand.SEND_COMMAND;
-import static com.example.buhalo.lazyir.modules.SendIr.SendIr.SEND_IR_COMMAND;
+import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.EXECUTE;
+import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.SEND_COMMAND;
+import static com.example.buhalo.lazyir.modules.sendIr.SendIr.SEND_IR_COMMAND;
 
 /**
  * Created by buhalo on 28.02.17.

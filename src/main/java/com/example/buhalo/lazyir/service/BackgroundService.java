@@ -86,7 +86,7 @@ public class BackgroundService extends Service {
     public void stopSendingPeriodicallyUdp()
     {
         Log.d("Back Service","Stop sending broadcasts periodically");
-        UdpBroadcastManager.getInstance().stopSending();
+        UdpBroadcastManager.stopSending();
     }
 
     public void eraseAllTcpConnectons()

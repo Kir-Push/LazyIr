@@ -42,9 +42,6 @@ public class MediaRemoteActivity extends AppCompatActivity {
     private Timer metadataTimer;
 
     private Button play;
-    private Button next;
-    private Button prev;
-    private Spinner spinner;
     private SeekBar timeLine;
     private TextView title;
     private TextView lenghtTxt;
@@ -64,7 +61,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         module = (Mpris) Device.getConnectedDevices().get(MainActivity.selected_id).getEnabledModules().get(Mpris.class.getSimpleName());
         playerNameToAdapter = new ArrayList<>();
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerNameToAdapter);
-        spinner = (Spinner) findViewById(R.id.spinner);
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -81,8 +78,8 @@ public class MediaRemoteActivity extends AppCompatActivity {
         title = (TextView) findViewById(R.id.trackName);
         lenghtTxt = (TextView) findViewById(R.id.lenght_text);
         play = (Button) findViewById(R.id.playButton);
-        next = (Button) findViewById(R.id.nextBtn);
-        prev = (Button) findViewById(R.id.prewBtn);
+        Button next = (Button) findViewById(R.id.nextBtn);
+        Button prev = (Button) findViewById(R.id.prewBtn);
         View layout = findViewById(R.id.volume_lin);
         volumeLine = (SeekBar) layout.findViewById(R.id.volume_bar);
            play.setOnClickListener(new View.OnClickListener() {

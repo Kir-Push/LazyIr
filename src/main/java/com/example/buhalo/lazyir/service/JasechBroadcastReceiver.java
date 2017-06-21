@@ -34,7 +34,6 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
     private static boolean lastCheck;
     private static boolean firstTime = true;
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
-    private static Date callStartTime;
     private static boolean isIncoming;
     private static String savedNumber;
 
@@ -110,7 +109,6 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
         switch (state) {
             case TelephonyManager.CALL_STATE_RINGING:
                 isIncoming = true;
-                callStartTime = new Date();
                 savedNumber = number;
                 onIncomingCallReceived(context, number,"incoming");
                 break;
@@ -118,14 +116,12 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
                 //Transition of ringing->offhook are pickups of incoming calls.  Nothing done on them
                 if(lastState != TelephonyManager.CALL_STATE_RINGING){
                     isIncoming = false;
-                    callStartTime = new Date();
                     onIncomingCallReceived(context, number,"outgoing"); // test
                    // onOutgoingCallStarted(context, savedNumber, callStartTime);
                 }
                 else if(isIncoming)
                 {
                     isIncoming = true;
-                    callStartTime = new Date();
                 }
                 else
                 {
@@ -204,11 +200,8 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
             System.out.println("Wifi enabled");
             WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
 
-            if(wifiInfo == null || wifiInfo.getNetworkId() == -1){
-                return false; // Not connected to an access point
-            }
+            return !(wifiInfo == null || wifiInfo.getNetworkId() == -1);
 
-            return true; // Connected to an access point
         }
         else {
             return false; // Wi-Fi adapter is OFF

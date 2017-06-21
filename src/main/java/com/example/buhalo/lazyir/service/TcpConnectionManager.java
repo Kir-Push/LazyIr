@@ -401,6 +401,7 @@ public class TcpConnectionManager {
             return;
         }
         Device.getConnectedDevices().get(id).setPaired(false);
+     //   unPairAction(id); //todo
     }
 
 

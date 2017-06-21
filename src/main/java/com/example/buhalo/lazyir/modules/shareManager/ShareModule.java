@@ -19,6 +19,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.buhalo.lazyir.modules.shareManager.ftpServer.ftpServerOn;
+
 /**
  * Created by buhalo on 05.03.17.
  */
@@ -47,8 +49,10 @@ public class ShareModule extends Module {
     private String clientPath;
     private boolean waitingForServerAnswerForConnect = false;
     private static SftpServer sftpServer;
+    private static ftpServer ftpServer;
     private static boolean sftServerOn = false;
     private static int port = 0;
+    private static int portFtp = 0;
 
     private boolean waitResponse;
 
@@ -68,8 +72,27 @@ public class ShareModule extends Module {
         }
         else if(np.getData().equals(SETUP_SERVER_AND_SEND_ME_PORT))
         {
+            if(np.getValue("os").equals("nix"))
             setupSftp(np,context.getApplicationContext());
+            else if(np.getValue("os").equals("win"))
+            setupftp(np,context.getApplicationContext());
         }
+    }
+
+    private void setupftp(NetworkPackage np, Context context) {
+        if(ftpServer == null)
+        {
+            ftpServer = new ftpServer();
+        }
+        NetworkPackage pack = new NetworkPackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
+        portFtp = ftpServer.setupFtpServer(context,np);
+        if(portFtp == 0)
+            portFtp = 9000;
+        pack.setValue(PORT,Integer.toString(portFtp));
+        String userName = ftpServer.getUser(np.getId());
+        pack.setValue("userName",userName);
+        pack.setValue("pass",ftpServer.getPass(userName));
+        TcpConnectionManager.getInstance().sendCommandToServer(np.getId(),pack.getMessage());
     }
 
     public static void setupSftp(NetworkPackage np, Context context) {

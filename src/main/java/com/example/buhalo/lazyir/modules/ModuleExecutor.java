@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.modules.SendIr.SendIr;
+import com.example.buhalo.lazyir.modules.sendIr.SendIr;
 
 /**
  * Created by buhalo on 05.03.17.

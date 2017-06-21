@@ -51,13 +51,13 @@
             android:theme="@style/baba">
         </activity>
 
-        <activity android:name=".modules.SendIr.IrActivity"
+        <activity android:name=".modules.sendIr.IrActivity"
             android:parentActivityName=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/baba">
         </activity>
 
-        <activity android:name=".modules.SendCommand.CommandActivity"
+        <activity android:name=".modules.sendcommand.CommandActivity"
             android:parentActivityName=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/baba">
