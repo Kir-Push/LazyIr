@@ -214,7 +214,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        scheduledFuture = scheduler.scheduleAtFixedRate(task ,0, 800, TimeUnit.MILLISECONDS);
+        scheduledFuture = scheduler.scheduleWithFixedDelay(task ,0, 400, TimeUnit.MILLISECONDS);
     }
 
     @Override
