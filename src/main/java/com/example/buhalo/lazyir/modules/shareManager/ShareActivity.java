@@ -1,9 +1,6 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ActionMode;
@@ -13,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -22,7 +18,6 @@ import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +41,8 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
     private String lastPathS;
 
     private String currPaths;
+
+    private int tabSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,13 +95,15 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     public void onOkclick(View view)
     {
-        System.out.println("dada");
-        List<FileWrap> checked = server_adapter.getChecked();
-        System.out.println(checked);
         android_adapter.notifyDataSetChanged();
         server_adapter.notifyDataSetChanged();
         android_list.setOnItemClickListener(this);
-        module.startDownloading(getCurrPath(),getCurrPaths(),checked);
+        if(tabSelected == 1) {
+            module.startDownloading(getCurrPath(), getCurrPaths(), server_adapter.getChecked());
+        }else if(tabSelected == 0)
+        {
+            module.startSending(getCurrPaths(),getCurrPath(),android_adapter.getChecked());
+        }
         server_adapter.setCbSend(false);
         android_adapter.setCbSend(false);
     }
@@ -138,10 +137,12 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
     public void onTabSelected(TabLayout.Tab tab) {
         if(tab.getPosition() == 0)
         {
+            tabSelected = 0;
             android_list.setVisibility(View.VISIBLE);
         }
         else if(tab.getPosition() == 1)
         {
+            tabSelected = 1;
             pcFileList.setVisibility(View.VISIBLE);
         }
 

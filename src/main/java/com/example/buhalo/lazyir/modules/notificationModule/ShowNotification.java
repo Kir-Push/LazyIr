@@ -27,12 +27,10 @@ public class ShowNotification extends Module {
             Notifications notifications = new Notifications();
             String ns = Context.NOTIFICATION_SERVICE;
             StatusBarNotification[] activeNotifications =NotificationListener.getAll();
-            System.out.println("\n\n\n\nDO null\n\n\n\n");
             if(activeNotifications == null)
             {
                 return;
             }
-            System.out.println("\n\n\n\nne null\n\n\n\n");
             for(int i = 0;i<activeNotifications.length;i++)
             {
       //          System.out.println("\n\n\n\n\n\n\n\n" + activeNotifications[i].);

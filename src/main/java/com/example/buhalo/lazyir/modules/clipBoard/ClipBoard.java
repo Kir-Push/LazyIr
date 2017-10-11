@@ -14,7 +14,7 @@ import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 public class ClipBoard extends Module {
     private static String RECEIVE = "receive";
-    private static boolean inserted = false;
+    private static volatile boolean inserted = false;
 
     private static ClipListener clipListener;
 
@@ -34,24 +34,26 @@ public class ClipBoard extends Module {
         clipboard.setPrimaryClip(clip);
     }
 
-    public static void setListener(Context context) // add it to background service
+    public static void setListener(Context context)
     {
         final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if(clipListener == null)
         {
             clipListener = new ClipListener(clipboard);
+            clipboard.addPrimaryClipChangedListener(clipListener);
         }
-        clipboard.addPrimaryClipChangedListener(clipListener);
     }
 
     public static void removeListener(Context context)
     {
+        if(clipListener == null)
+            return;
         final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.removePrimaryClipChangedListener(clipListener);
         clipListener = null;
     }
 
-    public static class ClipListener implements ClipboardManager.OnPrimaryClipChangedListener
+    private static class ClipListener implements ClipboardManager.OnPrimaryClipChangedListener
     {
         final ClipboardManager clipboard;
 

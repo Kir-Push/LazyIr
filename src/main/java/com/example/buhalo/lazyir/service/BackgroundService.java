@@ -13,8 +13,12 @@ import android.util.Log;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
+import com.example.buhalo.lazyir.utils.ExtScheduledThreadPoolExecutor;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
 /**
@@ -22,6 +26,9 @@ import java.util.ArrayList;
  */
 
 public class BackgroundService extends Service {
+
+    public static final ExecutorService executorService = Executors.newCachedThreadPool();
+    public static final ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
 
     final String LOG_TAG = "BackGroundService";
 
@@ -45,6 +52,8 @@ public class BackgroundService extends Service {
     private BatteryBroadcastReveiver mReceiver;
 
     private static boolean batteryRegistered = false;
+
+    private static boolean alreadystarted = false;
 
     @Override
     public void onCreate() {
@@ -189,7 +198,7 @@ public class BackgroundService extends Service {
             ClipBoard.removeListener(this);
         }catch (Exception e)
         {
-            Log.d("Service",e.toString());
+            Log.e("Service","Remove clipboard error",e);
         }
     }
 
@@ -205,6 +214,11 @@ public class BackgroundService extends Service {
 
     public static void startExternalMethod(Context context)
     {
+        if(alreadystarted)
+        {
+          //  stopExternalMethod(context);
+            return;
+        }
         Intent tempIntent = new Intent(context.getApplicationContext(), BackgroundService.class);
         ArrayList<Integer> list = new ArrayList<>();
         list.add(BackgroundService.startListeningUdp);
@@ -213,6 +227,7 @@ public class BackgroundService extends Service {
         list.add(BackgroundService.registerBatteryReceiver);
         tempIntent.putIntegerArrayListExtra("Commands", list);
         context.startService(tempIntent);
+        alreadystarted = true;
     }
 
     public static void startExternalCustomMethod(Context context,int... backgroundCommand)
@@ -238,5 +253,6 @@ public class BackgroundService extends Service {
         list.add(BackgroundService.eraseAllTcpConnectons);
         tempIntent.putIntegerArrayListExtra("Commands",list);
         context.startService(tempIntent);
+        alreadystarted = false;
     }
 }

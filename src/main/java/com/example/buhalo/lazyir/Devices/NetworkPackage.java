@@ -13,11 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by buhalo on 05.03.17.
- */
-
-//package spec's is type::id::name::data::nArgs::arg1::arg2::...
 public class NetworkPackage {
     public final static String ID = "id";
     public final static String NAME = "name";
@@ -93,6 +88,16 @@ public class NetworkPackage {
             }
         }
         return list;
+    }
+
+    public double getDouble(String key)
+    {
+        try {
+            return idNode.get(key).asDouble();
+        }catch (NullPointerException e)
+        {
+            return 0;
+        }
     }
 
     public String getType()

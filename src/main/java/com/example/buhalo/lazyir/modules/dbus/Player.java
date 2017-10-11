@@ -8,12 +8,14 @@ public class Player {
     private String name;
     private String playbackStatus;
     private String title;
-    private int lenght;
-    private int volume;
-    private int currTime;
+    private double lenght;
+    private double volume;
+    private double currTime;
     private String readyTimeString;
+    private String type;
+    private String id;
 
-    public Player(String name, String playbackStatus, String title, int lenght, int volume, int currTime, String readyTimeString) {
+    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString) {
         this.name = name;
         this.playbackStatus = playbackStatus;
         this.title = title;
@@ -21,9 +23,40 @@ public class Player {
         this.volume = volume;
         this.currTime = currTime;
         this.readyTimeString = readyTimeString;
+        this.type = "dbus";
+        this.id = "-1";
+    }
+
+    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString, String type, String id) {
+        this.name = name;
+        this.playbackStatus = playbackStatus;
+        this.title = title;
+        this.lenght = lenght;
+        this.volume = volume;
+        this.currTime = currTime;
+        this.readyTimeString = readyTimeString;
+        this.type = type;
+        this.id = id;
     }
 
     public Player() {
+    }
+
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -51,27 +84,27 @@ public class Player {
     }
 
 
-    public int getLenght() {
+    public double getLenght() {
         return lenght;
     }
 
-    public void setLenght(int lenght) {
+    public void setLenght(double lenght) {
         this.lenght = lenght;
     }
 
-    public int getVolume() {
+    public double getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(double volume) {
         this.volume = volume;
     }
 
-    public int getCurrTime() {
+    public double getCurrTime() {
         return currTime;
     }
 
-    public void setCurrTime(int currTime) {
+    public void setCurrTime(double currTime) {
         this.currTime = currTime;
     }
 

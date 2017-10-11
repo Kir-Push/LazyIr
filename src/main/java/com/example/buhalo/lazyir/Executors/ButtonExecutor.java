@@ -19,9 +19,6 @@ import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.EXECUTE;
 import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.SEND_COMMAND;
 import static com.example.buhalo.lazyir.modules.sendIr.SendIr.SEND_IR_COMMAND;
 
-/**
- * Created by buhalo on 28.02.17.
- */
 
 public class ButtonExecutor {
 

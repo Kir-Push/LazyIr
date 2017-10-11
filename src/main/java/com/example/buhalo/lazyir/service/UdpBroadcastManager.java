@@ -136,7 +136,7 @@ public class UdpBroadcastManager  {
                         DatagramPacket packet = new DatagramPacket(data, bufferSize);
                         try {
                             server.receive(packet);
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             Log.e("Udp", "UdpReceive exception + " + e.toString());
                             listening = false;
                             if(!server.isConnected())
@@ -242,7 +242,7 @@ public class UdpBroadcastManager  {
                 }
         }).start();
         }
-        catch (SocketException e)
+        catch (Exception e)
         {
             Log.e("Udp",e.toString());
         }

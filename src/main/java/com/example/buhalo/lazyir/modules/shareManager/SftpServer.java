@@ -111,7 +111,7 @@ public class SftpServer {
     public void stopSftpServer()
     {
         try {
-            sshd.stop();
+            sshd.stop(true);
         } catch (InterruptedException e) {
             Log.e("Sftp",e.toString());
         }

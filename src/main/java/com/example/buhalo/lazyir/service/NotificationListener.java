@@ -23,6 +23,9 @@ public class NotificationListener extends NotificationListenerService {
     public static final String DELETE_NOTOFICATION = "deleteNotification";
     public static final String SMS_TYPE = "com.android.mms";
 
+    //---------------------------------------------
+    public static final String SMS_TYPE_2 = "com.android.messaging";
+
     @Override
     public void onCreate() {
 
@@ -39,14 +42,19 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
+        try {
         if(notif == null)
             notif = this;
 
+            if(!smsMessage(sbn)) {
         if(!messengersMessage(sbn))
         {
-            if(!smsMessage(sbn)) {
                 sendToserver(sbn, RECEIVE_NOTIFICATION);
-            }
+        }
+        }
+        } catch (Exception e)
+        {
+        Log.e("NotificationListener",e.toString());
         }
 
     }
@@ -79,11 +87,13 @@ public class NotificationListener extends NotificationListenerService {
     private boolean smsMessage(StatusBarNotification sbn)
     {
         String pack = sbn.getPackageName();
-        return pack.equals(SMS_TYPE);
+        System.out.println(pack);
+        return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
     }
     public static StatusBarNotification[] getAll()
     {
-      return   notif.getActiveNotifications();
+
+      return   notif == null ? null : notif.getActiveNotifications();
     }
 
     public Notification castToMyNotification(StatusBarNotification sbn)
@@ -142,17 +152,20 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        Notification notification = castToMyNotification(sbn);
-        if(notification != null || notification.getPack() != null)
-        {
-            if(Messengers.pendingNotifs.containsKey(notification.getPack()+":"+notification.getTitle()))
-            {
-                Messengers.pendingNotifs.remove(notification.getPack()+":"+notification.getTitle());
-                return;
+        try {
+            Notification notification = castToMyNotification(sbn);
+            if (notification != null && notification.getPack() != null) {
+                if (Messengers.pendingNotifs.containsKey(notification.getPack() + ":" + notification.getTitle())) {
+                    Messengers.pendingNotifs.remove(notification.getPack() + ":" + notification.getTitle());
+                    return;
+                }
             }
+           // sendToserver(sbn, DELETE_NOTOFICATION);
+            Log.i("Msg", "Notification was removed");
+        }catch (Exception e)
+        {
+            Log.e("NotificationListener",e.toString());
         }
-        sendToserver(sbn,DELETE_NOTOFICATION);
-        Log.i("Msg","Notification was removed");
     }
 
     private void sendToserver(StatusBarNotification sbn,String method)

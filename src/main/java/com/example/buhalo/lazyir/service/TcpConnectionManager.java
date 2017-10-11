@@ -32,16 +32,15 @@ import static com.example.buhalo.lazyir.service.BackgroundService.port;
  */
 
 public class TcpConnectionManager {
-    public final static String TCP_INTRODUCE = "tcpIntroduce";
-    public final static  String TCP_INTRODUCE_MSG = "my name is";
-    public final static String TCP_PING = "ping pong";
-    public final static String TCP_PAIR_RESULT = "pairedresult";
-    public final static String RESULT = "result";
-    public final static String OK = "ok";
-    public final static String REFUSE = "refuse";
-    public final static String TCP_PAIR = "pair";
-    public final static String TCP_UNPAIR = "unpair";
-    public final static String TCP_SYNC = "sync";
+    private final static String TCP_INTRODUCE = "tcpIntroduce";
+    private final static String TCP_PING = "ping pong";
+    private final static String TCP_PAIR_RESULT = "pairedresult";
+    private final static String RESULT = "result";
+    private final static String OK = "ok";
+    private final static String REFUSE = "refuse";
+    private final static String TCP_PAIR = "pair";
+    private final static String TCP_UNPAIR = "unpair";
+    private final static String TCP_SYNC = "sync";
     private static TcpConnectionManager instance;
 
     private static volatile boolean ServerOn = false;
@@ -310,8 +309,16 @@ public class TcpConnectionManager {
                     Device.getConnectedDevices().get(deviceId).setPaired(true);
                     Battery.sendBatteryLevel(deviceId,context); // send battery level first after pairing, or maybe after sync?
                 }
+                else if(np.getValue(RESULT).equals(REFUSE))
+                {
+                    DBHelper.getInstance(context).deletePaired(deviceId);
+                    Device.getConnectedDevices().get(deviceId).setPaired(false);
+                    hasPaired = false;
+                }
             }
-            hasPaired = false;
+            else {
+                hasPaired = false;
+            }
         }
 
 
@@ -356,7 +363,7 @@ public class TcpConnectionManager {
                     StopListening(id);
                    // TryConnect(device);
                 }
-                if(!device.isPaired())
+                if(!device.isPaired()) // todo here eror check
                 {
                     Log.d("Tcp","Device is not paired and so on not allowed to continue");
                 }

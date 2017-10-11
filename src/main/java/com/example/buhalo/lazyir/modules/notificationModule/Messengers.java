@@ -24,7 +24,7 @@ import java.util.TimerTask;
 
 public class Messengers extends Module {
 
-    public static final String ANSWER = "answer";
+    private static final String ANSWER = "answer";
     public static HashMap<String,StatusBarNotification> pendingNotifs = new HashMap<>();
 
     private static boolean taskStarted = false;
@@ -80,11 +80,16 @@ public class Messengers extends Module {
         NetworkPackage np = new NetworkPackage(Messengers.class.getSimpleName(),ANSWER);
         String typeName = notification.getPack()+":"+notification.getTitle();
         np.setValue("typeName",typeName);
-        np.setValue("pack",notification.getPack());
+        np.setValue("pack",tryExtractPack(notification.getPack()));
         np.setValue("title",notification.getTitle());
         np.setValue("ticker",notification.getTicker());
         np.setValue("text",notification.getText());
         TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+    }
+
+    private static String tryExtractPack(String pack) {
+        int i;
+       return (i = pack.lastIndexOf(".")) != -1 ? pack.substring(i) : pack;
     }
 
 }

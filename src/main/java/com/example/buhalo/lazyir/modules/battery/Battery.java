@@ -21,6 +21,8 @@ public class Battery { // it not implement module because it one for all, send m
         NetworkPackage np = new NetworkPackage(Battery.class.getSimpleName(),STATUS);
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.getApplicationContext().registerReceiver(null, ifilter);
+        if(batteryStatus == null)
+            return;
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||

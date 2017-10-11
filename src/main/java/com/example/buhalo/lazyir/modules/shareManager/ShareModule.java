@@ -1,8 +1,13 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
@@ -11,10 +16,14 @@ import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +50,7 @@ public class ShareModule extends Module {
 
 
     public static final String FIRST_ARG_NUMBER_OF_FILES ="nf {?,?}";// first ? wil be you curr file, second overral files ( which you need to receive
+    public static final String CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE = "CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE";
 
 
     private Socket fileSocket;
@@ -117,6 +127,7 @@ public class ShareModule extends Module {
         if(sftpServer!= null)
         {
             sftpServer.stopSftpServer();
+         //   sftpServer = null;
         }
         sftServerOn = false;
     }
@@ -235,6 +246,14 @@ public class ShareModule extends Module {
             while (fileSize > 0 && (count = in.read(bytes, 0, (int)Math.min(bytes.length, fileSize))) != -1) {
                 System.out.println("write " + count);
 
+                final int finalCount = count;
+//                ((Activity)device.getContext().getApplicationContext()).runOnUiThread(new Runnable() {
+//                    public void run() {
+//                        Toast.makeText(device.getContext(),"Download: " + finalCount,Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+
+
                     if(new String(bytes,0,count).equals("endFile!!!$$$!!!"))
                     {
                         System.out.println("file break    count "  + count);
@@ -246,6 +265,7 @@ public class ShareModule extends Module {
                 fileSize -= count;
             }
             System.out.println("I'm in download file jaja   " + path + "   " + fileName);
+          //  Toast.makeText(device.getContext(),"Download: Done",Toast.LENGTH_SHORT).show();
             out.close();
         } catch (IOException e) {
            Log.e("ShareModule",e.toString());
@@ -328,4 +348,65 @@ public class ShareModule extends Module {
         clientPath = currPath;
         waitingForServerAnswerForConnect = true;
     }
-}
+
+    public void startSending(String currPaths, String currPath, final List<FileWrap> checked) {
+
+        serverPath = currPaths;
+        clientPath = currPath;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try (ServerSocket serverSocket  = new ServerSocket(5675)) {
+                    fileSocket = serverSocket.accept();
+                    System.out.println("commected " + fileSocket.getLocalAddress());
+                    String currPath = checked.get(0).getPath();
+                    DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fileSocket.getOutputStream()));
+                    for(int i = 0; i< checked.size(); i++)
+                    {
+                        String s = checked.get(i).getPath();
+                         System.out.println(currPath +"/" +  s);
+                        File file = new File(clientPath,s);
+                        try {
+                            FileInputStream in = new FileInputStream(file);
+                            byte[] bytes = new byte[16*1024];
+                            int count;
+                            out.writeUTF(s);
+                            System.out.println("Write +" + s);
+                            out.writeLong(file.length());
+                            while ((count = in.read(bytes)) > 0) {
+                                out.write(bytes, 0, count);
+                                out.flush();
+                            //    Toast.makeText(device.getContext(),"Sending:" + count,Toast.LENGTH_SHORT).show();
+
+                            }
+                            in.close();
+                          //  Toast.makeText(device.getContext(),"Sending: Done",Toast.LENGTH_SHORT).show();
+                            //   System.out.println("endFile!!!$$$!!!".getBytes());
+
+                        } catch (IOException e) {
+                            Log.e("ShareModule",e.toString());
+                        }
+                    }
+                    if(out != null)
+                        out.close();
+
+                }catch (IOException e)
+                {
+                    Log.e("SHAREMODULE",e.toString());
+                }
+            }
+        }).start();
+        try {
+            NetworkPackage napa = new NetworkPackage(SHARE_T, CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE);
+            napa.setValue(PORT,"5675");
+            napa.setObject(NetworkPackage.N_OBJECT,new FileWraps(checked));
+            napa.setValue("Whom",clientPath);
+            napa.setValue("Where",serverPath);
+            String fromTypeAndData = napa.getMessage();
+            TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),fromTypeAndData);
+        } catch (Exception error) {
+            Log.e("SHAREMANAGER",error.toString());
+        }
+    }
+ }
+
