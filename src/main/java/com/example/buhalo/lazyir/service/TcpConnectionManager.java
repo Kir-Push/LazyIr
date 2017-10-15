@@ -9,12 +9,14 @@ import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
+import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -22,8 +24,17 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import static com.example.buhalo.lazyir.service.BackgroundService.port;
 
@@ -121,15 +132,46 @@ public class TcpConnectionManager {
         }
     }
 
-    public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
+    protected Socket getConnection(InetAddress ip, int port,Context context) throws IOException  {
         try {
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(address,port),10000);
+            KeyStore trustStore = KeyStore.getInstance("BKS");
+            InputStream trustStoreStream = context.getResources().openRawResource(R.raw.testkeys);
+            trustStore.load(trustStoreStream, "bimkaSamokat".toCharArray());
+
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            SSLSocketFactory factory = sslContext.getSocketFactory();
+            return factory.createSocket(ip, port);
+        } catch (GeneralSecurityException e) {
+            Log.e(this.getClass().toString(), "Exception while creating context: ", e);
+            throw new IOException("Could not connect to SSL Server", e);
+        }
+    }
+
+
+
+
+
+    public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
+        Socket socket = null;
+        try {
+        //    Socket socket = new Socket();
+            socket = getConnection(address,port,context);
+            System.out.println(socket.isConnected());
+          //  socket.connect(new InetSocketAddress(address,port),10000);
             socket.setKeepAlive(true);
             ConnectionThread connection = new ConnectionThread(socket,context);
             connection.start();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 

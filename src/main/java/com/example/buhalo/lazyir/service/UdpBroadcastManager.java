@@ -172,7 +172,7 @@ public class UdpBroadcastManager  {
             Log.d("Udp","received package  + " + pck);
             Log.d("udp","number of connects " + Device.getConnectedDevices().size());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
-                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.port, np,context);
+                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.port, np,context); //todo add in udp and tcp packet type of app (pc or phone) and handle phone separately on the phone, and pc on pc
             }
         }
     }
