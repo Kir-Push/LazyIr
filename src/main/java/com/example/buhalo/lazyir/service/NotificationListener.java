@@ -79,8 +79,6 @@ public class NotificationListener extends NotificationListenerService {
             Messengers.sendToServer(notification);
             return true;
         }
-
-
         return false;
     }
 
@@ -121,6 +119,12 @@ public class NotificationListener extends NotificationListenerService {
             ticker = tickerText.toString();
         }
         title = extras.getString("android.title");
+        if(title == null)
+        {
+            CharSequence bigText = (CharSequence) extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
+            if(bigText != null)
+                title = bigText.toString();
+        }
         if(pack.equals("com.whatsapp") && txt == null)
         {
             return null;

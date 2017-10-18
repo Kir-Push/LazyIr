@@ -40,64 +40,63 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        try {
 
-        String action = intent.getAction();
+            String action = intent.getAction();
 
-        if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-         //   if(checkWifiOnAndConnected(context))
-        //        BackgroundService.startExternalMethod(context);
-            return;
-        }
-
-        if("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
-            final Bundle bundle = intent.getExtras();
-            if (bundle == null) return;
-            final Object[] pdus = (Object[]) bundle.get("pdus");
-            for (Object pdu : pdus) {
-                SmsMessage message = SmsMessage.createFromPdu((byte[])pdu);
-               smsReceive(message,context);
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                //   if(checkWifiOnAndConnected(context))
+                //        BackgroundService.startExternalMethod(context);
+                return;
             }
-            return;
-        }
-        if(TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action))
+
+            if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
+                final Bundle bundle = intent.getExtras();
+                if (bundle == null) return;
+                final Object[] pdus = (Object[]) bundle.get("pdus");
+                for (Object pdu : pdus) {
+                    SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
+                    smsReceive(message, context);
+                }
+                return;
+            }
+            if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
+                String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+                int state = 0;
+                if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                    state = TelephonyManager.CALL_STATE_IDLE;
+                } else if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    state = TelephonyManager.CALL_STATE_OFFHOOK;
+                } else if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                    state = TelephonyManager.CALL_STATE_RINGING;
+                }
+                onCallStateChanged(context, state, number);
+                return;
+            }
+
+            boolean currCheck = checkWifiOnAndConnected(context);
+            if (currCheck == lastCheck && !firstTime) {
+                return;
+            }
+
+            firstTime = false;
+            lastCheck = currCheck;
+
+
+            Log.d("BroadcastReceiver", "Some action " + action);
+            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                if (currCheck) {
+                    Log.d("BroadcastReceiver", "WIFI CONNECTED");
+                    startExternalMethod(context);
+                } else {
+                    Log.d("BroadcastReceiver", "WIFI NOT CONNECTED");
+                    stopExternalMethod(context);
+                }
+            }
+        }catch (Exception e)
         {
-            String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
-            String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
-            int state = 0;
-            if(stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)){
-                state = TelephonyManager.CALL_STATE_IDLE;
-            }
-            else if(stateStr != null &&stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){
-                state = TelephonyManager.CALL_STATE_OFFHOOK;
-            }
-            else if(stateStr != null &&stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
-                state = TelephonyManager.CALL_STATE_RINGING;
-            }
-            onCallStateChanged(context, state, number);
-            return;
-        }
-
-        boolean currCheck = checkWifiOnAndConnected(context);
-        if(currCheck == lastCheck && !firstTime)
-        {
-            return;
-        }
-
-        firstTime = false;
-        lastCheck = currCheck;
-
-
-        Log.d("BroadcastReceiver","Some action " + action);
-        if(action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION))
-        {
-            if(currCheck) {
-                Log.d("BroadcastReceiver","WIFI CONNECTED");
-                startExternalMethod(context);
-            }
-            else {
-                Log.d("BroadcastReceiver","WIFI NOT CONNECTED");
-                stopExternalMethod(context);
-            }
+           Log.e("BroadcastReceiver",e.toString());
         }
     }
 

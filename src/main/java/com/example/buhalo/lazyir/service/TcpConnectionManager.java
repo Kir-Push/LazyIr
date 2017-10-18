@@ -161,7 +161,8 @@ public class TcpConnectionManager {
         //    Socket socket = new Socket();
             socket = getConnection(address,port,context);
             System.out.println(socket.isConnected());
-          //  socket.connect(new InetSocketAddress(address,port),10000);
+         //   socket.connect(new InetSocketAddress(address,port),10000);
+            socket.setSoTimeout(60000);
             socket.setKeepAlive(true);
             ConnectionThread connection = new ConnectionThread(socket,context);
             connection.start();

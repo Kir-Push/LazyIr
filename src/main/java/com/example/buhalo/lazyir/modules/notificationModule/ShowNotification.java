@@ -45,11 +45,13 @@ public class ShowNotification extends Module {
 
     private Notification castNotf(StatusBarNotification sbn)
     {
+
         String pack = sbn.getPackageName();
         String text = "";
         String title;
         String ticker = "";
         Bundle extras = sbn.getNotification().extras;
+        try {
         String txt = tryExtract(extras);
         CharSequence charSequence = extras.getCharSequence("android.text");
         CharSequence tickerText = sbn.getNotification().tickerText;
@@ -65,16 +67,12 @@ public class ShowNotification extends Module {
         {
             ticker = tickerText.toString();
         }
-        try {
-
             title = extras.getString("android.title");
             if(title == null)
             {
-                title = ((SpannableString)extras.get("android.title")).toString();
-            }
-            if(title == null)
-            {
-                title = "";
+                CharSequence bigText = (CharSequence) extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
+                if(bigText != null)
+                    title = bigText.toString();
             }
         }
        catch (Exception e)
