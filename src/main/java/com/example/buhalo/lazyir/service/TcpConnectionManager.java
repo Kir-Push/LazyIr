@@ -36,6 +36,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
+import static com.example.buhalo.lazyir.Devices.NetworkPackage.DEVICE_TYPE;
 import static com.example.buhalo.lazyir.service.BackgroundService.port;
 
 /**
@@ -158,6 +159,8 @@ public class TcpConnectionManager {
     public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
         Socket socket = null;
         try {
+            if(!np.getValue(DEVICE_TYPE).equals("pc"))
+                return;
         //    Socket socket = new Socket();
             socket = getConnection(address,port,context);
             System.out.println(socket.isConnected());
@@ -169,6 +172,7 @@ public class TcpConnectionManager {
         } catch (Exception e) {
             e.printStackTrace();
             try {
+                if(socket!= null)
                 socket.close();
             } catch (IOException e1) {
                 e1.printStackTrace();

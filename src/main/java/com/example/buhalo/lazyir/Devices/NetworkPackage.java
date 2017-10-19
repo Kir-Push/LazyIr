@@ -19,6 +19,7 @@ public class NetworkPackage {
     public final static String TYPE = "type";
     public final static String DATA = "data";
     public final static String N_OBJECT = "object";
+    public final static String DEVICE_TYPE = "deviceType";
 
 
     private Device dv;
@@ -44,6 +45,7 @@ public class NetworkPackage {
         idNode.put(NAME,getMyName());
         idNode.put(TYPE,type);
         idNode.put(DATA,data);
+        idNode.put(DEVICE_TYPE,"android");
     }
 
     public NetworkPackage(String message)
