@@ -5,6 +5,7 @@ import android.app.Application;
 import android.support.v4.app.ActivityCompat;
 
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.script.compiler.TestWifiNotifExecuting;
 
 
 import static com.example.buhalo.lazyir.service.JasechBroadcastReceiver.checkWifiOnAndConnected;
@@ -26,6 +27,7 @@ public class AppBoot extends Application {
 
         super.onCreate();
 
+      //  new TestWifiNotifExecuting().test();
        if(checkWifiOnAndConnected(this))
         BackgroundService.startExternalMethod(this);
 

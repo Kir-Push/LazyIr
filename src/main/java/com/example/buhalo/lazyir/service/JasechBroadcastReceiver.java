@@ -15,8 +15,10 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.Notification;
 import com.example.buhalo.lazyir.modules.notificationModule.Notifications;
 import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
+import com.example.buhalo.lazyir.service.script.callback.callback;
 
 import java.util.Date;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.example.buhalo.lazyir.service.BackgroundService.startExternalMethod;
 import static com.example.buhalo.lazyir.service.BackgroundService.stopExternalMethod;
@@ -37,10 +39,15 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
     private static boolean isIncoming;
     private static String savedNumber;
 
+    //  onReceive method poll callback's after all other in onReceive method todo think when bettern call after or before
+    public static ConcurrentLinkedQueue<callback> BroadcastcallBacks = new ConcurrentLinkedQueue<>();
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
         try {
+
+
 
             String action = intent.getAction();
 
@@ -93,6 +100,12 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
                     Log.d("BroadcastReceiver", "WIFI NOT CONNECTED");
                     stopExternalMethod(context);
                 }
+            }
+
+            System.out.println(intent.getAction());
+            System.out.println(BroadcastcallBacks.size());
+            for (callback callBack : BroadcastcallBacks) {
+                callBack.call(context,intent);
             }
         }catch (Exception e)
         {
