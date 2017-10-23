@@ -6,6 +6,7 @@ package com.example.buhalo.lazyir;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -50,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     private DevicesAdapter adapter;
+    private SampleFragmentPagerAdapter sampleFragmentPagerAdapter;
+
+    public static boolean isEditMode() {
+        return editMode;
+    }
+
+    private static transient boolean editMode = false;
 
     private static final int PERMISSION_STORAGE = 567;
 
@@ -99,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setAdapter(new SampleFragmentPagerAdapter(getSupportFragmentManager(),
-                MainActivity.this));
+         sampleFragmentPagerAdapter = new SampleFragmentPagerAdapter(getSupportFragmentManager(), MainActivity.this);
+                ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager.setAdapter(sampleFragmentPagerAdapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -139,7 +147,21 @@ public class MainActivity extends AppCompatActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-       if(Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Unpair"))
+        if(item.toString().equals("Edit"))
+        {
+            boolean checked = item.isChecked();
+            item.setChecked(!checked);
+            editMode = !checked;
+//            finish();
+//            adapter.notifyDataSetChanged();
+//            mDrawerLayout.refreshDrawableState();
+//            Intent intent = getIntent();
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//            finish();
+//            startActivity(intent);
+     //       sampleFragmentPagerAdapter.
+        }else
+        if(Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Unpair"))
        {
            TcpConnectionManager.getInstance().unpair(selected_id,this);
        }
@@ -147,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
        {
            TcpConnectionManager.getInstance().sendPairing(selected_id);
        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -164,6 +187,13 @@ public class MainActivity extends AppCompatActivity {
         {
             menu.add("Pair");
         }
+        menu.add("Options");
+        MenuItem edit = menu.add("Edit");
+        edit.setCheckable(true);
+        if(editMode)
+            edit.setChecked(true);
+        else
+            edit.setChecked(false);
 
         return true;
     }

@@ -65,6 +65,46 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     private ListView buttonCommandList;
 
+// use when non edit in first page
+    private  View.OnTouchListener NonEditListenerTouch = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(v,
+                            "scaleX", 0.8f);
+                    ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(v,
+                            "scaleY", 0.8f);
+                    scaleDownX.setDuration(500);
+                    scaleDownY.setDuration(500);
+
+                    AnimatorSet scaleDown = new AnimatorSet();
+                    scaleDown.play(scaleDownX).with(scaleDownY);
+
+                    scaleDown.start();
+
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    ObjectAnimator scaleDownX2 = ObjectAnimator.ofFloat(
+                            v, "scaleX", 1f);
+                    ObjectAnimator scaleDownY2 = ObjectAnimator.ofFloat(
+                            v, "scaleY", 1f);
+                    scaleDownX2.setDuration(500);
+                    scaleDownY2.setDuration(500);
+
+                    AnimatorSet scaleDown2 = new AnimatorSet();
+                    scaleDown2.play(scaleDownX2).with(scaleDownY2);
+
+                    scaleDown2.start();
+                    mainButtonOnclick(v.getId());
+                    v.setEnabled(true);
+                    break;
+            }
+            return true;
+        }
+    };
+
 
     public static PageFragment newInstance(int page) {
         Bundle args = new Bundle();
@@ -95,6 +135,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
         if(mPage == 1)
         {
+            if(MainActivity.isEditMode())
+                createFourthPage(inflater,container);
+            else
             createFirstPage();
         }
         else if (mPage == 2)
@@ -121,44 +164,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             button.setBackgroundResource(findResourceId(button.getTag()));
             button.setScaleX(1);
             button.setScaleY(1);
-            button.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(v,
-                                    "scaleX", 0.8f);
-                            ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(v,
-                                    "scaleY", 0.8f);
-                            scaleDownX.setDuration(500);
-                            scaleDownY.setDuration(500);
-
-                            AnimatorSet scaleDown = new AnimatorSet();
-                            scaleDown.play(scaleDownX).with(scaleDownY);
-
-                            scaleDown.start();
-
-                            break;
-
-                        case MotionEvent.ACTION_UP:
-                            ObjectAnimator scaleDownX2 = ObjectAnimator.ofFloat(
-                                    v, "scaleX", 1f);
-                            ObjectAnimator scaleDownY2 = ObjectAnimator.ofFloat(
-                                    v, "scaleY", 1f);
-                            scaleDownX2.setDuration(500);
-                            scaleDownY2.setDuration(500);
-
-                            AnimatorSet scaleDown2 = new AnimatorSet();
-                            scaleDown2.play(scaleDownX2).with(scaleDownY2);
-
-                            scaleDown2.start();
-                            mainButtonOnclick(v.getId());
-                            v.setEnabled(true);
-                            break;
-                    }
-                    return true;
-                }
-            });
+            button.setOnTouchListener(NonEditListenerTouch);
         }
         return null; // return null because first page don't need view
     }
@@ -215,7 +221,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
             {
                 if(mPage == 3)
                 {
-                    tabLayout.getTabAt(3).select();
+                    tabLayout.getTabAt(0).select();
                     ClipData data = ClipData.newPlainText("tab", "4");
                     View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
                     v.startDrag(data, shadow, v, 0);
@@ -250,9 +256,13 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                 }
                 else
                 {
-                    nButton.setOnTouchListener(null);
-                    nButton.setOnLongClickListener(this);
-                    nButton.setOnClickListener(this);
+                    if(!MainActivity.isEditMode())
+                        nButton.setOnTouchListener(NonEditListenerTouch);
+                    else {
+                        nButton.setOnTouchListener(null);
+                        nButton.setOnLongClickListener(this);
+                        nButton.setOnClickListener(this);
+                    }
                         layout.addView(nButton);
                   if( event.getClipData().getItemAt(0).getText().equals("update"))
                     {
@@ -291,7 +301,8 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     @Override
     public boolean onLongClick(View v) {
-        tabLayout.getTabAt(3).select();
+        if(tabLayout.getSelectedTabPosition() != 0)
+        tabLayout.getTabAt(0).select();
         hideCommandLayout();
         unhideButtons();
         ClipData data = ClipData.newPlainText("mode", "update");
@@ -459,6 +470,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     {
         executeButtonCommands(getContext(),String.valueOf(id), MainActivity.selected_id);
     }
+
+
+
 
 
 }
