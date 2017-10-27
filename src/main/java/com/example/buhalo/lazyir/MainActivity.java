@@ -27,10 +27,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.UI.SampleFragmentPagerAdapter;
 import com.example.buhalo.lazyir.old.IrMethods;
@@ -40,6 +42,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.example.buhalo.lazyir.UI.PageFragment.NonEditListenerTouch;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -152,14 +156,10 @@ public class MainActivity extends AppCompatActivity {
             boolean checked = item.isChecked();
             item.setChecked(!checked);
             editMode = !checked;
-//            finish();
-//            adapter.notifyDataSetChanged();
-//            mDrawerLayout.refreshDrawableState();
-//            Intent intent = getIntent();
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//            finish();
-//            startActivity(intent);
-     //       sampleFragmentPagerAdapter.
+            // when selected option edit, buttons need to change listeners, therefore need recreate fragment's.
+            // crutch is re-set fragment adapter to layout, which cause recreating fragments
+            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+           viewPager.setAdapter(sampleFragmentPagerAdapter);
         }else
         if(Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Unpair"))
        {
@@ -190,11 +190,12 @@ public class MainActivity extends AppCompatActivity {
         menu.add("Options");
         MenuItem edit = menu.add("Edit");
         edit.setCheckable(true);
-        if(editMode)
+        if(editMode) {
             edit.setChecked(true);
-        else
+        }
+        else {
             edit.setChecked(false);
-
+        }
         return true;
     }
 

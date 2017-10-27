@@ -4,6 +4,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -66,7 +67,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     private ListView buttonCommandList;
 
 // use when non edit in first page
-    private  View.OnTouchListener NonEditListenerTouch = new View.OnTouchListener() {
+    public static final View.OnTouchListener NonEditListenerTouch = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
@@ -97,7 +98,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                     scaleDown2.play(scaleDownX2).with(scaleDownY2);
 
                     scaleDown2.start();
-                    mainButtonOnclick(v.getId());
+                    mainButtonOnclick(v.getContext(),v.getId());
                     v.setEnabled(true);
                     break;
             }
@@ -136,7 +137,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         if(mPage == 1)
         {
             if(MainActivity.isEditMode())
-                createFourthPage(inflater,container);
+                createFourthPage(inflater,container); // still first page, but edit mode on.
             else
             createFirstPage();
         }
@@ -155,7 +156,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         return view;
     }
 
-    private View createFirstPage()
+    public View createFirstPage()
     {
         List<Button> buttonList =   DBHelper.getInstance(getContext().getApplicationContext()).getButtons("1",getContext());
         for(final Button button : buttonList)
@@ -202,7 +203,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         return vv;
     }
 
-    private View createFourthPage(LayoutInflater inflater,final ViewGroup container)
+    private View createFourthPage(LayoutInflater inflater,final ViewGroup container) // fourth page s basicaly first page with edit mode on!
     {
         List<Button> buttonList =   DBHelper.getInstance(getContext()).getButtons("1",getContext());
         for(Button button : buttonList)
@@ -256,9 +257,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                 }
                 else
                 {
-                    if(!MainActivity.isEditMode())
+                    if(!MainActivity.isEditMode())   // if edit mode off set basic touch listener
                         nButton.setOnTouchListener(NonEditListenerTouch);
-                    else {
+                    else { // else set touch, long , click listener to button
                         nButton.setOnTouchListener(null);
                         nButton.setOnLongClickListener(this);
                         nButton.setOnClickListener(this);
@@ -466,9 +467,9 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
         }
     }
 
-    private void mainButtonOnclick(int id)
+    private static void mainButtonOnclick(Context context, int id)
     {
-        executeButtonCommands(getContext(),String.valueOf(id), MainActivity.selected_id);
+        executeButtonCommands(context,String.valueOf(id), MainActivity.selected_id);
     }
 
 
