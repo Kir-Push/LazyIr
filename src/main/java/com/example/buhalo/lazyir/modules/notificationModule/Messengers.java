@@ -51,7 +51,7 @@ public class Messengers extends Module {
 
                 NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender(sbn.getNotification());
                 List<NotificationCompat.Action> actions = wearableExtender.getActions();
-                for(NotificationCompat.Action act : actions) {
+        for(NotificationCompat.Action act : actions) {
                     if(act != null && act.getRemoteInputs() != null) {
                         RemoteInput[] remoteInputs = act.getRemoteInputs();
 

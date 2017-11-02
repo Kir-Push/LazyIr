@@ -190,7 +190,7 @@ public class TcpConnectionManager {
         }
 
     }
-
+ // todo locks and refactoringg like server side
 
     public class ConnectionThread extends Thread {
 
@@ -408,6 +408,7 @@ public class TcpConnectionManager {
                 {
                     Log.d("Tcp","Error in output for socket");
                     StopListening(id);
+                    return true; // if device null or not connected stopping listening and return from method, or may cause nullpointer exception later in method
                    // TryConnect(device);
                 }
                 if(!device.isPaired()) // todo here eror check

@@ -3,6 +3,7 @@ package com.example.buhalo.lazyir.service;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -11,6 +12,8 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.Messengers;
 import com.example.buhalo.lazyir.modules.notificationModule.Notification;
 import com.example.buhalo.lazyir.modules.notificationModule.Notifications;
+
+import java.util.List;
 
 /**
  * Created by buhalo on 21.03.17.
@@ -46,14 +49,13 @@ public class NotificationListener extends NotificationListenerService {
         if(notif == null)
             notif = this;
 
-            if(!smsMessage(sbn)) {
+        //first check if notification is not smsMessage, if it is - send as sms
+            if(!smsMessage(sbn)){
+                // after check if this  is not messenger message, if it is - send as message
         if(!messengersMessage(sbn))
-        {
-                sendToserver(sbn, RECEIVE_NOTIFICATION);
-        }
-        }
-        } catch (Exception e)
-        {
+            // if previous two false, this is notif, send to server
+                sendToserver(sbn, RECEIVE_NOTIFICATION);}
+        } catch (Exception e) {
         Log.e("NotificationListener",e.toString());
         }
 
@@ -69,8 +71,15 @@ public class NotificationListener extends NotificationListenerService {
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
 
-                Messengers.pendingNotifs.put(notification.getPack()+":"+notification.getTitle(),sbn);
-                Messengers.sendToServer(notification);
+                if(sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) {// telegram send second notif with id 1, it not contain action, therefore ignore it
+                    Messengers.pendingNotifs.put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                    Messengers.sendToServer(notification);
+                }
+                else if(!notification.getPack().equals("org.telegram.messenger"))
+                {
+                    Messengers.pendingNotifs.put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                    Messengers.sendToServer(notification);
+                }
                 return true;
             }
         }
@@ -82,15 +91,14 @@ public class NotificationListener extends NotificationListenerService {
         return false;
     }
 
+    //check if notification is SmsMessage or not
     private boolean smsMessage(StatusBarNotification sbn)
     {
         String pack = sbn.getPackageName();
-        System.out.println(pack);
         return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
     }
     public static StatusBarNotification[] getAll()
     {
-
       return   notif == null ? null : notif.getActiveNotifications();
     }
 
@@ -129,6 +137,8 @@ public class NotificationListener extends NotificationListenerService {
         {
             return null;
         }
+        // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
+//        if(pack.equals("org.telegram.messenger") && !title.contains("(\d new message)"))
         Notification notification = new Notification(text,title,pack,ticker, android.os.Build.MODEL);
         Log.i(SHOW_NOTIFICATION,pack + "  " + title + "  " + text + "  " + ticker);
         return notification;

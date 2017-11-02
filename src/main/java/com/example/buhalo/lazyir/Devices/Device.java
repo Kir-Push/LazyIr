@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by buhalo on 19.02.17.
@@ -29,7 +30,7 @@ public class Device {
     private volatile boolean listening;
     private volatile boolean pinging;
     private volatile boolean answer;
-    private HashMap<String,Module> enabledMdules = new HashMap<>();
+    private ConcurrentHashMap<String,Module> enabledMdules;
 
 
     public Device(Socket socket, String id, String name, InetAddress ip, BufferedReader in, PrintWriter out,Context context) {
@@ -143,10 +144,6 @@ public class Device {
         enabledMdules.clear();
     }
 
-    public void enableModule(String name)
-    {
-       enabledMdules.put(name,ModuleFactory.instantiateModuleByName(this,name));
-    }
 
     public HashMap<String,Module> getEnabledModules()
     {
