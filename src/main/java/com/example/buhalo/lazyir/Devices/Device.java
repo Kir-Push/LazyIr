@@ -30,7 +30,7 @@ public class Device {
     private volatile boolean listening;
     private volatile boolean pinging;
     private volatile boolean answer;
-    private ConcurrentHashMap<String,Module> enabledMdules;
+    private ConcurrentHashMap<String,Module> enabledModules;
 
 
     public Device(Socket socket, String id, String name, InetAddress ip, BufferedReader in, PrintWriter out,Context context) {
@@ -45,9 +45,10 @@ public class Device {
         this.pinging = false;
         this.answer = false;
         this.context = context;
-        for (Class registeredModule : ModuleFactory.getRegisteredModules()) { //todo after you create some menu where user can select module which he want to work!!
-            enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // it's enabled standart module which enabled by default;
-        }
+        enableModules();
+//        for (Class registeredModule : ModuleFactory.getRegisteredModules()) { //todo after you create some menu where user can select module which he want to work!!
+//            enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // it's enabled standart module which enabled by default;
+//        }
     }
 
     public static Map<String, Device> getConnectedDevices() {
@@ -141,13 +142,13 @@ public class Device {
 
     public void disableModules()
     {
-        enabledMdules.clear();
+        enabledModules.clear();
     }
 
 
-    public HashMap<String,Module> getEnabledModules()
+    public ConcurrentHashMap<String,Module> getEnabledModules()
     {
-        return enabledMdules;
+        return enabledModules;
     }
 
     public Context getContext() {
@@ -157,4 +158,14 @@ public class Device {
     public void setContext(Context context) {
         this.context = context;
     }
+
+    public void enableModule(String moduleName, Module module) {
+        enabledModules.put(moduleName,module);
+    }
+
+    public void disableModule(String moduleName) {
+        enabledModules.remove(moduleName);
+    }
+
+    public void enableModules() {enabledModules = ModuleFactory.getEnabledModules(this,context);}
 }

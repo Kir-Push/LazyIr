@@ -12,6 +12,7 @@ public interface DbCommands extends BaseColumns {
      String TABLE_NAME_COMMANDS = "commands";
      String TABLE_NAME_COMMANDS_BTN = "commandsbtn";
      String TABLE_NAME_PAIRED_DEVICES = "pairedDevices";
+     String TABLE_NAME_MODULE = "module";
      String COLUMN_NAME_ENTRY_ID = "entryid";
      String COLUMN_NAME_COMMAND = "command";
      String COLUMN_NAME_COMMAND_TYPE = "type";
@@ -28,6 +29,11 @@ public interface DbCommands extends BaseColumns {
      String COLUMN_NAME_LAYOUT_VALUE = "value";
      String COLUMN_NAME_COMAMND_VENDOR = "producer";
      String COLUMT_NAME_COMMAND_DEVICE = "device";
+     String COLUMN_NAME_MODULE_NAME = "name";
+     String COLUMN_NAME_MODULE_DEVICE = "device";
+     String COLUMN_NAME_MODULE_STATUS = "status";
+     String COLUMN_NAME_MODULE_OPTION = "option";
+     String COLUMN_NAME_MODULE_LIMIT = "limit";
      String TEXT_TYPE = " TEXT";
      String COMMA_SEP = ",";
      String INTEGER_TYPE = " INTEGER";

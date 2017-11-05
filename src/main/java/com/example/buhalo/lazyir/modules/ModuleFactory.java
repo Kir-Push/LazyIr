@@ -57,7 +57,7 @@ public class ModuleFactory {
             // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
             List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(dv);
             // getting list of enabledModules names from Database;
-            if(enabledModulesNames == null)
+            if(enabledModulesNames == null || enabledModulesNames.size() == 0)
             enabledModulesNames = DBHelper.getInstance(context).getEnabledModules(dv);
             //instantiate modules. Modules must itself handle multiple instances and so.
             for (String ModuleName : enabledModulesNames) {
@@ -74,29 +74,19 @@ public class ModuleFactory {
         }
         return resultMap;
     }
-  //disable module. Change value on Db and call method
-    public static void disableModule(Device dv,String moduleName,Context context)
+    //enable or disable module. Change value on Db and call method
+    // if enableOrDisable true, then enable and instanciate module, otherwise disable
+    public static void changeModuleStatus(Device dv,String moduleName,Context context,boolean enableOrDisable)
     {
         lock.lock();
         try{
-            DBHelper.getInstance(context).disableMethod(dv,moduleName);
+            DBHelper.getInstance(context).changeModuleStatus(dv,moduleName,enableOrDisable);
+            if(enableOrDisable)
+                dv.enableModule(moduleName,instantiateModuleByName(dv,moduleName));
+            else
             dv.disableModule(moduleName);
-        }catch (IllegalAccessException e) {
-            Log.e("ModuleFactory","disableModule",e);
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    //enable module and instanciate, add to device enable modules.
-    public static void enableModule(Device dv,String moduleName,Context context)
-    {
-        lock.lock();
-        try{
-            DBHelper.getInstance(context).enableMethod(dv,moduleName);
-            dv.enableModule(moduleName,instantiateModuleByName(dv,moduleName));
         }catch (IllegalAccessException | InstantiationException e) {
-            Log.e("ModuleFactory","enableModule",e);
+            Log.e("ModuleFactory","disableModule",e);
         }finally {
             lock.unlock();
         }
@@ -128,7 +118,7 @@ public class ModuleFactory {
 
     }
 
-    private static List<Class> getRegisteredModules() {
+    public static List<Class> getRegisteredModules() {
         if(registeredModules == null)
         {
             registerModulesInit();

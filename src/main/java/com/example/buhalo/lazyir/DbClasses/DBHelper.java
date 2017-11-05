@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.RelativeLayout;
 import com.example.buhalo.lazyir.Devices.Command;
+import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.modules.ModuleFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,6 +20,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
@@ -26,6 +32,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
         private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;
+        private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
         public static synchronized DBHelper getInstance(Context context)
         {
@@ -634,4 +641,124 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             db.delete(TABLE_NAME_COMMANDS, selection, selectionArgs);
         }
     }
+
+
+
+    //************************************************************************************************************
+    // Modules Info methods - get enabled, filling defaults, enabling and disabling and so on.
+
+
+    // common variables for modules methods
+    private String[] moduleProjectionSimple = {
+            COLUMN_NAME_MODULE_NAME,
+            COLUMN_NAME_MODULE_DEVICE,
+            COLUMN_NAME_MODULE_STATUS };
+
+    private String statusOn  = "ON";
+    private String statusOff = "OFF";
+
+
+
+    // first try getting enabledModulesBy device, if size 0, check if device non exist in db(first time connect, if true then fill by default list of enabled modules(all).
+    // return enabledModules in each cases
+    public List<String> checkAndSetDefaultIfNoInfo(Device dv) {
+        List<String> enabledModules = getEnabledModules(dv);
+        if(enabledModules.size() == 0 && checkIfFirstTimeDevice(dv))
+            enabledModules =  fillStandart(dv);
+        return enabledModules;
+    }
+
+    // populate module table for default enabled modules settings
+    // it's called when device connect for the fisrt time,and no setting's for device in db
+    // return list of enabled modules names by this method - actually all modules
+    // lock for write and read
+    private List<String> fillStandart(Device dv) {
+            lock.writeLock().lock();
+            lock.readLock().lock();
+            List<String> result = new ArrayList<>();
+            try(SQLiteDatabase db = getWritableDatabase()) {
+                for (Class moduleClass : ModuleFactory.getRegisteredModules()) {
+                    ContentValues values = new ContentValues();
+                    values.put(COLUMN_NAME_MODULE_NAME,moduleClass.getSimpleName());
+                    values.put(COLUMN_NAME_MODULE_DEVICE,dv.getId());
+                    values.put(COLUMN_NAME_MODULE_STATUS,statusOn);
+                    long  newRowId = db.insert(
+                            TABLE_NAME_MODULE,
+                            null,
+                            values);
+                }
+
+            }finally {
+                lock.readLock().unlock();
+                lock.writeLock().unlock();
+            }
+        return result;
+    }
+
+
+    // checking if device modules info exist in db.
+    // simply checking module table for device id.
+    // lock for write but not for read.
+    // return true if non exist, otherwise false.
+    private boolean checkIfFirstTimeDevice(Device dv) {
+        lock.writeLock().lock();
+        try(SQLiteDatabase db = getReadableDatabase()){
+            String[] projection = {COLUMN_NAME_MODULE_NAME};
+            String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ?";
+            String[] selectionArgs = {dv.getId()};
+
+            try(Cursor c = db.query(TABLE_NAME_MODULE,projection,selection,selectionArgs,null,null,null)) {
+                return c.getColumnCount() <= 0;
+            }
+        }finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    // get Enabled Modules for specific device,
+    // lock for write but not for read.
+    // return list of modules names
+    public  List<String> getEnabledModules(Device dv){
+        lock.writeLock().lock();
+        List<String> result = new ArrayList<>();
+        try(SQLiteDatabase db = getReadableDatabase()){
+
+            String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_STATUS + " LIKE ?";
+            String[] selectionArgs = {dv.getId(),statusOn};
+
+            try(Cursor c = db.query(TABLE_NAME_MODULE,moduleProjectionSimple,selection,selectionArgs,null,null,null)) {
+                while (c.moveToNext()){
+                    result.add(c.getString(c.getColumnIndex(COLUMN_NAME_MODULE_NAME)));
+                }
+            }
+        }finally {
+            lock.writeLock().unlock();
+        }
+        return result;
+    }
+
+    // enable or disable speficic module for device
+    // return nothing :)
+    // lock read and write
+    // arg status if true - on, false - off
+    // method does not check whether such entry exist, maybe need carefully testing
+    public void changeModuleStatus(Device dv, String moduleName,boolean status) {
+        lock.writeLock().lock();
+        lock.readLock().lock();
+        try(SQLiteDatabase db = getWritableDatabase()){
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NAME_MODULE_NAME,moduleName);
+            values.put(COLUMN_NAME_MODULE_DEVICE,dv.getId());
+            values.put(COLUMN_NAME_MODULE_STATUS,status ? statusOn : statusOff);
+            String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_NAME + " LIKE ?";
+            String[] args = new String[]{dv.getId(),moduleName};
+            db.update(TABLE_NAME_PAIRED_DEVICES,values,selection,args);
+        }finally {
+            lock.readLock().unlock();
+            lock.writeLock().unlock();
+        }
+    }
+
+
+    //*************************************************************************************************************************
 }
