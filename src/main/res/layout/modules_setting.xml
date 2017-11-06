@@ -6,11 +6,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/module_list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@android:color/white"
-        android:textColor="#000000">
+        android:orientation="vertical">
+        <!--android:background="@android:color/white"-->
+        <!--android:textColor="#000000">-->
 
         <ListView
             android:id="@+id/module_list"

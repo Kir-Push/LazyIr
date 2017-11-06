@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
-        private static final int DATABASE_VERSION = 25;
+        private static final int DATABASE_VERSION = 26;
         private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;
@@ -703,12 +703,12 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     private boolean checkIfFirstTimeDevice(Device dv) {
         lock.writeLock().lock();
         try(SQLiteDatabase db = getReadableDatabase()){
-            String[] projection = {COLUMN_NAME_MODULE_NAME};
+            String[] projection = {COLUMN_NAME_MODULE_DEVICE};
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ?";
             String[] selectionArgs = {dv.getId()};
 
             try(Cursor c = db.query(TABLE_NAME_MODULE,projection,selection,selectionArgs,null,null,null)) {
-                return c.getColumnCount() <= 0;
+                return c.getCount() <= 0;
             }
         }finally {
             lock.writeLock().unlock();
@@ -752,7 +752,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             values.put(COLUMN_NAME_MODULE_STATUS,status ? statusOn : statusOff);
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_NAME + " LIKE ?";
             String[] args = new String[]{dv.getId(),moduleName};
-            db.update(TABLE_NAME_PAIRED_DEVICES,values,selection,args);
+            db.update(TABLE_NAME_MODULE,values,selection,args);
         }finally {
             lock.readLock().unlock();
             lock.writeLock().unlock();

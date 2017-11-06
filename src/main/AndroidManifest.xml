@@ -70,6 +70,14 @@
             android:theme="@style/AppTheme.NoActionBar">
             </activity>
 
+
+         <!--attention on theme,if some error, see there-->
+        <activity android:name=".modules.ModulesActivity"
+            android:parentActivityName=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+
         <service android:name=".service.BackgroundService"
             android:enabled="true"/>
         <!--<service android:name=".service.SheluderService"-->

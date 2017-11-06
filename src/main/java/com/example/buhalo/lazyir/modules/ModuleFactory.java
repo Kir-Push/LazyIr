@@ -1,10 +1,8 @@
 package com.example.buhalo.lazyir.modules;
 
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.AppBoot;
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
@@ -18,7 +16,6 @@ import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -108,6 +105,10 @@ public class ModuleFactory {
 
     private static Module instantiateModuleByName(Device dv,String name) throws  IllegalAccessException,InstantiationException
     {
+        if(registeredModules == null)
+        {
+            registerModulesInit();
+        }
         for (Class registeredModule : registeredModules) {
             if(registeredModule.getSimpleName().equals(name))
             {
@@ -128,6 +129,28 @@ public class ModuleFactory {
 
     public static void setRegisteredModules(List<Class> registeredModules) {
         ModuleFactory.registeredModules = registeredModules;
+    }
+
+    // method getting all registered modules, get all enabled modules for device, after that iterate over all modules and check if enabledhashMap contain it,
+    // if no - add to resultList with false status. After that iterate over enabledModules and add all to resultList.
+    // use Module wrapper which is simple class with string name,dv id - (needed in internal logic) and bool status (enabled:disabled);
+    // alghorithm not efficient, but number of modules very small - around 10, maximum 15 items,
+    // it's not very bad for that. alghorithm has O(2n) difficulty.
+    public static List<ModulesWrap> getModulesNamesWithStatus(Device dv,Context context)
+    {
+        //to
+        List<ModulesWrap> result = new ArrayList<>();
+        ConcurrentHashMap<String, Module> enabledModules = getEnabledModules(dv, context);
+        List<Class> registeredModules = getRegisteredModules();
+        for (Class registeredModule : registeredModules) {
+            if(!enabledModules.containsKey(registeredModule.getSimpleName()))
+            result.add(new ModulesWrap(registeredModule.getSimpleName(),false, dv.getId()));
+        }
+        for (String s : enabledModules.keySet()) {
+            result.add(new ModulesWrap(s,true, dv.getId()));
+        }
+
+        return result;
     }
 
 }

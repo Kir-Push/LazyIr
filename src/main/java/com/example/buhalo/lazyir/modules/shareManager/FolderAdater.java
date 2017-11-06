@@ -17,9 +17,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by buhalo on 07.03.17.
- */
 
 public class FolderAdater extends BaseAdapter{
 
@@ -91,7 +88,7 @@ public class FolderAdater extends BaseAdapter{
     CompoundButton.OnCheckedChangeListener myCheckChangeList = new CompoundButton.OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView,
                                      boolean isChecked) {
-            // меняем данные товара (в корзине или нет)
+            // меняем данные товара (в корзине или нет) // в какой блять корзине, ты откуда это взял? а пох впринципе работает и ладно
             getFile((Integer) buttonView.getTag()).setChecked(isChecked);
         }
     };

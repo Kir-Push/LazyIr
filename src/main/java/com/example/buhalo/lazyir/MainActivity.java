@@ -31,10 +31,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.UI.SampleFragmentPagerAdapter;
+import com.example.buhalo.lazyir.modules.ModulesActivity;
 import com.example.buhalo.lazyir.old.IrMethods;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
@@ -160,6 +162,10 @@ public class MainActivity extends AppCompatActivity {
             // crutch is re-set fragment adapter to layout, which cause recreating fragments
             ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
            viewPager.setAdapter(sampleFragmentPagerAdapter);
+        }else if(item.toString().equals("Options"))
+        {
+            Intent intent = new Intent(this, ModulesActivity.class);
+            startActivity(intent);
         }else
         if(Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Unpair"))
        {

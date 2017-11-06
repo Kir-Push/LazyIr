@@ -399,7 +399,7 @@ public class TcpConnectionManager {
     }
 
 
-
+//todo lock as in server and so on
     public synchronized boolean sendCommandToServer(final String id, final String command)
     {
                 Device device =  Device.connectedDevices.get(id);
