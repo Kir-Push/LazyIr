@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
+import com.example.buhalo.lazyir.service.network.tcp.ConnectionThread;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -23,32 +24,44 @@ public class Device {
     private Socket socket;
     private String id;
     private String name;
+
+    // connection thread for this device, device will communicate over this thread
+    private ConnectionThread thread;
+    //add type, to future purposes
+    private String deviceType;
+
     private InetAddress ip;
     private volatile boolean paired;
-    private BufferedReader in;
-    private PrintWriter out;
     private volatile boolean listening;
     private volatile boolean pinging;
     private volatile boolean answer;
     private ConcurrentHashMap<String,Module> enabledModules;
 
 
-    public Device(Socket socket, String id, String name, InetAddress ip, BufferedReader in, PrintWriter out,Context context) {
+    public Device(Socket socket, String id, String name, InetAddress ip, ConnectionThread thread,Context context) {
         this.socket = socket;
         this.id = id;
         this.name = name;
         this.ip = ip;
         this.paired = false;
-        this.out = out;
-        this.in = in;
+        this.thread = thread;
         this.listening = false;
         this.pinging = false;
         this.answer = false;
         this.context = context;
+        // by default device type is PC;
+        this.deviceType = "pc";
+
+        // todo do same in server!
         enableModules();
 //        for (Class registeredModule : ModuleFactory.getRegisteredModules()) { //todo after you create some menu where user can select module which he want to work!!
 //            enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // it's enabled standart module which enabled by default;
 //        }
+    }
+
+    public Device(Socket socket, String id, String name, InetAddress ip, String deviceType, ConnectionThread thread,Context context) {
+       this(socket,id,name,ip,thread,context);
+       this.deviceType = deviceType;
     }
 
     public static Map<String, Device> getConnectedDevices() {
@@ -61,10 +74,6 @@ public class Device {
 
     public Socket getSocket() {
         return socket;
-    }
-
-    public void setSocket(Socket socket) {
-        this.socket = socket;
     }
 
     public String getId() {
@@ -83,14 +92,6 @@ public class Device {
         this.name = name;
     }
 
-    public InetAddress getIp() {
-        return ip;
-    }
-
-    public void setIp(InetAddress ip) {
-        this.ip = ip;
-    }
-
     public boolean isPaired() {
         return paired;
     }
@@ -100,20 +101,19 @@ public class Device {
     }
 
 
-    public PrintWriter getOut() {
-        return out;
+    public void printToOut(String message)
+    {
+        thread.printToOut(message);
     }
 
-    public void setOut(PrintWriter out) {
-        this.out = out;
+    public boolean isConnected()
+    {
+        return thread != null && thread.isConnected();
     }
 
-    public BufferedReader getIn() {
-        return in;
-    }
-
-    public void setIn(BufferedReader in) {
-        this.in = in;
+    public void closeConnection()
+    {
+        thread.closeConnection();
     }
 
     public boolean isListening() {
@@ -168,4 +168,12 @@ public class Device {
     }
 
     public void enableModules() {enabledModules = ModuleFactory.getEnabledModules(this,context);}
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
 }

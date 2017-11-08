@@ -22,8 +22,8 @@ import java.net.SocketException;
 
 public class UdpBroadcastManager  {
 
-    private static final String BROADCAST_INTRODUCE = "broadcast introduce";
-    private static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
+    public static final String BROADCAST_INTRODUCE = "broadcast introduce";
+    public static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
     private DatagramSocket socket;
     private  DatagramSocket server;
     private int send_period = 15000;

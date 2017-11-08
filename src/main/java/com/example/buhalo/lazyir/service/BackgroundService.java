@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -27,7 +29,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class BackgroundService extends Service {
 
+    // executor service for tasks
     public static final ExecutorService executorService = Executors.newCachedThreadPool();
+    // executor exclusively for timer's and repeating tasks
     public static final ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
 
     final String LOG_TAG = "BackGroundService";
@@ -58,6 +62,13 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        // initialize and setting executors
+        timerService.setRemoveOnCancelPolicy(true);
+        timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
+        timerService.allowCoreThreadTimeOut(true);
+        // executorService.submit(Communicator::getInstance);
+        ((ThreadPoolExecutor)executorService).setKeepAliveTime(10,TimeUnit.SECONDS);
+        ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
     }
 
 

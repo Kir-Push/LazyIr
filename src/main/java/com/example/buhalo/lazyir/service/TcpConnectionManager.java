@@ -44,16 +44,16 @@ import static com.example.buhalo.lazyir.service.BackgroundService.port;
  */
 
 public class TcpConnectionManager {
-    private final static String TCP_INTRODUCE = "tcpIntroduce";
-    private final static String TCP_PING = "ping pong";
-    private final static String TCP_PAIR_RESULT = "pairedresult";
-    private final static String RESULT = "result";
-    private final static String OK = "ok";
-    private final static String REFUSE = "refuse";
-    private final static String TCP_PAIR = "pair";
-    private final static String TCP_UNPAIR = "unpair";
-    private final static String TCP_SYNC = "sync";
-    private static TcpConnectionManager instance;
+    public final static String TCP_INTRODUCE = "tcpIntroduce";
+    public final static String TCP_PING = "ping pong";
+    public final static String TCP_PAIR_RESULT = "pairedresult";
+    public final static String RESULT = "result";
+    public final static String OK = "ok";
+    public final static String REFUSE = "refuse";
+    public final static String TCP_PAIR = "pair";
+    public final static String TCP_UNPAIR = "unpair";
+    public final static String TCP_SYNC = "sync";
+    public static TcpConnectionManager instance;
 
     private static volatile boolean ServerOn = false;
     ServerSocket myServerSocket;
@@ -159,6 +159,7 @@ public class TcpConnectionManager {
     public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
         Socket socket = null;
         try {
+            // at this moment connect only to pc
             if(!np.getValue(DEVICE_TYPE).equals("pc"))
                 return;
         //    Socket socket = new Socket();
@@ -397,7 +398,7 @@ public class TcpConnectionManager {
             }
         }
     }
-
+//todo add  checking wheter module enabled or not, and everything about it
 
 //todo lock as in server and so on
     public synchronized boolean sendCommandToServer(final String id, final String command)
