@@ -266,234 +266,60 @@ public class TcpConnectionManager {
             }
         }
 
-        public void determineWhatTodo(NetworkPackage np)
-        {
-            switch (np.getType())
-            {
-                case TCP_INTRODUCE:
-                    newConnectedDevice(np);
-                    break;
-                case TCP_PING:
-                    Device.connectedDevices.get(deviceId).setAnswer(true);
-                    ping(null);
-                    break;
-                case TCP_PAIR_RESULT:
-                    pairResult(np);
-                    break;
-                case TCP_SYNC:
-                    receiveSync(np);
-                    break;
-                default:
-                    Device.connectedDevices.get(deviceId).setAnswer(true);
-                    commandFromClient(np);
-                    break;
-            }
-        }
-
-        private void receiveSync(NetworkPackage np) {
-            try {
-
-                List<Command> receivedCommands = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
-                if(receivedCommands == null)
-                    return;
-              //  DBHelper.getInstance(context).removeCommandsPcAll();
-                List<String> commandsPc = DBHelper.getInstance(context).getCommandsPc();
-                HashSet<String> pcSet = new HashSet<>(commandsPc);
-                for (Command receivedCommand : receivedCommands) {
-                    if(!pcSet.contains(receivedCommand.getCommand_name()))
-                    DBHelper.getInstance(context).saveCommand(receivedCommand);
-                }
-            }catch (Exception e)
-            {
-                Log.e("Tcp",e.toString());
-            }
+       
 
 
-        }
-
-        public void ping(NetworkPackage np)
-        {
-            NetworkPackage p = new NetworkPackage(TCP_PING,TCP_PING);
-            //   Device.getConnectedDevices().get(deviceId).setAnswer(true);
-            String msg = p.getMessage();
-            Log.d("Tcp","Send " + msg);
-            out.println(msg);
-            out.flush();
-        }
-
-
-        public void newConnectedDevice(NetworkPackage np)
-        {
-            if(deviceId == null) {
-                Device device = new Device(connection, np.getId(), np.getName(), connection.getInetAddress(), in, out,context);
-                deviceId = np.getId();
-                Device.getConnectedDevices().put(device.getId(), device);
-                if(MainActivity.selected_id.equals(""))
-                {
-                    MainActivity.selected_id = deviceId;
-                }
-
-                if(np.getData() != null)
-                {
-                    String pairedCode = np.getData();
-                    List<String> savedPairedCode = DBHelper.getInstance(context).getPairedCode(deviceId);
-                    if(savedPairedCode.size() != 0 && savedPairedCode.get(0).equals(pairedCode))
-                    {
-                        hasPaired = true;
-                    }
-                }
-                sendIntroduce();
-              //  startPingPong(deviceId);
-            }
-        }
-
-        public void pairResult(NetworkPackage np)
-        {
-            if(np.getData() != null &&  deviceId != null)
-            {
-                if(np.getValue(RESULT).equals(OK))
-                {
-                        DBHelper.getInstance(context).savePairedDevice(deviceId,np.getData());
-                    Device.getConnectedDevices().get(deviceId).setPaired(true);
-                    Battery.sendBatteryLevel(deviceId,context); // send battery level first after pairing, or maybe after sync?
-                }
-                else if(np.getValue(RESULT).equals(REFUSE))
-                {
-                    DBHelper.getInstance(context).deletePaired(deviceId);
-                    Device.getConnectedDevices().get(deviceId).setPaired(false);
-                    hasPaired = false;
-                }
-            }
-            else {
-                hasPaired = false;
-            }
-        }
-
-
-
-
-        private void sendIntroduce() {
-            String data= null;
-            if(hasPaired) {
-                data = String.valueOf(android.os.Build.SERIAL.hashCode());
-            }
-            NetworkPackage networkPackage = new NetworkPackage(TCP_INTRODUCE,data);
-                out.println(networkPackage.getMessage());
-                out.flush();
-        }
-
-        public void commandFromClient(NetworkPackage np)
-        {
-            try {
-                Device device = Device.getConnectedDevices().get(np.getId());
-                if(!device.isPaired())
-                {
-                    return;
-                }
-                Module module = device.getEnabledModules().get(np.getType());
-                module.execute(np);
-            }catch (Exception e)
-            {
-                Log.e("Tcp",e.toString());
-            }
-        }
     }
 //todo add  checking wheter module enabled or not, and everything about it
 
-//todo lock as in server and so on
-    public synchronized boolean sendCommandToServer(final String id, final String command)
-    {
-                Device device =  Device.connectedDevices.get(id);
-
-                if(device == null || device.getSocket() == null || !device.getSocket().isConnected() || device.getSocket().isClosed())
-                {
-                    Log.d("Tcp","Error in output for socket");
-                    StopListening(id);
-                    return true; // if device null or not connected stopping listening and return from method, or may cause nullpointer exception later in method
-                   // TryConnect(device);
-                }
-                if(!device.isPaired()) // todo here eror check
-                {
-                    Log.d("Tcp","Device is not paired and so on not allowed to continue");
-                }
-                try {
-
-                    if(device.getOut() != null) {
-                        device.getOut().println(command);
-                        device.getOut().flush();
-                        Log.d("Tcp", "Send command " + command);
-                    }
-
-                }catch (Exception e)
-                {
-                    Log.d("Tcp","Error in open output for socket " + e.toString());
-                }
-        return true;
+    public synchronized void sendCommandToServer(final String id, final String command) {
+        Device device =  Device.connectedDevices.get(id);
+        if(device == null || !device.isConnected()) {
+            Log.d("Tcp","Error in output for jasechsocket");
+            StopListening(id);
+            return;
+        }if(!device.isPaired()) {
+            Log.d("Tcp","Device is not paired and so on not allowed to continue");
+            return;
+        }
+        device.printToOut(command);
+        Log.d("Tcp", "Send command " + command);
     }
 
     public void sendPairing(String id)
     {
-        NetworkPackage networkPackage = new NetworkPackage(TCP_PAIR,String.valueOf(android.os.Build.SERIAL.hashCode()));
-        Device device = Device.getConnectedDevices().get(id);
-        if(device == null) {
-            StopListening(id);
-            return;
-        }
-        device.getOut().println(networkPackage.getMessage());
-        device.getOut().flush();
+        NetworkPackage networkPackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_PAIR,String.valueOf(android.os.Build.SERIAL.hashCode()));
+        sendCommandToServer(id,networkPackage.getMessage());
     }
 
-    public void unpair(String id,Context context)
-    {
-        NetworkPackage networkPackage = new NetworkPackage(TCP_UNPAIR, TCP_UNPAIR);
-        Device device = Device.getConnectedDevices().get(id);
-
+    //send unpair command to server
+    // remove pair note from db
+    public void unpair(String id,Context context) {
         DBHelper.getInstance(context).deletePaired(id);
-        String fromTypeAndData = networkPackage.getMessage();
-        sendCommandToServer(id,fromTypeAndData);
-        if(device == null)
-        {
-            StopListening(id);
-            return;
-        }
+        NetworkPackage orCreatePackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_UNPAIR, TCP_UNPAIR);
+        sendCommandToServer(id,orCreatePackage.getMessage());
         Device.getConnectedDevices().get(id).setPaired(false);
-     //   unPairAction(id); //todo
+        //   unPairAction(id); //todo
     }
+
+
 
 
     public void StopListening(String id) {
-        if(!Device.connectedDevices.containsKey(id))
-            return;
         Device closingDevice = Device.connectedDevices.get(id);
         if(closingDevice == null)
-        {
-            Device.connectedDevices.remove(id);
             return;
-        }
-        closingDevice.setListening(false);
-        closingDevice.setPaired(false);
-        try {
-            Log.d("Tcp","Delete " + id + " connection");
-            Device.connectedDevices.remove(id);
-            closingDevice.getSocket().close();
-        } catch (IOException e) {
-            Log.e("Tcp","Error in closing listening");
-        }
+        closingDevice.closeConnection();
     }
 
 
-    public boolean checkExistingConnection(String dvId)
-    {
-       if(!Device.getConnectedDevices().containsKey(dvId))
-       {
+    public boolean checkExistingConnection(String dvId) {
+       if(!Device.getConnectedDevices().containsKey(dvId)) {
            return false;
        }
-        if(Device.getConnectedDevices().get(dvId).getSocket() == null || !Device.getConnectedDevices().get(dvId).getSocket().isConnected())
-        {
+        if(Device.getConnectedDevices().get(dvId).getSocket() == null || !Device.getConnectedDevices().get(dvId).getSocket().isConnected()) {
             StopListening(dvId);
             return false;
-        }
-        return true;
-
+        }return true;
     }
 }

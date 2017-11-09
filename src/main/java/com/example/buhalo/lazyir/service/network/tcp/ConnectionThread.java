@@ -4,9 +4,13 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
+import com.example.buhalo.lazyir.Devices.Command;
+import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
@@ -17,8 +21,11 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -34,7 +41,9 @@ import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_INTRODUCE;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PING;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_SYNC;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
 
 /**
@@ -82,15 +91,14 @@ public class ConnectionThread implements Runnable {
 
     // ask user for pairing in notification
     // todo create notification which ask user for pairing, and everything needed for it.
-    public void requestPairFromUser(NetworkPackage np)
-    {
-        BackgroundService.getTcp().reguestPair(np);
+    public void requestPairFromUser(NetworkPackage np) {
+      //  BackgroundService.getTcp().reguestPair(np);
     }
 
     // printing method,
+    // it's print to server over tcp connection
     // locked for concurrency error's avoiding
-    public void printToOut(String message)
-    {
+    public void printToOut(String message) {
         lock.lock();
         try{
             if(out == null) {
@@ -108,25 +116,148 @@ public class ConnectionThread implements Runnable {
 
     }
 
-
-    public void pairResult(NetworkPackage np)
-    {
-        if(np.getData() != null &&  deviceId != null)
-        {
-            if(np.getValue(RESULT).equals(OK))
-            {
+ // pair result from device
+    public void pairResult(NetworkPackage np) {
+        if(np.getData() != null &&  deviceId != null) {
+            if(np.getValue(RESULT).equals(OK)) {
                 DBHelper.getInstance(context).savePairedDevice(deviceId,np.getData());
                 Device.getConnectedDevices().get(deviceId).setPaired(true);
                 Battery.sendBatteryLevel(deviceId,context); // send battery level first after pairing, or maybe after sync?
             }
-            else if(np.getValue(RESULT).equals(REFUSE))
-            {
+            else if(np.getValue(RESULT).equals(REFUSE)) {
                 DBHelper.getInstance(context).deletePaired(deviceId);
                 Device.getConnectedDevices().get(deviceId).setPaired(false);
             }
-        }
-        else {
+        } else {
             Device.getConnectedDevices().get(deviceId).setPaired(false); // todo check for nullPointer
         }
     }
+
+
+    // send ping to device
+    private void ping() {
+        printToOut(NetworkPackage.Cacher.getOrCreatePackage(TCP_PING,TCP_PING).getMessage());
+    }
+
+
+    // instanciate new device, put it in map and check in db if it paired.
+    // after that send introduce package
+    private void newConnectedDevice(NetworkPackage np)
+    {
+        if(deviceId == null) {
+            deviceId = np.getId();
+            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,context);
+            Device.getConnectedDevices().put(deviceId, device);
+            if(MainActivity.selected_id.equals("")) {
+                MainActivity.selected_id = deviceId;
+            }
+            if(np.getData() != null) {
+                String pairedCode = np.getData();
+                List<String> savedPairedCode = DBHelper.getInstance(context).getPairedCode(deviceId);
+                if(savedPairedCode.size() != 0 && savedPairedCode.get(0).equals(pairedCode)) {
+                    device.setPaired(true);
+                }
+            }
+            sendIntroduce();
+            //  startPingPong(deviceId);
+        }
+    }
+
+
+
+    // closeConnection method.
+    // first check future and cansel if not null,
+    // after that iterate over all modules and disable them(they itself handle,if they will work after disabling)
+    // finally remove device from list of connected devices,close socket's and out, in.
+    public void closeConnection() {
+        lock.lock();
+        try {
+            if (timerFuture != null && !timerFuture.isDone()) {
+                timerFuture.cancel(true);
+            }
+            for (Module module : Device.getConnectedDevices().get(deviceId).getEnabledModules().values()) {
+                if(module != null)
+                    module.endWork();
+            }
+            Device.getConnectedDevices().remove(deviceId);
+            // calling after because can throw exception and remove from hashmap won't be done
+            in.close();
+            out.close();
+            connection.close();
+        }catch (Exception e) {Log.e("ConnectionThread","Error in stopped connection",e);}
+        finally {
+            lock.unlock();
+            Log.d("ConnectionThread", deviceId + " - Stopped connection");}
+    }
+
+    //check if connected
+    public boolean isConnected() {
+        lock.lock();
+        try {
+            return connection != null && out != null && in != null && connectionRun;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    // this method does not used at this time, maybe in future, but you will need rewrite it
+    private void receiveSync(NetworkPackage np) {
+        try {
+            List<Command> receivedCommands = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
+            if(receivedCommands == null)
+                return;
+            //  DBHelper.getInstance(context).removeCommandsPcAll();
+            List<String> commandsPc = DBHelper.getInstance(context).getCommandsPc();
+            HashSet<String> pcSet = new HashSet<>(commandsPc);
+            for (Command receivedCommand : receivedCommands) {
+                if(!pcSet.contains(receivedCommand.getCommand_name()))
+                    DBHelper.getInstance(context).saveCommand(receivedCommand);
+            }
+        }catch (Exception e) {
+            Log.e("Tcp",e.toString());
+        }
+    }
+
+    // work with command from client, get name of module, and pass package to it
+    public void commandFromClient(NetworkPackage np) {
+        try {
+            Device device = Device.getConnectedDevices().get(np.getId());
+            if(!device.isPaired()) {
+                return;
+            }
+            Module module = device.getEnabledModules().get(np.getType());
+            if(module != null)
+            module.execute(np);
+        }catch (Exception e) {
+            Log.e("Tcp",e.toString());
+        }
+    }
+
+
+    // determine what to do with package
+    // it depends of package's type value
+    public void determineWhatTodo(NetworkPackage np) {
+        switch (np.getType()) {
+            case TCP_INTRODUCE:
+                newConnectedDevice(np);
+                break;
+            case TCP_PING:
+                Device.connectedDevices.get(deviceId).setAnswer(true);
+                ping();
+                break;
+            case TCP_PAIR_RESULT:
+                pairResult(np);
+                break;
+            case TCP_SYNC:
+                receiveSync(np);
+                break;
+            default:
+                Device.connectedDevices.get(deviceId).setAnswer(true);
+                commandFromClient(np);
+                break;
+        }
+    }
+
+
+    //todo check security issue, when someonew send message with other id, check whetrher ID equal to ID in connectionThread
 }
