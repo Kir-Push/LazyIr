@@ -19,19 +19,15 @@ import static com.example.buhalo.lazyir.modules.battery.Battery.STATUS;
 public class BatteryBroadcastReveiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(Device.getConnectedDevices().size() < 1)
-        {
+        if(Device.getConnectedDevices().size() < 1) {
             return;
         }
         int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                 status == BatteryManager.BATTERY_STATUS_FULL;
 
-
-        NetworkPackage np = new NetworkPackage(Battery.class.getSimpleName(), STATUS);
-        System.out.println("BATTEY LEVEL " + level + " CHARGING? " + isCharging);
+        NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(Battery.class.getSimpleName(),STATUS);
         np.setValue(PERCENTAGE,Integer.toString(level));
         np.setValue(STATUS,Boolean.toString(isCharging)); // true charging, false not
         TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());

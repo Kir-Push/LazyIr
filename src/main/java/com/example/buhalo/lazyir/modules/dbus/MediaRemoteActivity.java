@@ -17,6 +17,7 @@ import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -54,13 +55,18 @@ public class MediaRemoteActivity extends AppCompatActivity {
     private Button next;
     private Button prev;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledFuture;
     private Deque<DbusCommand> commandQueque = new ArrayDeque<>();
     private final DbusCommand cachedSendGetAll = new DbusCommand(1, null, 0, null, null);
     private final DbusCommand cachedGetPlayers = new DbusCommand(7, null, 0, null, null);
     private static volatile boolean pendingUserAction = false;
 
+    // task which will be executed by timer, with some delay between
+    // poll command's from commanQueque and execute them
+    // if Queque null, add to queque main commands (sendGetAll and getPlayers)
+    // command getPlayers has timeout 3 sec, it mean that she will wait
+    // for server answer for 3 sec.
+    // next timer iteration will start only after 400 ms after end of previous
     private Runnable task = new Runnable() {
         @Override
         public void run() {
@@ -72,7 +78,6 @@ public class MediaRemoteActivity extends AppCompatActivity {
                     commandQueque.push(cachedGetPlayers);
                 }
                 while ((cmd = commandQueque.pollLast()) != null) {
-                    System.out.println("AAAAAA!!!   " + cmd);
                     switch (cmd.getCode()) {
                         case 1:
                             module.sendGetAllPlayers();
@@ -109,29 +114,41 @@ public class MediaRemoteActivity extends AppCompatActivity {
         }
     };
 
+    // received player's list and fill it to ui adapter
+    // if name has js9876528: in name, that means it's javascript player - from browser
+    // add number to player's name to determine player's with equal name's
+    // dbus itself don't need it, because player's give unique name's to their instances,
+    // but javascript not
     private void fillPlayers(List<Player> players) throws InterruptedException {
+        // if user clicked on some action, and we are await answer for it, then
+        // you don't need old data, set bool to false, and return.
         if(pendingUserAction) {
             pendingUserAction = false;
             return;}
         if(players == null) return;
 
+        // clear before fill with new data
         playerNameToAdapter.clear();
         int counter = 0;
-        for(Player player : players)
-        {
-            String name;
+        for(Player player : players) {
+            StringBuilder name;
             if (player.getName().startsWith("js9876528:")) {     // some number to identify browser or dbus
-                name = player.getTitle();
-                while(playerNameToAdapter.contains(name))
-                    name += "-"  +String.valueOf(++counter);
+                name = new StringBuilder(player.getTitle());
+                // if already has that name, add count number to it eg. player1, player2.
+                while(playerNameToAdapter.contains(name.toString()))
+                    name.append("-").append(String.valueOf(++counter));
             }
             else {
                 int length = player.getName().length();
-                name = player.getName().substring(23,length);
+                // i forgot why i need substring name to 23 symbols on start, need to check
+                name = new StringBuilder(player.getName().substring(23, length));
             }
-            playerNameToAdapter.add(name);
-            playerHashMap.put(name,player);
+            // add to adapter, it's will show on screen
+            playerNameToAdapter.add(name.toString());
+            // hashmap to store player by it's name as key.
+            playerHashMap.put(name.toString(),player);
         }
+        // it's need to run from ui thread
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -140,6 +157,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         });
     }
 
+    // all filling happen's here
     private void updateState() {
         if(playerNameToAdapter.size() == 0)
             return;
@@ -167,8 +185,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         play.refreshDrawableState();
     }
 
-    private void setVolumeLine(int volume)
-    {
+    private void setVolumeLine(int volume) {
         volumeLine.setMax(100);
         volumeLine.setProgress(volume);
         volumeLine.refreshDrawableState();
@@ -181,9 +198,13 @@ public class MediaRemoteActivity extends AppCompatActivity {
             Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
             finish();
             return;}
+        if(MainActivity.getSelected_id().equals("")) {
+            Toast.makeText(this,"No selected Device",Toast.LENGTH_SHORT).show();
+            finish();
+            return;}
         setContentView(R.layout.media_control);
 
-        module = (Mpris) Device.getConnectedDevices().get(MainActivity.selected_id).getEnabledModules().get(Mpris.class.getSimpleName());
+        module = (Mpris) Device.getConnectedDevices().get(MainActivity.getSelected_id()).getEnabledModules().get(Mpris.class.getSimpleName());
         playerNameToAdapter = new ArrayList<>();
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerNameToAdapter);
         playerHashMap = new HashMap<>();
@@ -210,11 +231,11 @@ public class MediaRemoteActivity extends AppCompatActivity {
 
 
 
-    //start task on ui because you need interact with ui,period: every 500? or 250 ms
+    //start task on ui because you need interact with ui,period: every 500? or 250 ms -- WAT?
     @Override
     protected void onStart() {
         super.onStart();
-        scheduledFuture = scheduler.scheduleWithFixedDelay(task ,0, 400, TimeUnit.MILLISECONDS);
+        scheduledFuture =  BackgroundService.timerService.scheduleWithFixedDelay(task ,0, 400, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -281,8 +302,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
 
     }
 
-    private Player getPlayer()
-    {
+    private Player getPlayer() {
         return playerHashMap.get(playerNameToAdapter.get(selectedPlayer));
     }
 
@@ -292,11 +312,10 @@ public class MediaRemoteActivity extends AppCompatActivity {
     }
 
 
-    private void putCommand(int i,String commandName,int arg)
-    {
+    private void putCommand(int i,String commandName,int arg) {
         if(selectedPlayer >= playerNameToAdapter.size()) return;
         try {commandQueque.push(new DbusCommand(i, null, arg, null, getPlayerName())); pendingUserAction = true;
-        } catch (Exception e) {Log.e("MediaRemoteActivity","Error when put command "+ commandName + " in commandQueque!");}
+        } catch (Exception e) {Log.e("MediaRemoteActivity","Error when put command "+ commandName + " in commandQueque!",e);}
     }
 
 

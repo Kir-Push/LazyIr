@@ -55,71 +55,66 @@ public class Mpris extends Module {
 
         }
         } catch (InterruptedException e) {
-            Log.e("Mpris",e.toString());
+            Log.e("Mpris","Error in Mpris execute",e);
         }
     }
 
     private void fillPlayers(NetworkPackage np) throws InterruptedException {
-   //     if(serverAnswer.size() > 0)
-   //         serverAnswer.clear();
         serverAnswer.put(np.getObject(ALL_PLAYERS,Players.class).getPlayerList());
         counter++;
     }
 
     public List<Player> getPlayers(int timeout) throws InterruptedException {
-
         return serverAnswer.poll(timeout, TimeUnit.MILLISECONDS);
     }
 
-    public void sendMetadata(String player)
-    {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),GET_ALL_INFO);
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+    public void sendMetadata(String player) {
+        send(player,GET_ALL_INFO);
     }
 
-    public void sendPlayPause(String player)
-    {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),PLAYPAUSE);
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+    public void sendPlayPause(String player) {
+        send(player,PLAYPAUSE);
     }
 
-    public void sendNext(String player)
-    {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),NEXT);
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+    public void sendNext(String player) {
+        send(player,NEXT);
     }
 
     public void sendVolume(String player,int volume)
     {
         double vol = ((double)volume)/100;
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),VOLUME);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),VOLUME);
         np.setValue(VOLUME,Double.toString(vol));
         np.setValue(PLAYER,player);
         sendMsg(np.getMessage());
     }
 
     public void sendSeek(String player, int seek) {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),SEEK);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK);
         np.setValue(SEEK,Integer.toString(seek));
         np.setValue(PLAYER,player);
         sendMsg(np.getMessage());
     }
 
-    public void sendPrev(String player)
-    {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),PREVIOUS);
+    public void sendPrev(String player) {
+        send(player,PREVIOUS);
+    }
+
+    private void send(String player,String cmd){
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),cmd);
         np.setValue(PLAYER,player);
         sendMsg(np.getMessage());
     }
 
-
+    // Mpris actually doesn't have any state
+    @Override
+    public void endWork() {
+        serverAnswer = null;
+    }
 
     public void sendGetAllPlayers()
     {
-        NetworkPackage np = new NetworkPackage(Mpris.class.getSimpleName(),ALL_PLAYERS);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),ALL_PLAYERS);
         sendMsg(np.getMessage());
     }
 

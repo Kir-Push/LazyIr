@@ -28,10 +28,10 @@ public abstract class Module {
 
     public abstract void execute(NetworkPackage np);
 
-    public void sendMsg(String msg)
-    {
+    public void sendMsg(String msg) {
         TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),msg);
     }
 
 
+    public abstract void endWork();
 }

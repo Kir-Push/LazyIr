@@ -8,6 +8,9 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Created by buhalo on 18.04.17.
  */
@@ -17,27 +20,42 @@ public class ClipBoard extends Module {
     private static volatile boolean inserted = false;
 
     private static ClipListener clipListener;
+    private static Lock lock = new ReentrantLock();
 
     @Override
     public void execute(NetworkPackage np) {
-        if(np.getData().equals(RECEIVE))
-        {
+        if(np.getData().equals(RECEIVE)) {
             onReceive(np);
         }
 
     }
 
+    // you actually do not need do something there, because
+    // module need be ended only when connected device are 0
+    // and this will be done by background onZeroConnections method.
+    @Override
+    public void endWork() {
+
+    }
+
     private void onReceive(NetworkPackage np) {
-        inserted = true;
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", np.getValue("text"));
-        clipboard.setPrimaryClip(clip);
+        lock.lock();
+        try {
+            inserted = true;
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", np.getValue("text"));
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(clip);
+            }
+        }finally {
+            lock.unlock();
+        }
     }
 
     public static void setListener(Context context)
     {
         final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if(clipListener == null)
+        if(clipListener == null && clipboard != null)
         {
             clipListener = new ClipListener(clipboard);
             clipboard.addPrimaryClipChangedListener(clipListener);
@@ -46,10 +64,12 @@ public class ClipBoard extends Module {
 
     public static void removeListener(Context context)
     {
-        if(clipListener == null)
-            return;
+
         final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        clipboard.removePrimaryClipChangedListener(clipListener);
+        if(clipListener == null || clipboard == null)
+            return;
+            clipboard.removePrimaryClipChangedListener(clipListener);
+
         clipListener = null;
     }
 
@@ -57,7 +77,7 @@ public class ClipBoard extends Module {
     {
         final ClipboardManager clipboard;
 
-        public ClipListener(ClipboardManager clipboard)
+        ClipListener(ClipboardManager clipboard)
         {
             this.clipboard = clipboard;
         }
@@ -73,7 +93,7 @@ public class ClipBoard extends Module {
             ClipData.Item item = clipData.getItemAt(0);
             if(item != null && item.getText() != null) {
                 String text = item.getText().toString();
-                NetworkPackage np = new NetworkPackage(ClipBoard.class.getSimpleName(), RECEIVE);
+                NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(ClipBoard.class.getSimpleName(), RECEIVE);
                 np.setValue("text", text);
                 TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
             }

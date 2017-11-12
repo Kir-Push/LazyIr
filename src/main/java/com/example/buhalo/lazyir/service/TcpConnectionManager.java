@@ -13,6 +13,7 @@ import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
+import com.example.buhalo.lazyir.service.network.tcp.ConnectionThread;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,11 +25,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -58,70 +64,60 @@ public class TcpConnectionManager {
     private static volatile boolean ServerOn = false;
     ServerSocket myServerSocket;
 
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
     private TcpConnectionManager() {
         try {
             myServerSocket = new ServerSocket(port);
         } catch (IOException e) {
-            Log.e("Tcp", e.toString());
+            Log.e("Tcp", "error in TcpConnectionManager Constructor",e);
         }
     }
 
     public static TcpConnectionManager getInstance()
     {
         if(instance == null)
-        {
             instance = new TcpConnectionManager();
-        }
         return instance;
     }
 
 
     public void startListening(final int port, final Context context) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(ServerOn)
-                {
-                    Log.d("Tcp","Server already working");
-                    return;
-                }
-
-                if(myServerSocket.isClosed())
-                {
-                    try {
-                        myServerSocket = new ServerSocket(port);
-                    } catch (IOException e) {
-                        Log.e("Tcp",e.toString());
-                    }
-                }
-                ServerOn = true;
-
-                while(ServerOn)
-                {
-                    Socket socket;
-                    try {
-                        socket = myServerSocket.accept();
-                        socket.setKeepAlive(true);
-
-                    } catch (IOException e) {
-                        Log.e("Tpc","Exception on accept connection ignoring + " + e.toString());
-                        if(myServerSocket.isClosed())
-                            ServerOn = false;
-                        continue;
-                    }
-                    ConnectionThread connection = new ConnectionThread(socket,context);
-                    connection.start();
-                }
-                try
-                {
-                    myServerSocket.close();
-                    Log.d("Tcp","Closing server");
-                }catch (IOException e)
-                {
-                    Log.e("Tcp","error in closing connecton");
-                }
-            }
-        }).start();
+       BackgroundService.executorService.submit(new Runnable() {
+           @Override
+           public void run() {
+               if(ServerOn) {
+                   Log.d("Tcp","Server already working");
+                   return;
+               }
+               if(myServerSocket.isClosed()) {
+                   try {
+                       myServerSocket = new ServerSocket(port);
+                   } catch (IOException e) {
+                       Log.e("Tcp",e.toString());
+                   }
+               }
+               ServerOn = true;
+               while(ServerOn) {
+                   Socket socket;
+                   try {
+                       socket = myServerSocket.accept();
+                       socket.setKeepAlive(true);
+                       BackgroundService.executorService.submit(new ConnectionThread(socket, context));
+                   } catch (IOException e) {
+                       Log.e("Tpc","Exception on accept connection ignoring + ",e);
+                       if(myServerSocket.isClosed())
+                           ServerOn = false;
+                   }
+               }
+               try {
+                   myServerSocket.close();
+                   Log.d("Tcp","Closing server");
+               }catch (IOException e) {
+                   Log.e("Tcp","error in closing connecton");
+               }
+           }
+       });
     }
 
     public void stopListening() {
@@ -129,10 +125,11 @@ public class TcpConnectionManager {
         try {
             myServerSocket.close();
         } catch (IOException e) {
-            Log.e("Tcp","Error in close serverSocket " + e.toString());
+            Log.e("Tcp","Error in close serverSocket ",e);
         }
     }
 
+    // configure sslsocket for tls connection
     protected Socket getConnection(InetAddress ip, int port,Context context) throws IOException  {
         try {
             KeyStore trustStore = KeyStore.getInstance("BKS");
@@ -157,33 +154,20 @@ public class TcpConnectionManager {
 
 
     public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
-        Socket socket = null;
         try {
             // at this moment connect only to pc
             if(!np.getValue(DEVICE_TYPE).equals("pc"))
                 return;
-        //    Socket socket = new Socket();
-            socket = getConnection(address,port,context);
-            System.out.println(socket.isConnected());
-         //   socket.connect(new InetSocketAddress(address,port),10000);
-            socket.setSoTimeout(60000);
-            socket.setKeepAlive(true);
-            ConnectionThread connection = new ConnectionThread(socket,context);
-            connection.start();
+            Socket socket = getConnection(address,port,context);
+            // submit connection to executorService - this service is main for app
+            BackgroundService.executorService.submit(new ConnectionThread(socket, context));
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                if(socket!= null)
-                socket.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            Log.e("Tcp","Exception on accept connection ignoring +",e);
         }
     }
 
     public void sendCommandToAll(String message) {
-        if(Device.getConnectedDevices().size() == 0)
-        {
+        if(Device.getConnectedDevices().size() == 0) {
             return;
         }
         for (Device device : Device.getConnectedDevices().values()) {
@@ -191,99 +175,26 @@ public class TcpConnectionManager {
         }
 
     }
- // todo locks and refactoringg like server side
 
-    public class ConnectionThread extends Thread {
-
-        private Socket connection;
-        private Context context;
-        private String deviceId = null;
-        private boolean connectionRun = true;
-        BufferedReader in = null;
-        PrintWriter out = null;
-        private boolean hasPaired = false;
-        private boolean waitAnswerPair = false;
-
-        public ConnectionThread(Socket socket,Context context) {
-            this.connection = socket;
-            this.context = context;
-        }
-
-        @Override
-        public void run() {
-            Log.d("Tcp","Start connecting to new connection");
-            try{
-                in = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
-                out = new PrintWriter(
-                        new OutputStreamWriter(connection.getOutputStream()));
-
-//                if(Device.getConnectedDevices().size() == 0) //if first connection set periods of broadcast 3 times less often
-//                {
-//               //     UdpBroadcastManager.getInstance().setSend_period(UdpBroadcastManager.getInstance().getSend_period()*3);
-//                }
-                while (connectionRun)
-                {
-                    String clientCommand = in.readLine();
-                    Log.d("Tcp","Client says.. " + clientCommand);
-
-
-                    if(clientCommand == null)
-                    {
-                        connectionRun = false;
-                        continue;
-                    }
-                    NetworkPackage np = new NetworkPackage(clientCommand);
-                    determineWhatTodo(np);
-                }
-
-            }catch (Exception e)
-            {
-                Log.e("Tcp","Error in tcp out + " + e.toString());
-            }
-            finally {
-                try {
-                    in.close();
-                    out.close();
-                    connection.close();
-                    StopListening(deviceId);
-                    if(Device.getConnectedDevices().size() == 0) //return to normal frequency
-                    {
-                        UdpBroadcastManager.getInstance().setSend_period(15000);
-                        UdpBroadcastManager.getInstance().count = 0;
-                        MainActivity.selected_id = "";
-                        ShareModule.stopSftpServer();
-                    }
-                    else
-                    {
-                        MainActivity.selected_id = Device.getConnectedDevices().values().iterator().next().getId();
-                    }
-                    Log.d("Tcp","Stopped connection");
-                }catch (IOException e)
-                {
-                    Log.e("Tcp",e.toString());
-                }
-            }
-        }
-
-       
-
-
-    }
 //todo add  checking wheter module enabled or not, and everything about it
 
-    public synchronized void sendCommandToServer(final String id, final String command) {
-        Device device =  Device.connectedDevices.get(id);
-        if(device == null || !device.isConnected()) {
-            Log.d("Tcp","Error in output for jasechsocket");
-            StopListening(id);
-            return;
-        }if(!device.isPaired()) {
-            Log.d("Tcp","Device is not paired and so on not allowed to continue");
-            return;
+    public void sendCommandToServer(final String id, final String command) {
+        lock.writeLock().lock();
+        try {
+            Device device = Device.connectedDevices.get(id);
+            if (device == null || !device.isConnected()) {
+                Log.d("Tcp", "Error in output for jasechsocket");
+                StopListening(id);
+                return;
+            }
+            if (!device.isPaired()) {
+                Log.d("Tcp", "Device is not paired and so on not allowed to continue");
+                return;
+            }
+            device.printToOut(command);
+        }finally {
+            lock.writeLock().unlock();
         }
-        device.printToOut(command);
-        Log.d("Tcp", "Send command " + command);
     }
 
     public void sendPairing(String id)

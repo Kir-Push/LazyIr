@@ -12,11 +12,15 @@ import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
+import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.UdpBroadcastManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -61,7 +65,7 @@ public class ConnectionThread implements Runnable {
     private ScheduledFuture<?> timerFuture;
     private Lock lock = new ReentrantLock();
 
-    ConnectionThread(Socket socket,Context context) throws SocketException {
+    public ConnectionThread(Socket socket,Context context) throws SocketException {
         this.connection = socket;
         this.context = context;
         // enabling keepAlive and timeout to close socket,
@@ -69,6 +73,30 @@ public class ConnectionThread implements Runnable {
         // when he run netowork code in background, so you need wait more.
         connection.setKeepAlive(true);
         connection.setSoTimeout(60000);
+    }
+
+    @Override
+    public void run() {
+        try{
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            out = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
+            connectionRun = true;
+            while (connectionRun)
+            {
+                String clientCommand = in.readLine();
+                if(clientCommand == null) {
+                    connectionRun = false;
+                    continue;
+                }
+                NetworkPackage np =  NetworkPackage.Cacher.getOrCreatePackage(clientCommand);
+                determineWhatTodo(np);
+            }
+        }catch (IOException e){
+            connectionRun = false;
+            Log.e("Tcp","Error in tcp out",e);
+        }finally {
+            closeConnection();
+        }
     }
 
     // it's method does not used now, but it's using in server side, and in future
@@ -97,7 +125,7 @@ public class ConnectionThread implements Runnable {
 
     // printing method,
     // it's print to server over tcp connection
-    // locked for concurrency error's avoiding
+    // locked to avoiding concurrency error's
     public void printToOut(String message) {
         lock.lock();
         try{
@@ -111,10 +139,7 @@ public class ConnectionThread implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
 
-    }
 
  // pair result from device
     public void pairResult(NetworkPackage np) {
@@ -186,6 +211,9 @@ public class ConnectionThread implements Runnable {
             connection.close();
         }catch (Exception e) {Log.e("ConnectionThread","Error in stopped connection",e);}
         finally {
+            // call in finally becaus it may be called in end (after remove device from list)
+            // but error can be throwed before it.
+            BackgroundService.createIntentForBackground(context,BackgroundService.onZeroConnections);
             lock.unlock();
             Log.d("ConnectionThread", deviceId + " - Stopped connection");}
     }

@@ -11,16 +11,21 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
+import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.utils.ExtScheduledThreadPoolExecutor;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -51,13 +56,15 @@ public class BackgroundService extends Service {
     public final static int registerBatteryReceiver = 5;
     public final static int unRegisterBatteryRecever = -5;
 
+    public final static int onZeroConnections = 6;
+
     public static int port = 5667;
 
     private BatteryBroadcastReveiver mReceiver;
-
     private static boolean batteryRegistered = false;
-
     private static boolean alreadystarted = false;
+
+    private static Lock lock = new ReentrantLock();
 
     @Override
     public void onCreate() {
@@ -130,6 +137,20 @@ public class BackgroundService extends Service {
         super.onDestroy();
     }
 
+    // check if mobile has zero connection's
+    // if true set send udp broadcast perios to 15 sec, set selected device to null
+    // else set selected device to next device
+    public void onZeroConnections(){
+        if(Device.getConnectedDevices().size() == 0) { //return to normal frequency
+            UdpBroadcastManager.getInstance().setSend_period(15000);
+            UdpBroadcastManager.getInstance().count = 0;
+            MainActivity.setSelected_id("");
+            ShareModule.stopSftpServer();
+        } else {
+            MainActivity.setSelected_id(Device.getConnectedDevices().values().iterator().next().getId());
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -178,6 +199,9 @@ public class BackgroundService extends Service {
                             case unRegisterBatteryRecever:
                                 unRegisterBatteryRecever();
                                 break;
+                            case onZeroConnections:
+                                onZeroConnections();
+                                break;
                             default:
                                 break;
                         }
@@ -223,8 +247,29 @@ public class BackgroundService extends Service {
         }
     }
 
+    // create intent for backgroundService thread (onStartCommand method)
+    // receive context and flag - which is BackgroundService constants
+    // then creates intent and pass it to context.
+    public static void createIntentForBackground(Context context,int... flag)
+    {
+        lock.lock();
+        try{
+            Intent intent = new Intent(context.getApplicationContext(), BackgroundService.class);
+            ArrayList<Integer> commandList = new ArrayList<>();
+            for (int i : flag) {
+                commandList.add(i);
+            }
+            intent.putIntegerArrayListExtra("Commands",commandList);
+            context.startService(intent);
+        }finally {
+            lock.unlock();
+        }
+    }
+
     public static void startExternalMethod(Context context)
     {
+        lock.lock();
+        try{
         if(alreadystarted)
         {
           //  stopExternalMethod(context);
@@ -239,6 +284,9 @@ public class BackgroundService extends Service {
         tempIntent.putIntegerArrayListExtra("Commands", list);
         context.startService(tempIntent);
         alreadystarted = true;
+        }finally {
+            lock.unlock();
+        }
     }
 
     public static void startExternalCustomMethod(Context context,int... backgroundCommand)

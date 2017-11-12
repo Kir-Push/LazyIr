@@ -6,19 +6,22 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**
  * Created by buhalo on 17.04.17.
  */
 
+// you use it only in one place, when introduce received, maybe you don't need it, you have batterybroadcastreceiver which send to all device battery when system push it
+@Deprecated
 public class Battery { // it not implement module because it one for all, send message when connected device , and after send to all when broadcast received
     public static final String STATUS = "status";
     public static final String PERCENTAGE = "percentage";
 
     public static void sendBatteryLevel(String id, Context context)
     {
-        NetworkPackage np = new NetworkPackage(Battery.class.getSimpleName(),STATUS);
+        NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(Battery.class.getSimpleName(),STATUS);
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.getApplicationContext().registerReceiver(null, ifilter);
         if(batteryStatus == null)

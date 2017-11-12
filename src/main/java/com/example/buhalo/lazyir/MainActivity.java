@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.example.buhalo.lazyir.UI.PageFragment.NonEditListenerTouch;
 
@@ -51,13 +53,14 @@ import static com.example.buhalo.lazyir.UI.PageFragment.NonEditListenerTouch;
 public class MainActivity extends AppCompatActivity {
 
 
-    public static String selected_id = "";
+    private static String selected_id = "";
     final String LOG_TAG = "MainActivity";
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     private DevicesAdapter adapter;
     private SampleFragmentPagerAdapter sampleFragmentPagerAdapter;
+    private static Lock lock = new ReentrantLock();
 
     public static boolean isEditMode() {
         return editMode;
@@ -79,9 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.mipmap.andrr);
-        actionBar.setTitle(selected_id);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.mipmap.andrr);
+            actionBar.setTitle(selected_id);
+        }
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         adapter = new DevicesAdapter(this);
@@ -148,7 +153,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         invalidateOptionsMenu();
          adapter.notifyDataSetChanged();
-         getSupportActionBar().setTitle(selected_id);
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null)
+        supportActionBar.setTitle(selected_id);
 
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -206,6 +213,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public static String getSelected_id() {
+        lock.lock();
+        try {
+            return selected_id;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public static void setSelected_id(String selected_id) {
+        lock.lock();
+        try {
+            MainActivity.selected_id = selected_id;
+        }finally {
+            lock.unlock();
+        }
+    }
 
     private class DevicesAdapter extends BaseAdapter
     {
