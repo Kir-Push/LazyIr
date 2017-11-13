@@ -161,7 +161,7 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
 
     private void onIncomingCallEnded(Context context, String savedNumber,String type) {
         String name = SmsModule.getName(savedNumber,context.getApplicationContext());
-        NetworkPackage np = new NetworkPackage(SHOW_NOTIFICATION,"com.android.endCall");
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.endCall");
         np.setValue("number",name);
         np.setValue("callType",type);
         String message = np.getMessage();
@@ -173,7 +173,7 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
 
     private void onIncomingCallReceived(Context context, String number,String type) {
         String name = SmsModule.getName(number,context.getApplicationContext());
-        NetworkPackage np = new NetworkPackage(SHOW_NOTIFICATION,"com.android.call");
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.call");
         np.setValue("number",name);
         np.setValue("text","Incoming CALL");
         np.setValue("callType",type);
@@ -196,7 +196,7 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
         }
 
         String name = SmsModule.getName(phoneNumber,context.getApplicationContext());
-        NetworkPackage np = new NetworkPackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
         np.setValue("phoneNumber",phoneNumber);
         np.setValue("numberName",name);
         np.setValue("text",messageBody);

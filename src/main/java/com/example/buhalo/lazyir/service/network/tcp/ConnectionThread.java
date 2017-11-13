@@ -173,8 +173,8 @@ public class ConnectionThread implements Runnable {
             deviceId = np.getId();
             Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,context);
             Device.getConnectedDevices().put(deviceId, device);
-            if(MainActivity.selected_id.equals("")) {
-                MainActivity.selected_id = deviceId;
+            if(MainActivity.getSelected_id().equals("")) {
+                MainActivity.setSelected_id(deviceId);
             }
             if(np.getData() != null) {
                 String pairedCode = np.getData();

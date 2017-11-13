@@ -35,10 +35,10 @@ public class ButtonExecutor {
                 ir.add(cmd);
         }
         CommandsList commandsList = new CommandsList(pc);
-        NetworkPackage npPc = new NetworkPackage(SEND_COMMAND,EXECUTE);
+        NetworkPackage npPc = NetworkPackage.Cacher.getOrCreatePackage(SEND_COMMAND,EXECUTE);
       npPc.setObject(NetworkPackage.N_OBJECT,commandsList);
         npPc.setDv(Device.connectedDevices.get(dvId));
-        NetworkPackage npIr = new NetworkPackage(SendIr.class.getSimpleName(),SEND_IR_COMMAND);
+        NetworkPackage npIr = NetworkPackage.Cacher.getOrCreatePackage(SendIr.class.getSimpleName(),SEND_IR_COMMAND);
         CommandsList irCommandsList = new CommandsList(ir);
         npIr.setObject(NetworkPackage.N_OBJECT,irCommandsList);
         npIr.setDv(Device.connectedDevices.get(dvId));

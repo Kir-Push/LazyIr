@@ -38,11 +38,11 @@ public class ModulesActivity extends AppCompatActivity {
 //            return;
 //        } // todo commented for test, when tested using mock device
         // mock device for test purposes
-        MainActivity.selected_id  = "dadada";
+        MainActivity.setSelected_id("dadada");
         Device.getConnectedDevices().put("dadada",new Device(null,"dadada","agasjka",null,null,null,this));
 
 
-        Device device = Device.connectedDevices.get(MainActivity.selected_id);
+        Device device = Device.connectedDevices.get(MainActivity.getSelected_id());
         System.out.println(device.getId());
         moduleSettingAdapter = new ModuleSettingAdapter(this,ModuleFactory.getModulesNamesWithStatus(device,this));
         moduleListView.setAdapter(moduleSettingAdapter);

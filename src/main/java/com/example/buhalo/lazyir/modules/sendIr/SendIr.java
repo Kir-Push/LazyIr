@@ -28,6 +28,11 @@ public class SendIr extends Module {
         }).start();
     }
 
+    @Override
+    public void endWork() {
+
+    }
+
     private void transmitIr(List<Command> args)
     {
         if(args.size() < 1)

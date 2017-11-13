@@ -245,7 +245,10 @@ public class NetworkPackage {
         private static void countCacheAndAdd(int hash, NetworkPackage np) {
             // get value from map, increment it, and put back. Check if size of map
             // >= 10 and add to cache if true.
-            usableCounter.put(hash, usableCounter.get(hash) + 1);
+            Integer integer = usableCounter.get(hash);
+            if(integer == null)
+                integer = 0;
+            usableCounter.put(hash, integer + 1);
             if (usableCounter.size() >= 10)
                 addToCache(hash, np);
         }

@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
-        private static final int DATABASE_VERSION = 26;
+        private static final int DATABASE_VERSION = 27;
         private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;

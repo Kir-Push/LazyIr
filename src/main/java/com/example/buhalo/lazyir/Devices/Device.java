@@ -35,7 +35,7 @@ public class Device {
     private volatile boolean listening;
     private volatile boolean pinging;
     private volatile boolean answer;
-    private ConcurrentHashMap<String,Module> enabledModules;
+    private ConcurrentHashMap<String,Module> enabledModules = new ConcurrentHashMap<>();
 
 
     public Device(Socket socket, String id, String name, InetAddress ip, ConnectionThread thread,Context context) {

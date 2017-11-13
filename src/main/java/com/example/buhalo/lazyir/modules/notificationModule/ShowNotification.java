@@ -37,10 +37,15 @@ public class ShowNotification extends Module {
                 Notification notification =  castNotf(activeNotifications[i]);
                 notifications.addNotification(notification);
             }
-            NetworkPackage nps = new NetworkPackage(SHOW_NOTIFICATION,"ALL NOTIFS");
+            NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"ALL NOTIFS");
             nps.setObject(NetworkPackage.N_OBJECT,notifications);
             TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),nps.getMessage());
         }
+    }
+
+    @Override
+    public void endWork() {
+
     }
 
     private Notification castNotf(StatusBarNotification sbn)

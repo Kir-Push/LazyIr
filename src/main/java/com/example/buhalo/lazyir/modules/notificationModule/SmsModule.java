@@ -34,6 +34,11 @@ public class SmsModule extends Module {
 
     }
 
+    @Override
+    public void endWork() {
+
+    }
+
     private void send_sms(String name,String text,String dvId) {
         String error = null;
         try {
@@ -88,7 +93,7 @@ public class SmsModule extends Module {
 
     private void sendResponse(String response,String dvId)
     {
-        NetworkPackage np = new NetworkPackage(SMS_TYPE,RESPONSE);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SMS_TYPE,RESPONSE);
         np.setValue("response",response);
         TcpConnectionManager.getInstance().sendCommandToServer(dvId,np.getMessage());
     }

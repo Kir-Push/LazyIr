@@ -41,8 +41,13 @@ public class SynchroModule extends Module {
 
     }
 
+    @Override
+    public void endWork() {
+        
+    }
+
     private void sendAllCommands() {
-        NetworkPackage np = new NetworkPackage(SynchroModule.class.getSimpleName(),GET_ALL_COMMANDS);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SynchroModule.class.getSimpleName(),GET_ALL_COMMANDS);
         List<Command> commandFull = DBHelper.getInstance(context).getCommandFull();
         CommandsList cmdList = new CommandsList(commandFull);
         np.setObject("cmds",cmdList);

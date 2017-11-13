@@ -1,10 +1,13 @@
 package com.example.buhalo.lazyir.modules.sendcommand;
 
+import com.example.buhalo.lazyir.AppBoot;
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.List;
@@ -20,20 +23,23 @@ public class SendCommand extends Module {
 
     @Override
     public void execute(final NetworkPackage np) {
-        new Thread(new Runnable() {
+        BackgroundService.executorService.submit(new Runnable() {
             @Override
             public void run() {
-                if(np.getData().equals(EXECUTE))
-                {
+                if(np.getData().equals(EXECUTE)) {
                     sendCommands(np);
                 }
-                else if(np.getData().equals(RECEIVED_COMMAND))
-                {
+                else if(np.getData().equals(RECEIVED_COMMAND)) {
                     final List<Command> args = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
                     saveCommand(args);
                 }
             }
-        }).start();
+        });
+    }
+
+    @Override
+    public void endWork() {
+
     }
 
     private void sendCommands(NetworkPackage np)

@@ -89,12 +89,17 @@ public class ShareModule extends Module {
         }
     }
 
+    @Override
+    public void endWork() {
+
+    }
+
     private void setupftp(NetworkPackage np, Context context) {
         if(ftpServer == null)
         {
             ftpServer = new ftpServer();
         }
-        NetworkPackage pack = new NetworkPackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
+        NetworkPackage pack = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
         portFtp = ftpServer.setupFtpServer(context,np);
         if(portFtp == 0)
             portFtp = 9000;
@@ -109,7 +114,7 @@ public class ShareModule extends Module {
         if (sftpServer == null) {
             sftpServer = new SftpServer();
         }
-        NetworkPackage pack = new NetworkPackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
+        NetworkPackage pack = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
         if(!sftServerOn) {
             port = sftpServer.setupSftpServer(context);
             sftServerOn = true;
@@ -153,7 +158,7 @@ public class ShareModule extends Module {
 
     public List<FileWrap> getFilesListFromServer(String path)
     {
-        NetworkPackage np = new NetworkPackage(SHARE_T, GET_PATH);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, GET_PATH);
         FileWrap fileWrap = new FileWrap(false,false,path);
         FileWraps fileWraps = new FileWraps();
         fileWraps.addCommand(fileWrap);
@@ -161,7 +166,7 @@ public class ShareModule extends Module {
         String fromTypeAndData;
         try {
            fromTypeAndData = np.getMessage();
-            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
+            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.getSelected_id(),fromTypeAndData);
             responseList = null;
             waitResponse = true;
             int count =0;
@@ -295,7 +300,7 @@ public class ShareModule extends Module {
                 String id = np.getId();
                 Device device = Device.getConnectedDevices().get(id);
                 try {
-                    fileSocket = new Socket(device.getIp(),port);
+                    fileSocket = new Socket(device.getSocket().getInetAddress(),port);
                     in = new DataInputStream(new BufferedInputStream(fileSocket.getInputStream()));
                     fileList= downloadFiles(clientPath, args, null);
                     in.close();
@@ -332,7 +337,7 @@ public class ShareModule extends Module {
     }
 
     public void startDownloading(String currPath, String currPaths, List<FileWrap> files) {
-        NetworkPackage np = new NetworkPackage(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
         List<FileWrap> args = new ArrayList<>();
         args.add(new FileWrap(false,false,currPaths));
         for(FileWrap fileWrap : files)
@@ -343,7 +348,7 @@ public class ShareModule extends Module {
         FileWraps fileWraps = new FileWraps(args);
         np.setObject(NetworkPackage.N_OBJECT,fileWraps);
         String fromTypeAndData = np.getMessage();
-        TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.selected_id,fromTypeAndData);
+        TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.getSelected_id(),fromTypeAndData);
         serverPath = currPaths;
         clientPath = currPath;
         waitingForServerAnswerForConnect = true;
@@ -397,7 +402,7 @@ public class ShareModule extends Module {
             }
         }).start();
         try {
-            NetworkPackage napa = new NetworkPackage(SHARE_T, CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE);
+            NetworkPackage napa = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE);
             napa.setValue(PORT,"5675");
             napa.setObject(NetworkPackage.N_OBJECT,new FileWraps(checked));
             napa.setValue("Whom",clientPath);

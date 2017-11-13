@@ -126,7 +126,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
                              Bundle savedInstanceState) {
 
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(MainActivity.selected_id);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(MainActivity.getSelected_id());
         View view;
         tabLayout = (TabLayout)  ((Activity) getContext()).findViewById(R.id.sliding_tabs);
         view = inflater.inflate(R.layout.fragment_page, container, false);
@@ -469,7 +469,7 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
 
     private static void mainButtonOnclick(Context context, int id)
     {
-        executeButtonCommands(context,String.valueOf(id), MainActivity.selected_id);
+        executeButtonCommands(context,String.valueOf(id), MainActivity.getSelected_id());
     }
 
 

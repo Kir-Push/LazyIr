@@ -31,19 +31,20 @@ public class Messengers extends Module {
     private static final String ANSWER = "answer";
     // you may receive answer from many device simultaneously, you need work with pengnotifs one by one, if 2 device answer for one message,
     // you get one, answer, remove, and second answer will be skipped
-    private static Lock lock = new ReentrantLock();
-    public static ConcurrentHashMap<String,StatusBarNotification> pendingNotifs = new ConcurrentHashMap<>();
+    private Lock lock = new ReentrantLock();
+
 
 
     //todo this is testing variant for (you need to test, can you use some pending StatusBarNotification many times, if you can,
     // todo use it many times, if many device answer simultaneously.)
     // todo you will need create getter and setter for that and each device will have independent instance,
     // todo it will consume memory, but for 5-10 device not much,
-    // todo remember TEST FOR MULTIPLE USE STATUSBARNOTIFICATION 
+    // todo remember TEST FOR MULTIPLE USE STATUSBARNOTIFICATION
     private ConcurrentHashMap<String,StatusBarNotification> pendingNotifsLocal = new ConcurrentHashMap<>();
 
     private static boolean taskStarted = false;
 
+    //todo add bollean isWork to each module, to check whether module working or not
     @Override
     public void execute(NetworkPackage np) {
         if(np.getData().equals(ANSWER)) {
@@ -53,8 +54,12 @@ public class Messengers extends Module {
 
     @Override
     public void endWork() {
-        if(Device.getConnectedDevices().size() == 0)
-            pendingNotifs.clear();
+        lock.lock();
+        try {
+            pendingNotifsLocal.clear();
+        }finally {
+            lock.unlock();
+        }
     }
 
     // todo you need to test, can you use some pending StatusBarNotification many times, if you can,
@@ -64,9 +69,9 @@ public class Messengers extends Module {
         try {
             String whom = np.getValue("typeName");
             String text = np.getValue("text");
-            StatusBarNotification statusBarNotification = pendingNotifs.get(whom);
+            StatusBarNotification statusBarNotification = pendingNotifsLocal.get(whom);
             answerMessenger(statusBarNotification, text);
-            pendingNotifs.remove(whom);
+            pendingNotifsLocal.remove(whom);
         }finally {
             lock.unlock();
         }
@@ -118,4 +123,11 @@ public class Messengers extends Module {
        return (i = pack.lastIndexOf(".")) != -1 ? pack.substring(i) : pack;
     }
 
+    public ConcurrentHashMap<String, StatusBarNotification> getPendingNotifsLocal() {
+        return pendingNotifsLocal;
+    }
+
+    public void setPendingNotifsLocal(ConcurrentHashMap<String, StatusBarNotification> pendingNotifsLocal) {
+        this.pendingNotifsLocal = pendingNotifsLocal;
+    }
 }

@@ -163,7 +163,7 @@ public class UdpBroadcastManager  {
     public void udpReceived(DatagramPacket packet, Context context)
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
-        NetworkPackage np = new NetworkPackage(pck);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(pck);
         if(np.getId().equals(android.os.Build.SERIAL))
         {
         }
@@ -207,7 +207,7 @@ public class UdpBroadcastManager  {
         }
         startSending();
         exitedFromSend = false;
-        NetworkPackage np = new NetworkPackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
         try {
             final String message  = np.getMessage();
             if(socket == null) {

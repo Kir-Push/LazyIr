@@ -71,22 +71,25 @@ public class NotificationListener extends NotificationListenerService {
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
 
-                if(sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) {// telegram send second notif with id 1, it not contain action, therefore ignore it
-                    Messengers.pendingNotifs.put(notification.getPack() + ":" + notification.getTitle(), sbn);
-                    Messengers.sendToServer(notification);
-                }
-                else if(!notification.getPack().equals("org.telegram.messenger"))
-                {
-                    Messengers.pendingNotifs.put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                if((sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) || !notification.getPack().equals("org.telegram.messenger")) {// telegram send second notif with id 1, it not contain action, therefore ignore it
+                    for (Device device : Device.getConnectedDevices().values()) {
+                        Messengers messenger = null;
+                        if(device != null && (messenger = (Messengers)device.getEnabledModules().get(Messengers.class.getSimpleName())) != null) {
+                            messenger.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                        }
+                    }
                     Messengers.sendToServer(notification);
                 }
                 return true;
             }
         }
-        if(Messengers.pendingNotifs.containsKey(notification.getPack()+":"+notification.getTitle()))
-        {
-            Messengers.sendToServer(notification);
-            return true;
+        // todo фигня выходит, верни обратно одну статическую pendingNotifs и не парь мозг
+        for (Device device : Device.getConnectedDevices().values()) {
+            Messengers messenger = null;
+            if(device != null && (messenger = (Messengers)device.getEnabledModules().get(Messengers.class.getSimpleName())) != null && messenger.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
+                Messengers.sendToServer(notification);
+                return true;
+            }
         }
         return false;
     }
@@ -169,9 +172,11 @@ public class NotificationListener extends NotificationListenerService {
         try {
             Notification notification = castToMyNotification(sbn);
             if (notification != null && notification.getPack() != null) {
-                if (Messengers.pendingNotifs.containsKey(notification.getPack() + ":" + notification.getTitle())) {
-                    Messengers.pendingNotifs.remove(notification.getPack() + ":" + notification.getTitle());
-                    return;
+                for (Device device : Device.getConnectedDevices().values()) {
+                    Messengers messenger = null;
+                    if (device != null && (messenger = (Messengers) device.getEnabledModules().get(Messengers.class.getSimpleName())) != null && messenger.getPendingNotifsLocal().containsKey(notification.getPack() + ":" + notification.getTitle())) {
+                        messenger.getPendingNotifsLocal().remove(notification.getPack() + ":" + notification.getTitle());
+                    }
                 }
             }
            // sendToserver(sbn, DELETE_NOTOFICATION);
@@ -188,7 +193,7 @@ public class NotificationListener extends NotificationListenerService {
             if (android.os.Build.VERSION.SDK_INT == android.os.Build.VERSION_CODES.KITKAT) {
                 return;
             }
-            NetworkPackage np = new NetworkPackage(SHOW_NOTIFICATION,method);
+            NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,method);
             Notification notification = castToMyNotification(sbn);
             if(notification == null)
                 return;
