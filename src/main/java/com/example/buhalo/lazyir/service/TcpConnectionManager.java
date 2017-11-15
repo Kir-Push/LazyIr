@@ -4,41 +4,22 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
-import com.example.buhalo.lazyir.Devices.Command;
-import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
-import com.example.buhalo.lazyir.modules.Module;
-import com.example.buhalo.lazyir.modules.battery.Battery;
-import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.service.network.tcp.ConnectionThread;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -67,14 +48,10 @@ public class TcpConnectionManager {
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     private TcpConnectionManager() {
-        try {
-            myServerSocket = new ServerSocket(port);
-        } catch (IOException e) {
-            Log.e("Tcp", "error in TcpConnectionManager Constructor",e);
-        }
     }
 
-    public static TcpConnectionManager getInstance()
+
+    static TcpConnectionManager getInstance()
     {
         if(instance == null)
             instance = new TcpConnectionManager();
@@ -90,7 +67,7 @@ public class TcpConnectionManager {
                    Log.d("Tcp","Server already working");
                    return;
                }
-               if(myServerSocket.isClosed()) {
+               if(myServerSocket == null || myServerSocket.isClosed()) {
                    try {
                        myServerSocket = new ServerSocket(port);
                    } catch (IOException e) {
@@ -123,6 +100,7 @@ public class TcpConnectionManager {
     public void stopListening() {
         ServerOn = false;
         try {
+            if(myServerSocket != null)
             myServerSocket.close();
         } catch (IOException e) {
             Log.e("Tcp","Error in close serverSocket ",e);
@@ -184,7 +162,7 @@ public class TcpConnectionManager {
             Device device = Device.connectedDevices.get(id);
             if (device == null || !device.isConnected()) {
                 Log.d("Tcp", "Error in output for jasechsocket");
-                StopListening(id);
+                stopListening(id);
                 return;
             }
             if (!device.isPaired()) {
@@ -216,8 +194,7 @@ public class TcpConnectionManager {
 
 
 
-    public void StopListening(String id) {
-        Device closingDevice = Device.connectedDevices.get(id);
+    public void stopListening(Device closingDevice) {
         if(closingDevice == null)
             return;
         closingDevice.closeConnection();
@@ -229,7 +206,7 @@ public class TcpConnectionManager {
            return false;
        }
         if(Device.getConnectedDevices().get(dvId).getSocket() == null || !Device.getConnectedDevices().get(dvId).getSocket().isConnected()) {
-            StopListening(dvId);
+            stopListening(dvId);
             return false;
         }return true;
     }

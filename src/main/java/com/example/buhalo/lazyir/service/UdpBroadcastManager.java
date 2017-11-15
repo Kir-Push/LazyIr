@@ -249,9 +249,9 @@ public class UdpBroadcastManager  {
     }
     public static boolean isSending() {return sending;}
 
-    public static void startSending() {sending = true;}
+    public void startSending() {sending = true;}
 
-    public static void stopSending()
+    public void stopSending()
     {
         sending = false;
     }
@@ -262,5 +262,11 @@ public class UdpBroadcastManager  {
 
     public void setSend_period(int send_period) {
         this.send_period = send_period;
+    }
+
+    // todo rewrite class, it shit
+    public void onZeroConnections() {
+        setSend_period(15000);
+       count = 0;
     }
 }

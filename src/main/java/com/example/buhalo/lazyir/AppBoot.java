@@ -1,11 +1,6 @@
 package com.example.buhalo.lazyir;
 
-import android.Manifest;
 import android.app.Application;
-import android.support.v4.app.ActivityCompat;
-
-import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.script.compiler.TestWifiNotifExecuting;
 
 
 import static com.example.buhalo.lazyir.service.JasechBroadcastReceiver.checkWifiOnAndConnected;

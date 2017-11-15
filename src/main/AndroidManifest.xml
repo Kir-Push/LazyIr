@@ -78,8 +78,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             />
 
-        <service android:name=".service.BackgroundService"
-            android:enabled="true"/>
         <!--<service android:name=".service.SheluderService"-->
             <!--android:permission="android.permission.BIND_JOB_SERVICE"/>-->
 
@@ -102,6 +100,10 @@
             </intent-filter>
         </receiver>
 
+
+        <service android:name=".service.BackgroundService"
+            android:enabled="true"
+            android:exported="false"/>
 
         <service android:name=".service.NotificationListener"
             android:label="@string/NotificationListen"

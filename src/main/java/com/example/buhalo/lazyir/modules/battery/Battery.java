@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**

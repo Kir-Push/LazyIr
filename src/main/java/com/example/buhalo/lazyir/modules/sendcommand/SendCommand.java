@@ -1,13 +1,10 @@
 package com.example.buhalo.lazyir.modules.sendcommand;
 
-import com.example.buhalo.lazyir.AppBoot;
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
-import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.List;

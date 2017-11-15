@@ -13,24 +13,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
-import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 

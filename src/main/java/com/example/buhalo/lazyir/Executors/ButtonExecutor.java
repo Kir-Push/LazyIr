@@ -35,17 +35,19 @@ public class ButtonExecutor {
                 ir.add(cmd);
         }
         CommandsList commandsList = new CommandsList(pc);
+
         NetworkPackage npPc = NetworkPackage.Cacher.getOrCreatePackage(SEND_COMMAND,EXECUTE);
-      npPc.setObject(NetworkPackage.N_OBJECT,commandsList);
-        npPc.setDv(Device.connectedDevices.get(dvId));
+        npPc.setObject(NetworkPackage.N_OBJECT,commandsList);
+        Device device = Device.connectedDevices.get(dvId);
+        npPc.setDv(device);
+
         NetworkPackage npIr = NetworkPackage.Cacher.getOrCreatePackage(SendIr.class.getSimpleName(),SEND_IR_COMMAND);
         CommandsList irCommandsList = new CommandsList(ir);
         npIr.setObject(NetworkPackage.N_OBJECT,irCommandsList);
-        npIr.setDv(Device.connectedDevices.get(dvId));
-        Log.d("ButtonExecutor","Check For conenction");
-        if(Device.getConnectedDevices().get(dvId) == null)
+        npIr.setDv(device);
+
+        if(device == null)
         {
-            Log.d("ButtonExecutor","No connection");
             Toast.makeText(context,"No connection",Toast.LENGTH_SHORT).show();
             ModuleExecutor.executePackageIrOffline(npIr,context);
         }

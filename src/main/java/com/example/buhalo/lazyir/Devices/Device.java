@@ -49,14 +49,10 @@ public class Device {
         this.pinging = false;
         this.answer = false;
         this.context = context;
-        // by default device type is PC;
-        this.deviceType = "pc";
+        this.deviceType = "pc";   // by default device type is PC;
 
         // todo do same in server!
         enableModules();
-//        for (Class registeredModule : ModuleFactory.getRegisteredModules()) { //todo after you create some menu where user can select module which he want to work!!
-//            enabledMdules.put(registeredModule.getSimpleName(), ModuleFactory.instantiateModule(this,registeredModule)); // it's enabled standart module which enabled by default;
-//        }
     }
 
     public Device(Socket socket, String id, String name, InetAddress ip, String deviceType, ConnectionThread thread,Context context) {

@@ -9,46 +9,31 @@ import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
-import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
-import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
-import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.UdpBroadcastManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
 
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_INTRODUCE;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PING;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_SYNC;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
 
 /**
  * Created by buhalo on 08.11.17.
@@ -120,7 +105,7 @@ public class ConnectionThread implements Runnable {
     // ask user for pairing in notification
     // todo create notification which ask user for pairing, and everything needed for it.
     public void requestPairFromUser(NetworkPackage np) {
-      //  BackgroundService.getTcp().reguestPair(np);
+      //  BackgroundServiceOld.getTcp().reguestPair(np);
     }
 
     // printing method,

@@ -19,6 +19,9 @@ import java.util.List;
  * Created by buhalo on 21.03.17.
  */
 
+// todo thread problem, it work in main thread, you don't need that,
+    // todo you need work in separate thread, maybe in backgroundService
+    //todo https://stackoverflow.com/questions/17926236/notificationlistenerservice-implementation
 public class NotificationListener extends NotificationListenerService {
     public static NotificationListener notif;
     public static final String SHOW_NOTIFICATION = "ShowNotification";
