@@ -42,6 +42,8 @@ import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_SYNC;
 // class for connection work, it represent device connection, and pass messages to modules if needed.
 public class ConnectionThread implements Runnable {
     private volatile Socket connection;
+
+
     private Context context;
     private String deviceId = null;
     private volatile boolean connectionRun;
@@ -269,6 +271,10 @@ public class ConnectionThread implements Runnable {
                 commandFromClient(np);
                 break;
         }
+    }
+
+    public Context getContext() {
+        return context;
     }
 
 

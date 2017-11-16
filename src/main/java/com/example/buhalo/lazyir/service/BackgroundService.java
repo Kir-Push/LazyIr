@@ -1,9 +1,11 @@
 package com.example.buhalo.lazyir.service;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -30,12 +32,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by buhalo on 14.11.17.
  */
 
-public class BackgroundService extends IntentService {
+public class BackgroundService extends Service {
 
     /**
      * ThreadPool's for basic tasks and short timer tasks.
      */
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
+
     private static final ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
 
     private static ConcurrentLinkedQueue<Runnable> takQueue = new ConcurrentLinkedQueue<>();
@@ -46,31 +49,21 @@ public class BackgroundService extends IntentService {
     private BatteryBroadcastReveiver mReceiver;
     private boolean batteryRegistered;
 
+    private static Context appContext;
+
     // If a Context object is needed, call getApplicationContext() here.
     private static Lock lock = new ReentrantLock();
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public BackgroundService(String name) {
-        super(name);
+
+    public BackgroundService() {
+        super();
         tcp = TcpConnectionManager.getInstance();
         udp = UdpBroadcastManager.getInstance();
-    }
-
-    /**
-     * Default constructor, need for autostart
-     *
-     * Uses default name for worker thread
-     */
-    public BackgroundService() {
-        super("backgroundWorker");
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        appContext = this.getApplicationContext();
         // initialize and setting executors
         timerService.setRemoveOnCancelPolicy(true);
         timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
@@ -97,32 +90,41 @@ public class BackgroundService extends IntentService {
         timerService.shutdownNow();
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent == null)
-            return;
+            return START_STICKY;
         String action = intent.getAction();
         if(action != null && action.equals("cmd")){
             String cmd = intent.getStringExtra("cmd");
             int args = intent.getIntExtra("args", -1);
-
-                try {
-                    Method method = tryToextractMethod(cmd);
-                    if(args == -1)
-                         method.invoke(this);
-                    else
-                        method.invoke(this,args);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    Log.e("BackgroundService","OnHandleIntentError",e);
-                }
-
+            try {
+                Method method = tryToextractMethod(cmd);
+                if(args == -1)
+                    method.invoke(this);
+                else
+                    method.invoke(this,args);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                Log.e("BackgroundService","OnHandleIntentError",e);
+            }
         } else if(action != null && action.equals("task")) {
-
             Runnable task;
             while ((task = takQueue.poll()) != null)
                 executorService.submit(task);
         }
+        else if(action != null && action.equals("sendToAll")){
+            String msg = intent.getStringExtra("message");
+            sendToAll(msg);
+        }
+        return START_STICKY;
     }
 
     private Method tryToextractMethod(String methodName){
@@ -180,7 +182,7 @@ public class BackgroundService extends IntentService {
     }
 
     private void startClipboardListener() {
-        ClipBoard.setListener(this);
+        ClipBoard.setListener(getApplicationContext());
     }
 
     private void unregisterBatteryRecever() {
@@ -210,18 +212,45 @@ public class BackgroundService extends IntentService {
         }
     }
 
+    private void sendToAll(String message){
+        executorService.submit(()->{
+        if(Device.getConnectedDevices().size() == 0) {
+            return;
+        }
+        for (Device device : Device.getConnectedDevices().values()) {
+            if(device != null && device.isConnected())
+            device.sendMessage(message);
+        }});
+    }
+
     public static void addCommandToQueue(Context context,BackgroundServiceCmds cmd){
-        Intent intent = new Intent(context, BackgroundService.class);
+        Intent intent = new Intent(context.getApplicationContext(), BackgroundService.class);
         intent.putExtra("cmd",cmd.name());
         intent.setAction("cmd");
-        context.startService(intent);
+        context.getApplicationContext().startService(intent);
+    }
+
+
+    public static void sendToAllDevices(String message){
+        Intent intent = new Intent(appContext, BackgroundService.class);
+        intent.setAction("sendToAll");
+        intent.putExtra("message",message);
+        appContext.startService(intent);
     }
 
     public static void submitNewTask(Context context,Runnable task){ // todo this for timer
-        Intent intent = new Intent(context, BackgroundService.class);
+        Intent intent = new Intent(context.getApplicationContext(), BackgroundService.class);
         takQueue.add(task);
         intent.setAction("task");
-        context.startService(intent);
+        context.getApplicationContext().startService(intent);
+    }
+
+    public static ScheduledThreadPoolExecutor getTimerService() {
+        return timerService;
+    }
+
+    public static Context getAppContext() {
+        return appContext;
     }
 
 }

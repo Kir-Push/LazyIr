@@ -7,6 +7,8 @@ import android.os.BatteryManager;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import static com.example.buhalo.lazyir.modules.battery.Battery.PERCENTAGE;
@@ -30,6 +32,6 @@ public class BatteryBroadcastReveiver extends BroadcastReceiver {
         NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(Battery.class.getSimpleName(),STATUS);
         np.setValue(PERCENTAGE,Integer.toString(level));
         np.setValue(STATUS,Boolean.toString(isCharging)); // true charging, false not
-        TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+        BackgroundService.sendToAllDevices(np.getMessage());
     }
 }

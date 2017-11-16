@@ -38,7 +38,7 @@ public class NetworkPackage {
     //This variable depends on app version(pc or android)
     private final static String DEVICE = "android";
 
-    private Device dv;
+    private String dv;
 
     private String msg;
 
@@ -159,12 +159,12 @@ public class NetworkPackage {
     }
 
 
-    public Device getDv() {
+    public String getDvId() {
         return dv;
     }
 
-    public void setDv(Device dv) {
-        this.dv = dv;
+    public void setDvId(String id) {
+        this.dv = id;
     }
 
 

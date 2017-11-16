@@ -6,6 +6,7 @@ import android.content.Context;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.concurrent.locks.Lock;
@@ -95,7 +96,7 @@ public class ClipBoard extends Module {
                 String text = item.getText().toString();
                 NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(ClipBoard.class.getSimpleName(), RECEIVE);
                 np.setValue("text", text);
-                TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+                BackgroundService.sendToAllDevices(np.getMessage());
             }
         }
     }

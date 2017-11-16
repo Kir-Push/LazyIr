@@ -39,12 +39,12 @@ public class ButtonExecutor {
         NetworkPackage npPc = NetworkPackage.Cacher.getOrCreatePackage(SEND_COMMAND,EXECUTE);
         npPc.setObject(NetworkPackage.N_OBJECT,commandsList);
         Device device = Device.connectedDevices.get(dvId);
-        npPc.setDv(device);
+        npPc.setDvId(dvId);
 
         NetworkPackage npIr = NetworkPackage.Cacher.getOrCreatePackage(SendIr.class.getSimpleName(),SEND_IR_COMMAND);
         CommandsList irCommandsList = new CommandsList(ir);
         npIr.setObject(NetworkPackage.N_OBJECT,irCommandsList);
-        npIr.setDv(device);
+        npIr.setDvId(dvId);
 
         if(device == null)
         {

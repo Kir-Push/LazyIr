@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Device {
     public static ConcurrentHashMap<String,Device> connectedDevices = new ConcurrentHashMap<>();
-    private Context context;
     private Socket socket;
     private String id;
     private String name;
@@ -48,7 +47,6 @@ public class Device {
         this.listening = false;
         this.pinging = false;
         this.answer = false;
-        this.context = context;
         this.deviceType = "pc";   // by default device type is PC;
 
         // todo do same in server!
@@ -97,7 +95,7 @@ public class Device {
     }
 
 
-    public void printToOut(String message)
+    public void sendMessage(String message)
     {
         thread.printToOut(message);
     }
@@ -148,11 +146,7 @@ public class Device {
     }
 
     public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
+        return thread.getContext();
     }
 
     public void enableModule(String moduleName, Module module) {
@@ -163,7 +157,7 @@ public class Device {
         enabledModules.remove(moduleName);
     }
 
-    public void enableModules() {enabledModules = ModuleFactory.getEnabledModules(this,context);}
+    public void enableModules() {enabledModules = ModuleFactory.getEnabledModules(this,thread.getContext());}
 
     public String getDeviceType() {
         return deviceType;

@@ -156,7 +156,7 @@ public class TcpConnectionManager {
 
 //todo add  checking wheter module enabled or not, and everything about it
 
-    public void sendCommandToServer(final String id, final String command) {
+    public void sendCommandToServerOLd(final String id, final String command) {
         lock.writeLock().lock();
         try {
             Device device = Device.connectedDevices.get(id);
