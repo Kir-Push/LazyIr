@@ -13,6 +13,7 @@ import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.io.BufferedInputStream;
@@ -107,7 +108,7 @@ public class ShareModule extends Module {
         String userName = ftpServer.getUser(np.getId());
         pack.setValue("userName",userName);
         pack.setValue("pass",ftpServer.getPass(userName));
-        TcpConnectionManager.getInstance().sendCommandToServer(np.getId(),pack.getMessage());
+        BackgroundService.sendToDevice(np.getId(),pack.getMessage());
     }
 
     public static void setupSftp(NetworkPackage np, Context context) {
@@ -124,7 +125,7 @@ public class ShareModule extends Module {
         pack.setValue(PORT,Integer.toString(port));
         pack.setValue("userName",SftpServer.USER);
         pack.setValue("pass",sftpServer.pass);
-        TcpConnectionManager.getInstance().sendCommandToServer(np.getId(),pack.getMessage());
+        BackgroundService.sendToDevice(np.getId(),pack.getMessage());
     }
 
     public static void stopSftpServer()
@@ -166,7 +167,7 @@ public class ShareModule extends Module {
         String fromTypeAndData;
         try {
            fromTypeAndData = np.getMessage();
-            TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.getSelected_id(),fromTypeAndData);
+            BackgroundService.sendToDevice(MainActivity.getSelected_id(),fromTypeAndData);
             responseList = null;
             waitResponse = true;
             int count =0;
@@ -348,7 +349,7 @@ public class ShareModule extends Module {
         FileWraps fileWraps = new FileWraps(args);
         np.setObject(NetworkPackage.N_OBJECT,fileWraps);
         String fromTypeAndData = np.getMessage();
-        TcpConnectionManager.getInstance().sendCommandToServer(MainActivity.getSelected_id(),fromTypeAndData);
+        BackgroundService.sendToDevice(MainActivity.getSelected_id(),fromTypeAndData);
         serverPath = currPaths;
         clientPath = currPath;
         waitingForServerAnswerForConnect = true;
@@ -408,7 +409,7 @@ public class ShareModule extends Module {
             napa.setValue("Whom",clientPath);
             napa.setValue("Where",serverPath);
             String fromTypeAndData = napa.getMessage();
-            TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),fromTypeAndData);
+            BackgroundService.sendToDevice(device.getId(),fromTypeAndData);
         } catch (Exception error) {
             Log.e("SHAREMANAGER",error.toString());
         }

@@ -19,5 +19,7 @@ public enum BackgroundServiceCmds {
     registerBatteryReceiver,
     onZeroConnections,
     submitTask,
-    sendToAll
+    sendToAll,
+    destroy,
+    startTasks
 }

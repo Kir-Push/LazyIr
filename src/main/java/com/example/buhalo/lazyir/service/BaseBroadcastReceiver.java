@@ -10,29 +10,15 @@ import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.modules.notificationModule.Notification;
-import com.example.buhalo.lazyir.modules.notificationModule.Notifications;
 import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
-import com.example.buhalo.lazyir.service.script.callback.callback;
-
-import java.util.Date;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static com.example.buhalo.lazyir.service.BackgroundService.startExternalMethod;
-import static com.example.buhalo.lazyir.service.BackgroundService.stopExternalMethod;
-import static com.example.buhalo.lazyir.service.NotificationListener.RECEIVE_NOTIFICATION;
 import static com.example.buhalo.lazyir.service.NotificationListener.SHOW_NOTIFICATION;
 
 /**
  * Created by buhalo on 14.03.17.
  */
 
-
-//todo This method is called when the BroadcastReceiver is receiving an Intent broadcast. During this time you can use the other methods on BroadcastReceiver to view/modify the current result values. This method is always called within the main thread of its process, unless you explicitly asked for it to be scheduled on a different thread using registerReceiver(BroadcastReceiver, IntentFilter, String, android.os.Handler). When it runs on the main thread you should never perform long-running operations in it (there is a timeout of 10 seconds that the system allows before considering the receiver to be blocked and a candidate to be killed). You cannot launch a popup dialog in your implementation of onReceive().
-//todo https://developer.android.com/reference/android/content/BroadcastReceiver.html
-public class JasechBroadcastReceiver extends BroadcastReceiver {
+public class BaseBroadcastReceiver extends BroadcastReceiver {
 
     private static boolean lastCheck;
     private static boolean firstTime = true;
@@ -40,78 +26,59 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
     private static boolean isIncoming;
     private static String savedNumber;
 
-    //  onReceive method poll callback's after all other in onReceive method todo think when bettern call after or before
-    public static ConcurrentLinkedQueue<callback> BroadcastcallBacks = new ConcurrentLinkedQueue<>();
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        try {
-
-
-
             String action = intent.getAction();
-
-            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                //   if(checkWifiOnAndConnected(context))
-                //        BackgroundServiceOld.startExternalMethod(context);
+            if(action == null)
                 return;
-            }
-
             if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
                 final Bundle bundle = intent.getExtras();
                 if (bundle == null) return;
                 final Object[] pdus = (Object[]) bundle.get("pdus");
-                for (Object pdu : pdus) {
+                for (Object pdu : pdus != null ? pdus : new Object[0]) {
                     SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
                     smsReceive(message, context);
                 }
                 return;
             }
             if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
-                String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
-                String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+                Bundle extras = intent.getExtras();
+                if(extras == null)
+                    return;
+                String stateStr = extras.getString(TelephonyManager.EXTRA_STATE);
+                String number = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
                 int state = 0;
-                if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                if(stateStr != null){
+                if (stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
                     state = TelephonyManager.CALL_STATE_IDLE;
-                } else if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                } else if ( stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
                     state = TelephonyManager.CALL_STATE_OFFHOOK;
-                } else if (stateStr != null && stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                     state = TelephonyManager.CALL_STATE_RINGING;
+                }
                 }
                 onCallStateChanged(context, state, number);
                 return;
             }
-
             boolean currCheck = checkWifiOnAndConnected(context);
             if (currCheck == lastCheck && !firstTime) {
                 return;
             }
-
             firstTime = false;
             lastCheck = currCheck;
-
 
             Log.d("BroadcastReceiver", "Some action " + action);
             if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION) || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 if (currCheck) {
                     Log.d("BroadcastReceiver", "WIFI CONNECTED");
-                    startExternalMethod(context);
+                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.startTasks);
                 } else {
                     Log.d("BroadcastReceiver", "WIFI NOT CONNECTED");
-                    stopExternalMethod(context);
+                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.destroy);
                 }
             }
-
-            System.out.println(intent.getAction());
-            System.out.println(BroadcastcallBacks.size());
-            for (callback callBack : BroadcastcallBacks) {
-                callBack.call(context,intent);
-            }
-        }catch (Exception e)
-        {
-           Log.e("BroadcastReceiver",e.toString());
-        }
     }
 
     private void onCallStateChanged(Context context, int state, String number) {
@@ -168,7 +135,7 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
         String message = np.getMessage();
         if(message != null && !message.equals(""))
         {
-            TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+            BackgroundService.sendToAllDevices(np.getMessage());
         }
     }
 
@@ -181,7 +148,7 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
         String message = np.getMessage();
         if(message != null && !message.equals(""))
         {
-            TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+            BackgroundService.sendToAllDevices(np.getMessage());
         }
     }
 
@@ -201,16 +168,14 @@ public class JasechBroadcastReceiver extends BroadcastReceiver {
         np.setValue("phoneNumber",phoneNumber);
         np.setValue("numberName",name);
         np.setValue("text",messageBody);
-        TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
-
+        BackgroundService.sendToAllDevices(np.getMessage());
     }
 
     public static boolean checkWifiOnAndConnected(Context context) {
         WifiManager wifiMgr = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (wifiMgr.isWifiEnabled()) { // Wi-Fi adapter is ON
+        if (wifiMgr != null && wifiMgr.isWifiEnabled()) { // Wi-Fi adapter is ON
 
-            System.out.println("Wifi enabled");
             WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
 
             return !(wifiInfo == null || wifiInfo.getNetworkId() == -1);

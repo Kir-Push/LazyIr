@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission-sdk-23 android:name="string"
         android:maxSdkVersion="23" />
     <uses-feature android:name="android.hardware.ConsumerIrManager" />
@@ -82,19 +83,22 @@
             <!--android:permission="android.permission.BIND_JOB_SERVICE"/>-->
 
 
-        <receiver android:name=".service.JasechBroadcastReceiver">
+        <!--<receiver android:name=".servBaseBroadcastReceiveriver">-->
+            <!--&lt;!&ndash;<intent-filter>&ndash;&gt;-->
+                <!--&lt;!&ndash;<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />&ndash;&gt;-->
+            <!--&lt;!&ndash;</intent-filter>&ndash;&gt;-->
             <!--<intent-filter>-->
-                <!--<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />-->
+                <!--<action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>-->
             <!--</intent-filter>-->
-            <intent-filter>
-                <action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
-            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.PHONE_STATE" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
+        <receiver android:name=".service.BootListener">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -102,13 +106,13 @@
 
 
         <service android:name=".service.BackgroundService"
-            android:enabled="true"
             android:exported="false"/>
+        <!--android:enabled="true"-->
 
         <service android:name=".service.NotificationListener"
             android:label="@string/NotificationListen"
-            android:enabled="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <!--android:enabled="true"-->
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>

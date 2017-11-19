@@ -38,12 +38,16 @@ public class ModulesActivity extends AppCompatActivity {
 //            return;
 //        } // todo commented for test, when tested using mock device
         // mock device for test purposes
-        MainActivity.setSelected_id("dadada");
-        Device.getConnectedDevices().put("dadada",new Device(null,"dadada","agasjka",null,null,null,this));
+      //  MainActivity.setSelected_id("dadada");
+      //  Device.getConnectedDevices().put("dadada",new Device(null,"dadada","agasjka",null,null,null,this));
 
 
         Device device = Device.connectedDevices.get(MainActivity.getSelected_id());
-        System.out.println(device.getId());
+        if(device == null){
+            Toast toast = Toast.makeText(getApplicationContext(), "Sorry no connection",Toast.LENGTH_SHORT );
+            toast.show();
+            finish();
+        }
         moduleSettingAdapter = new ModuleSettingAdapter(this,ModuleFactory.getModulesNamesWithStatus(device,this));
         moduleListView.setAdapter(moduleSettingAdapter);
     }

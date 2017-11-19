@@ -3,7 +3,11 @@ package com.example.buhalo.lazyir;
 import android.app.Application;
 
 
-import static com.example.buhalo.lazyir.service.JasechBroadcastReceiver.checkWifiOnAndConnected;
+import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
+import com.example.buhalo.lazyir.service.BootListener;
+
+import static com.example.buhalo.lazyir.service.BaseBroadcastReceiver.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 21.02.17.
@@ -22,9 +26,12 @@ public class AppBoot extends Application {
 
         super.onCreate();
 
-      //  new TestWifiNotifExecuting().test();
+        BootListener.registerBroadcasts(getApplicationContext());
+
+        if(BackgroundService.getAppContext() == null)
+            BackgroundService.setAppContext(getApplicationContext());
        if(checkWifiOnAndConnected(this))
-        BackgroundService.startExternalMethod(this);
+           BackgroundService.addCommandToQueue(BackgroundServiceCmds.startTasks);
 
     }
 

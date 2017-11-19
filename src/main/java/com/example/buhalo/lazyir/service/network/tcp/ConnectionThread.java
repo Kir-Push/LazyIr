@@ -11,6 +11,7 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
+import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLSocket;
 
+import static com.example.buhalo.lazyir.service.BackgroundServiceCmds.onZeroConnections;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
@@ -200,7 +202,7 @@ public class ConnectionThread implements Runnable {
         finally {
             // call in finally becaus it may be called in end (after remove device from list)
             // but error can be throwed before it.
-            BackgroundService.createIntentForBackground(context,BackgroundService.onZeroConnections);
+            BackgroundService.addCommandToQueue(onZeroConnections);
             lock.unlock();
             Log.d("ConnectionThread", deviceId + " - Stopped connection");}
     }
@@ -229,7 +231,7 @@ public class ConnectionThread implements Runnable {
                     DBHelper.getInstance(context).saveCommand(receivedCommand);
             }
         }catch (Exception e) {
-            Log.e("Tcp",e.toString());
+            Log.e("Tcp",e.toString() + "here?");
         }
     }
 
@@ -244,7 +246,7 @@ public class ConnectionThread implements Runnable {
             if(module != null)
             module.execute(np);
         }catch (Exception e) {
-            Log.e("Tcp",e.toString());
+            Log.e("Tcp",e.toString() + "here?");
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.buhalo.lazyir.service;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -52,6 +53,9 @@ public class NotificationListener extends NotificationListenerService {
         if(notif == null)
             notif = this;
 
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && sbn.getId() == BackgroundService.NotifId)
+            snoozeNotification(sbn.getKey(), 600000);
+
         //first check if notification is not smsMessage, if it is - send as sms
             if(!smsMessage(sbn)){
                 // after check if this  is not messenger message, if it is - send as message
@@ -101,6 +105,9 @@ public class NotificationListener extends NotificationListenerService {
     private boolean smsMessage(StatusBarNotification sbn)
     {
         String pack = sbn.getPackageName();
+//        if(pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2))
+//            snoozeNotification(sbn.getKey(),30000);
+//            sbn.getNotification().
         return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
     }
     public static StatusBarNotification[] getAll()

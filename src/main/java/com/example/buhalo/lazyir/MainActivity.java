@@ -38,6 +38,7 @@ import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.UI.SampleFragmentPagerAdapter;
 import com.example.buhalo.lazyir.modules.ModulesActivity;
 import com.example.buhalo.lazyir.old.IrMethods;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.ArrayList;
@@ -176,11 +177,11 @@ public class MainActivity extends AppCompatActivity {
         }else
         if(Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Unpair"))
        {
-           TcpConnectionManager.getInstance().unpair(selected_id,this);
+           BackgroundService.unpairDevice(selected_id);
        }
        else if (!Device.getConnectedDevices().get(selected_id).isPaired() && item.toString().equals("Pair"))
        {
-           TcpConnectionManager.getInstance().sendPairing(selected_id);
+           TcpConnectionManager.sendPairing(selected_id);
        }
 
 

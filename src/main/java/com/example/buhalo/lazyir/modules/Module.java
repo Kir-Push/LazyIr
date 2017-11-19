@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**
@@ -29,9 +30,10 @@ public abstract class Module {
     public abstract void execute(NetworkPackage np);
 
     public void sendMsg(String msg) {
-        TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),msg);
+        BackgroundService.sendToDevice(device.getId(),msg);
     }
 
 
+    public void sendToAll(String msg) {BackgroundService.sendToAllDevices(msg);}
     public abstract void endWork();
 }

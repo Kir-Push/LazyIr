@@ -70,10 +70,10 @@ public class UdpBroadcastManager  {
                     InetAddress broadcastAddress = getBroadcastAddress(context);
                     byte[] sendData = message.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
-                    Log.d("Udp","Sending broadcast: "+ message);
+                    Log.d("Udp","Sending broadcast: "+ message + " " + Thread.currentThread());
                     socket.send(sendPacket);
                 } catch (IOException e) {
-                    Log.e("Udp",e.toString());
+                    Log.e("Udp",e.toString() + " " + Thread.currentThread(),e);
                 }
 
     }
@@ -121,7 +121,7 @@ public class UdpBroadcastManager  {
                 server.setReuseAddress(true);
             //    server.setSoTimeout(15000);
             } catch (SocketException e) {
-                Log.e("Udp",e.toString());
+                Log.e("Udp",e.toString() + " here?");
                 return;
             }
             listening = true;
@@ -244,7 +244,7 @@ public class UdpBroadcastManager  {
         }
         catch (Exception e)
         {
-            Log.e("Udp",e.toString());
+            Log.e("Udp",e.toString() + "here?1");
         }
     }
     public static boolean isSending() {return sending;}

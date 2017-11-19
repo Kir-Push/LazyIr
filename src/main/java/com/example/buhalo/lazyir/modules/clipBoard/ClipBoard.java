@@ -43,7 +43,7 @@ public class ClipBoard extends Module {
         lock.lock();
         try {
             inserted = true;
-            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("label", np.getValue("text"));
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
@@ -55,8 +55,8 @@ public class ClipBoard extends Module {
 
     public static void setListener(Context context)
     {
-        final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if(clipListener == null && clipboard != null)
+        final ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if(clipboard != null)
         {
             clipListener = new ClipListener(clipboard);
             clipboard.addPrimaryClipChangedListener(clipListener);

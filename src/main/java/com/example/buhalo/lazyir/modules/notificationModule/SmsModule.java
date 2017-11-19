@@ -8,6 +8,7 @@ import android.telephony.SmsManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class SmsModule extends Module {
     {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SMS_TYPE,RESPONSE);
         np.setValue("response",response);
-        TcpConnectionManager.getInstance().sendCommandToServer(dvId,np.getMessage());
+        BackgroundService.sendToDevice(dvId,np.getMessage());
     }
 
 

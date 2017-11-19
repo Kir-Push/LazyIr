@@ -142,7 +142,7 @@ public class NetworkPackage {
         return null;
     }
 
-    public final String getMyId() {
+    public static String getMyId() {
         return android.os.Build.SERIAL;
     }
 
@@ -154,7 +154,7 @@ public class NetworkPackage {
         return idNode.get(NAME).textValue();
     }
 
-    public String getMyName() {
+    public static String getMyName() {
         return android.os.Build.MODEL;
     }
 

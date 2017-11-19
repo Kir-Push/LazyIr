@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.NotificationListener;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
@@ -39,7 +40,7 @@ public class ShowNotification extends Module {
             }
             NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"ALL NOTIFS");
             nps.setObject(NetworkPackage.N_OBJECT,notifications);
-            TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),nps.getMessage());
+            BackgroundService.sendToDevice(device.getId(),nps.getMessage());
         }
     }
 

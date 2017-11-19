@@ -5,6 +5,7 @@ import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class SynchroModule extends Module {
         List<Command> commandFull = DBHelper.getInstance(context).getCommandFull();
         CommandsList cmdList = new CommandsList(commandFull);
         np.setObject("cmds",cmdList);
-        TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),np.getMessage());
+        BackgroundService.sendToDevice(device.getId(),np.getMessage());
     }
 
     private void addCommand(NetworkPackage np) {

@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
     private final DbusCommand cachedGetPlayers = new DbusCommand(7, null, 0, null, null);
     private static volatile boolean pendingUserAction = false;
 
+    //todo it work, don't touch it for time
     // task which will be executed by timer, with some delay between
     // poll command's from commanQueque and execute them
     // if Queque null, add to queque main commands (sendGetAll and getPlayers)
@@ -226,7 +228,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        scheduledFuture =  BackgroundService.timerService.scheduleWithFixedDelay(task ,0, 400, TimeUnit.MILLISECONDS);
+        scheduledFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task ,0, 400, TimeUnit.MILLISECONDS);
     }
 
     @Override

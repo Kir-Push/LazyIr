@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**
@@ -33,7 +34,7 @@ public class Battery { // it not implement module because it one for all, send m
         String percentage = Integer.toString(level);
         np.setValue(PERCENTAGE,percentage);
         np.setValue(STATUS,Boolean.toString(isCharging)); // true charging, false not
-        TcpConnectionManager.getInstance().sendCommandToServer(id,np.getMessage());
+        BackgroundService.sendToDevice(id,np.getMessage());
     }
 
 }

@@ -47,65 +47,15 @@ public class TcpConnectionManager {
 
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private TcpConnectionManager() {
-    }
+    private TcpConnectionManager() {}
 
 
-    static TcpConnectionManager getInstance()
-    {
+    static TcpConnectionManager getInstance() {
         if(instance == null)
             instance = new TcpConnectionManager();
         return instance;
     }
 
-
-    public void startListening(final int port, final Context context) {
-       BackgroundService.executorService.submit(new Runnable() {
-           @Override
-           public void run() {
-               if(ServerOn) {
-                   Log.d("Tcp","Server already working");
-                   return;
-               }
-               if(myServerSocket == null || myServerSocket.isClosed()) {
-                   try {
-                       myServerSocket = new ServerSocket(port);
-                   } catch (IOException e) {
-                       Log.e("Tcp",e.toString());
-                   }
-               }
-               ServerOn = true;
-               while(ServerOn) {
-                   Socket socket;
-                   try {
-                       socket = myServerSocket.accept();
-                       socket.setKeepAlive(true);
-                       BackgroundService.executorService.submit(new ConnectionThread(socket, context));
-                   } catch (IOException e) {
-                       Log.e("Tpc","Exception on accept connection ignoring + ",e);
-                       if(myServerSocket.isClosed())
-                           ServerOn = false;
-                   }
-               }
-               try {
-                   myServerSocket.close();
-                   Log.d("Tcp","Closing server");
-               }catch (IOException e) {
-                   Log.e("Tcp","error in closing connecton");
-               }
-           }
-       });
-    }
-
-    public void stopListening() {
-        ServerOn = false;
-        try {
-            if(myServerSocket != null)
-            myServerSocket.close();
-        } catch (IOException e) {
-            Log.e("Tcp","Error in close serverSocket ",e);
-        }
-    }
 
     // configure sslsocket for tls connection
     protected Socket getConnection(InetAddress ip, int port,Context context) throws IOException  {
@@ -131,82 +81,44 @@ public class TcpConnectionManager {
 
 
 
-    public void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
+     void receivedUdpIntroduce(InetAddress address, int port,NetworkPackage np, Context context) {
         try {
             // at this moment connect only to pc
             if(!np.getValue(DEVICE_TYPE).equals("pc"))
                 return;
             Socket socket = getConnection(address,port,context);
             // submit connection to executorService - this service is main for app
-            BackgroundService.executorService.submit(new ConnectionThread(socket, context));
-        } catch (Exception e) {
-            Log.e("Tcp","Exception on accept connection ignoring +",e);
+            BackgroundService.submitNewTask(new ConnectionThread(socket, context));
+        } catch (IOException e) {
+            Log.e("Tcp","Exception on accept connection ignoring ",e);
         }
     }
 
-    public void sendCommandToAll(String message) {
-        if(Device.getConnectedDevices().size() == 0) {
-            return;
-        }
-        for (Device device : Device.getConnectedDevices().values()) {
-            sendCommandToServer(device.getId(),message);
-        }
+    public void sendCommandToAll(String message) {BackgroundService.sendToAllDevices(message);}
 
-    }
 
-//todo add  checking wheter module enabled or not, and everything about it
-
-    public void sendCommandToServerOLd(final String id, final String command) {
-        lock.writeLock().lock();
-        try {
-            Device device = Device.connectedDevices.get(id);
-            if (device == null || !device.isConnected()) {
-                Log.d("Tcp", "Error in output for jasechsocket");
-                stopListening(id);
-                return;
-            }
-            if (!device.isPaired()) {
-                Log.d("Tcp", "Device is not paired and so on not allowed to continue");
-                return;
-            }
-            device.printToOut(command);
-        }finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public void sendPairing(String id)
-    {
-        NetworkPackage networkPackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_PAIR,String.valueOf(android.os.Build.SERIAL.hashCode()));
-        sendCommandToServer(id,networkPackage.getMessage());
-    }
-
-    //send unpair command to server
-    // remove pair note from db
-    public void unpair(String id,Context context) {
-        DBHelper.getInstance(context).deletePaired(id);
-        NetworkPackage orCreatePackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_UNPAIR, TCP_UNPAIR);
-        sendCommandToServer(id,orCreatePackage.getMessage());
-        Device.getConnectedDevices().get(id).setPaired(false);
-        //   unPairAction(id); //todo
+    public static void sendPairing(String id) {
+        NetworkPackage networkPackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_PAIR,String.valueOf(NetworkPackage.getMyId().hashCode()));
+        BackgroundService.sendToDevice(id,networkPackage.getMessage());
     }
 
 
 
 
-    public void stopListening(Device closingDevice) {
+    void stopListening(Device closingDevice) {
         if(closingDevice == null)
             return;
         closingDevice.closeConnection();
     }
 
 
-    public boolean checkExistingConnection(String dvId) {
+    boolean checkExistingConnection(String dvId) {
        if(!Device.getConnectedDevices().containsKey(dvId)) {
            return false;
        }
-        if(Device.getConnectedDevices().get(dvId).getSocket() == null || !Device.getConnectedDevices().get(dvId).getSocket().isConnected()) {
-            stopListening(dvId);
+        Device device = Device.getConnectedDevices().get(dvId);
+        if(device.getSocket() == null || !device.getSocket().isConnected()) {
+            stopListening(device);
             return false;
         }return true;
     }

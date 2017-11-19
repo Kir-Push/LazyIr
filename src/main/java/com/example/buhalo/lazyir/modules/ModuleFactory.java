@@ -17,6 +17,7 @@ import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -140,7 +141,7 @@ public class ModuleFactory {
     {
         //to
         List<ModulesWrap> result = new ArrayList<>();
-        ConcurrentHashMap<String, Module> enabledModules = getEnabledModules(dv, context);
+        Map<String, Module> enabledModules = getEnabledModules(dv, context);
         List<Class> registeredModules = getRegisteredModules();
         for (Class registeredModule : registeredModules) {
             if(!enabledModules.containsKey(registeredModule.getSimpleName()))

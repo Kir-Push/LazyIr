@@ -5,6 +5,7 @@ import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.List;
@@ -20,16 +21,13 @@ public class SendCommand extends Module {
 
     @Override
     public void execute(final NetworkPackage np) {
-        BackgroundService.executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                if(np.getData().equals(EXECUTE)) {
-                    sendCommands(np);
-                }
-                else if(np.getData().equals(RECEIVED_COMMAND)) {
-                    final List<Command> args = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
-                    saveCommand(args);
-                }
+        BackgroundService.submitNewTask(() -> {
+            if(np.getData().equals(EXECUTE)) {
+                sendCommands(np);
+            }
+            else if(np.getData().equals(RECEIVED_COMMAND)) {
+                final List<Command> args = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
+                saveCommand(args);
             }
         });
     }
@@ -43,7 +41,7 @@ public class SendCommand extends Module {
     {
         String message;
         message = np.getMessage();
-        TcpConnectionManager.getInstance().sendCommandToServer(device.getId(),message);
+        BackgroundService.sendToDevice(device.getId(),message);
     }
 
     private void saveCommand(List<Command> args)

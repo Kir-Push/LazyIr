@@ -11,6 +11,7 @@ import android.util.Log;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.HashMap;
@@ -115,7 +116,7 @@ public class Messengers extends Module {
         np.setValue("title",notification.getTitle());
         np.setValue("ticker",notification.getTicker());
         np.setValue("text",notification.getText());
-        TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+        BackgroundService.sendToAllDevices(np.getMessage());
     }
 
     private static String tryExtractPack(String pack) {
