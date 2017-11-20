@@ -20,7 +20,7 @@ import static com.example.buhalo.lazyir.modules.dbus.Mpris.ALL_PLAYERS;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PING;
 import static com.example.buhalo.lazyir.service.UdpBroadcastManager.BROADCAST_INTRODUCE;
 import static com.example.buhalo.lazyir.service.UdpBroadcastManager.BROADCAST_INTRODUCE_MSG;
-// todo elsewher change from directly create package to use cache.getOrCreatePackage - it uses cachin system, but you will need to test it carefully.
+
 public class NetworkPackage {
     public final static String ID = "id";
     public final static String NAME = "name";
@@ -184,10 +184,9 @@ public class NetworkPackage {
         }
 
         //if in cache more than 20 items clear less useful items
-        //todo test this method carefully
         private static void clearIfNeeded() {
             if (networkPackageCache.size() > 20) {
-                int lessValue = 10000;
+                int lessValue = Integer.MAX_VALUE;
                 int hashForRemove = -1;
                 for (Map.Entry<Integer, Integer> integerIntegerEntry : usableCounter.entrySet()) {
                     Integer value = integerIntegerEntry.getValue();
@@ -210,8 +209,7 @@ public class NetworkPackage {
             NetworkPackage networkPackage;
             if ((networkPackage = checkForMostUsefulTypes(type, data)) != null)
                 return networkPackage;
-            //todo test this hairy hash method
-            int hash = type.hashCode() | data.hashCode();
+            int hash = getHash(type, data);
 
             NetworkPackage result = getFromCache(hash);
             if (result == null) {
@@ -249,7 +247,7 @@ public class NetworkPackage {
             if(integer == null)
                 integer = 0;
             usableCounter.put(hash, integer + 1);
-            if (usableCounter.size() >= 10)
+            if (usableCounter.get(hash) >= 10)
                 addToCache(hash, np);
         }
 
@@ -262,6 +260,10 @@ public class NetworkPackage {
         }
 
 
+    }
+
+    public static int getHash(String type, String data) {
+        return type.hashCode() | data.hashCode();
     }
 }
 

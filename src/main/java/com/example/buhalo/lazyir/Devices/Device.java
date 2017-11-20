@@ -97,7 +97,7 @@ public class Device {
 
     public void sendMessage(String message)
     {
-        if(thread.isConnected())
+        if(thread != null && thread.isConnected())
         thread.printToOut(message);
     }
 

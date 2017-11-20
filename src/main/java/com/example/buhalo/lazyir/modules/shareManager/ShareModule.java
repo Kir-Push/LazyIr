@@ -127,15 +127,21 @@ public class ShareModule extends Module {
         pack.setValue("pass",sftpServer.pass);
         BackgroundService.sendToDevice(np.getId(),pack.getMessage());
     }
-
+//todo ftp method stop, now it will not stop
     public static void stopSftpServer()
     {
         if(sftpServer!= null)
         {
             sftpServer.stopSftpServer();
+
          //   sftpServer = null;
         }
         sftServerOn = false;
+        if(ftpServer != null)
+        {
+            ftpServer.stopFtp();
+        }
+        ftpServerOn = false;
     }
 
     public List<FileWrap> getFilesList(String path)

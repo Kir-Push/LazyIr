@@ -335,6 +335,7 @@ public class BackgroundService extends Service {
     }
 
 
+    // todo think need to be in separate thread, or no
     private void sendToOneDevice(String id, String msg) {
         Device.getConnectedDevices().get(id).sendMessage(msg);
     }

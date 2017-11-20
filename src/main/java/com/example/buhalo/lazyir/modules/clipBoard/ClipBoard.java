@@ -56,8 +56,7 @@ public class ClipBoard extends Module {
     public static void setListener(Context context)
     {
         final ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        if(clipboard != null)
-        {
+        if(clipboard != null) {
             clipListener = new ClipListener(clipboard);
             clipboard.addPrimaryClipChangedListener(clipListener);
         }
