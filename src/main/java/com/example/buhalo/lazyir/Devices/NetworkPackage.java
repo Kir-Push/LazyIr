@@ -120,13 +120,15 @@ public class NetworkPackage {
         }
     }
 
-    public void setValue(String key, String value) {
+    public NetworkPackage setValue(String key, String value) {
         idNode.put(key, value);
+        return this;
     }
 
-    public <T> void setObject(String key, T object) {
+    public <T> NetworkPackage setObject(String key, T object) {
         JsonNode node = new ObjectMapper().convertValue(object, JsonNode.class);
         idNode.set(key, node);
+        return this;
     }
 
     public <T> T getObject(String key, Class<T> tClass) {

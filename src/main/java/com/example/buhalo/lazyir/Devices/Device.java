@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class Device {
-    public static ConcurrentHashMap<String,Device> connectedDevices = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,Device> connectedDevices = new ConcurrentHashMap<>();
     private Socket socket;
     private String id;
     private String name;
@@ -63,7 +63,7 @@ public class Device {
     }
 
     public static void setConnectedDevices(ConcurrentHashMap<String, Device> connectedDevices) {
-        Device.connectedDevices = connectedDevices;
+        connectedDevices = connectedDevices;
     }
 
     public Socket getSocket() {

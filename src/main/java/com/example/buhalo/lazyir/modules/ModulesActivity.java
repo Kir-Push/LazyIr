@@ -42,7 +42,7 @@ public class ModulesActivity extends AppCompatActivity {
       //  Device.getConnectedDevices().put("dadada",new Device(null,"dadada","agasjka",null,null,null,this));
 
 
-        Device device = Device.connectedDevices.get(MainActivity.getSelected_id());
+        Device device = Device.getConnectedDevices().get(MainActivity.getSelected_id());
         if(device == null){
             Toast toast = Toast.makeText(getApplicationContext(), "Sorry no connection",Toast.LENGTH_SHORT );
             toast.show();

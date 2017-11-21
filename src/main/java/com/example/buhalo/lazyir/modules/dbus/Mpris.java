@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by buhalo on 15.04.17.
  */
-
+// ServerAnswer LinkedList are queque for received players from server,
+// with size only 1
 public class Mpris extends Module {
 
     public final static String SEEK = "seek";
@@ -28,21 +29,16 @@ public class Mpris extends Module {
     public final static String PLAYER = "player";
     public final static String GET_ALL_INFO = "allInfo";
     public final static String ALL_PLAYERS = "allPlayers";
+    public final static String REPEAT = "repeat";
 
-
-
-    private double counter = 0;
-    private double lastReturnCounter = -1;
-
-
+    private final static int TIMEOUT = 1000;
     private LinkedBlockingQueue<List<Player>> serverAnswer = new LinkedBlockingQueue<>(1);
 
 
     @Override
     public void execute(NetworkPackage np) {
         try {
-        String data = np.getData();
-        switch (data)
+        switch (np.getData())
         {
             case ALL_PLAYERS:
                     fillPlayers(np);
@@ -52,58 +48,58 @@ public class Mpris extends Module {
                 break;
             default:
                 break;
-
         }
         } catch (InterruptedException e) {
             Log.e("Mpris","Error in Mpris execute",e);
         }
     }
 
+    // use offer insteab pull, because i don't want to wait while list was empty,
+    // and after some time, these data may be outdate, so if list full, just wait
+    // #TIMEOUT second's and put or ignore
     private void fillPlayers(NetworkPackage np) throws InterruptedException {
-        serverAnswer.put(np.getObject(ALL_PLAYERS,Players.class).getPlayerList());
-        counter++;
+        serverAnswer.offer(np.getObject(ALL_PLAYERS,Players.class).getPlayerList(),TIMEOUT,TimeUnit.MILLISECONDS);
     }
 
-    public List<Player> getPlayers(int timeout) throws InterruptedException {
+    // wait and return null if time exceeds
+    List<Player> getPlayers(int timeout) throws InterruptedException {
         return serverAnswer.poll(timeout, TimeUnit.MILLISECONDS);
     }
 
-    public void sendMetadata(String player) {
+    void sendMetadata(String player) {
         send(player,GET_ALL_INFO);
     }
 
-    public void sendPlayPause(String player) {
+    void sendPlayPause(String player) {
         send(player,PLAYPAUSE);
     }
 
-    public void sendNext(String player) {
+    void sendNext(String player) {
         send(player,NEXT);
     }
 
-    public void sendVolume(String player,int volume)
-    {
+    void sendVolume(String player,int volume) {
         double vol = ((double)volume)/100;
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),VOLUME);
-        np.setValue(VOLUME,Double.toString(vol));
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK).setValue(PLAYER,player).setValue(VOLUME,Double.toString(vol)).getMessage());
     }
 
-    public void sendSeek(String player, int seek) {
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK);
-        np.setValue(SEEK,Integer.toString(seek));
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+    // hard to read, but one string ;)
+    // in send methods, it get get networkPackage from cache, set Player, set method's now return this networkPackage, so
+    // after set other value if need and finally call getMessage.
+    void sendSeek(String player, int seek) {
+        sendMsg( NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK).setValue(SEEK,Integer.toString(seek)).setValue(PLAYER,player).getMessage());
     }
 
-    public void sendPrev(String player) {
+    void sendPrev(String player) {
         send(player,PREVIOUS);
     }
 
     private void send(String player,String cmd){
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),cmd);
-        np.setValue(PLAYER,player);
-        sendMsg(np.getMessage());
+        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),cmd).setValue(PLAYER,player).getMessage());
+    }
+
+    void sendRepeat(String player){
+        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(), REPEAT).setValue(PLAYER,player).getMessage());
     }
 
     // Mpris actually doesn't have any state
@@ -112,8 +108,7 @@ public class Mpris extends Module {
         serverAnswer = null;
     }
 
-    public void sendGetAllPlayers()
-    {
+    void sendGetAllPlayers() {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),ALL_PLAYERS);
         sendMsg(np.getMessage());
     }

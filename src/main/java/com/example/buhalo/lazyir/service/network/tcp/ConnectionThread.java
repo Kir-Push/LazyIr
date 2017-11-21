@@ -259,7 +259,7 @@ public class ConnectionThread implements Runnable {
                 newConnectedDevice(np);
                 break;
             case TCP_PING:
-                Device.connectedDevices.get(deviceId).setAnswer(true);
+                Device.getConnectedDevices().get(deviceId).setAnswer(true);
                 ping();
                 break;
             case TCP_PAIR_RESULT:
@@ -269,7 +269,7 @@ public class ConnectionThread implements Runnable {
                 receiveSync(np);
                 break;
             default:
-                Device.connectedDevices.get(deviceId).setAnswer(true);
+                Device.getConnectedDevices().get(deviceId).setAnswer(true);
                 commandFromClient(np);
                 break;
         }

@@ -19,6 +19,7 @@ import android.support.v4.app.JobIntentService;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.os.Process;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
@@ -280,7 +281,7 @@ public class BackgroundService extends Service {
     }
 
     private void closeAllTcpConnections(){
-        for(Device dv : Device.connectedDevices.values())
+        for(Device dv : Device.getConnectedDevices().values())
             tcp.stopListening(dv);
     }
 
@@ -337,7 +338,16 @@ public class BackgroundService extends Service {
 
     // todo think need to be in separate thread, or no
     private void sendToOneDevice(String id, String msg) {
-        Device.getConnectedDevices().get(id).sendMessage(msg);
+        Device device = Device.getConnectedDevices().get(id);
+        if(device != null && device.isConnected())
+        device.sendMessage(msg);
+        else
+            showNoConnection();
+    }
+
+    private void showNoConnection() {
+        Toast toast = Toast.makeText(getApplicationContext(), "Sorry no connection",Toast.LENGTH_SHORT );
+        toast.show();
     }
 
     public static void addCommandToQueue(BackgroundServiceCmds cmd){

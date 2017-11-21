@@ -187,7 +187,8 @@ public class MediaRemoteActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Device.getConnectedDevices().size() == 0) {
+        Device device = Device.getConnectedDevices().get(MainActivity.getSelected_id());
+        if(Device.getConnectedDevices().size() == 0 || device == null) {
             Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
             finish();
             return;}
@@ -196,7 +197,6 @@ public class MediaRemoteActivity extends AppCompatActivity {
             finish();
             return;}
         setContentView(R.layout.media_control);
-
         module = (Mpris) Device.getConnectedDevices().get(MainActivity.getSelected_id()).getEnabledModules().get(Mpris.class.getSimpleName());
         playerNameToAdapter = new ArrayList<>();
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerNameToAdapter);

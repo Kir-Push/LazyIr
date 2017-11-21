@@ -55,22 +55,29 @@ public class ClipBoard extends Module {
 
     public static void setListener(Context context)
     {
+        lock.lock();
+        try{
         final ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
         if(clipboard != null) {
             clipListener = new ClipListener(clipboard);
             clipboard.addPrimaryClipChangedListener(clipListener);
+        }}finally {
+            lock.unlock();
         }
     }
 
     public static void removeListener(Context context)
     {
-
-        final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if(clipListener == null || clipboard == null)
-            return;
+        lock.lock();
+        try {
+            final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipListener == null || clipboard == null)
+                return;
             clipboard.removePrimaryClipChangedListener(clipListener);
-
-        clipListener = null;
+            clipListener = null;
+        }finally {
+            lock.unlock();
+        }
     }
 
     private static class ClipListener implements ClipboardManager.OnPrimaryClipChangedListener
@@ -84,8 +91,7 @@ public class ClipBoard extends Module {
 
         @Override
         public void onPrimaryClipChanged() {
-            if(inserted)
-            {
+            if(inserted) {
                 inserted = false;
                 return;
             }

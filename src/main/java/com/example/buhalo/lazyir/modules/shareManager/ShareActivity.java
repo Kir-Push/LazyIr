@@ -52,7 +52,7 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
         pcFileList = (ListView) findViewById(R.id.pc_file_list);
         android_list = (ListView) findViewById(R.id.file_list);
         tabs.addOnTabSelectedListener(this);
-        Device device = Device.connectedDevices.get(MainActivity.getSelected_id());
+        Device device = Device.getConnectedDevices().get(MainActivity.getSelected_id());
         if(device != null)
         module = (ShareModule) device.getEnabledModules().get(ShareModule.class.getSimpleName());
         if(module == null || device == null)

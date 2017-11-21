@@ -40,12 +40,7 @@ public class TcpConnectionManager {
     public final static String TCP_PAIR = "pair";
     public final static String TCP_UNPAIR = "unpair";
     public final static String TCP_SYNC = "sync";
-    public static TcpConnectionManager instance;
-
-    private static volatile boolean ServerOn = false;
-    ServerSocket myServerSocket;
-
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private static TcpConnectionManager instance;
 
     private TcpConnectionManager() {}
 

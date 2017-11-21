@@ -48,6 +48,7 @@ public class ShareModule extends Module {
     public static final String GET_DIRECTORY = "get directory";
     public static final String POST_DIRECORY = "post directory";
     public static final String PORT = "port";
+    public static final String PATH = "path";
 
 
     public static final String FIRST_ARG_NUMBER_OF_FILES ="nf {?,?}";// first ? wil be you curr file, second overral files ( which you need to receive
