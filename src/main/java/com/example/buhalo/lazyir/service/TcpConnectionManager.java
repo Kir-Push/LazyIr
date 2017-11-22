@@ -24,7 +24,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import static com.example.buhalo.lazyir.Devices.NetworkPackage.DEVICE_TYPE;
-import static com.example.buhalo.lazyir.service.BackgroundService.port;
 
 /**
  * Created by buhalo on 19.02.17.

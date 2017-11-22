@@ -121,6 +121,7 @@ public class ConnectionThread implements Runnable {
             if(out == null) {
                 return;
             }
+            System.out.println("MEssage send " + message);
             out.println(message);
             out.flush();
         }finally {
@@ -145,6 +146,7 @@ public class ConnectionThread implements Runnable {
         } else {
             Device.getConnectedDevices().get(deviceId).setPaired(false); // todo check for nullPointer
         }
+        MainActivity.updateActivity();
     }
 
 

@@ -14,7 +14,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static com.example.buhalo.lazyir.service.BaseBroadcastReceiver.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 19.02.17.
@@ -26,14 +33,16 @@ public class UdpBroadcastManager  {
     public static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
     private DatagramSocket socket;
     private  DatagramSocket server;
-    private int send_period = 15000;
-    public int  count = 0;
+    private volatile int send_period = 15000;
+    private int  count = 0;
 
 
     private volatile static boolean listening = false;
-    public volatile static boolean exitedFromSend = true;
+    private volatile static boolean exitedFromSend = true;
     private volatile static boolean sending;
+    private static Lock lock = new ReentrantLock();
     private static UdpBroadcastManager instance;
+    private  ScheduledFuture<?> sendingFuture = null;
 
     private UdpBroadcastManager() {
         try {
@@ -43,50 +52,48 @@ public class UdpBroadcastManager  {
         }
     }
 
-    private void configureManager() throws IOException
-    {
-
-        StrictMode.ThreadPolicy policy = new   StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+    private DatagramSocket configureManager() throws IOException {
         socket = new DatagramSocket();
         socket.setReuseAddress(true);
         socket.setBroadcast(true);
+        return socket;
     }
 
 
-    public static UdpBroadcastManager getInstance()
-    {
+    public static UdpBroadcastManager getInstance(){
         if(instance == null)
-        {
             instance = new UdpBroadcastManager();
-        }
         return instance;
     }
 
 
-    public void sendBroadcast(final Context context, final String message, final int port)
+    private void sendBroadcast(final String message, final int port)
     {
+        lock.lock();
+        if(socket == null){
+            BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
+            return;
+        }
                 try {
-                    InetAddress broadcastAddress = getBroadcastAddress(context);
+                    InetAddress broadcastAddress = getBroadcastAddress(BackgroundService.getAppContext());
                     byte[] sendData = message.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
-                    Log.d("Udp","Sending broadcast: "+ message + " " + Thread.currentThread());
+                    Log.d("Udp","Sending broadcast: "+ message);
                     socket.send(sendPacket);
                 } catch (IOException e) {
                     Log.e("Udp",e.toString() + " " + Thread.currentThread(),e);
+                }finally {
+            lock.unlock();
                 }
 
     }
 
     private InetAddress getBroadcastAddress(Context context) throws IOException {
         WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        DhcpInfo dhcp = wifi.getDhcpInfo();
+        DhcpInfo dhcp = wifi != null ? wifi.getDhcpInfo() : null;
         // handle null somehow
         if(dhcp == null)
-        {
             return InetAddress.getByName("255.255.255.255");
-        }
-
 
         int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
         byte[] quads = new byte[4];
@@ -96,177 +103,160 @@ public class UdpBroadcastManager  {
         return InetAddress.getByAddress(quads);
     }
 
-    public synchronized void startUdpListener(final Context context,int port)
+    void startUdpListener(final Context context,int port)
     {
-
-        if(listening)
-        {
+        lock.lock();
+        try {
+        if(isListening()) {
             Log.d("Udp","listening already working");
             return;
         }
+            if (!checkWifiOnAndConnected(context)) return;
 
-        final ConnectivityManager connMgr = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        final android.net.NetworkInfo wifi =
-                connMgr.getActiveNetworkInfo();
-
-
-        if(wifi.getType() != ConnectivityManager.TYPE_WIFI && !wifi.isAvailable()) {
-            Log.d("udp","No Wifi network -- listener not started");
-          return;
-        }
-            try {
                 server = new DatagramSocket(port);
                 server.setReuseAddress(true);
-            //    server.setSoTimeout(15000);
-            } catch (SocketException e) {
-                Log.e("Udp",e.toString() + " here?");
-                return;
-            }
-            listening = true;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
+                setListening(true);
+                BackgroundService.submitNewTask(()->{
                     Log.d("Udp","start listening");
                     final int bufferSize = 1024 * 5;
                     byte[] data = new byte[bufferSize];
-                    while (listening) {
+                    while (isListening()) {
+                        if(server == null)
+                            break;
                         DatagramPacket packet = new DatagramPacket(data, bufferSize);
                         try {
                             server.receive(packet);
                         } catch (Exception e) {
-                            Log.e("Udp", "UdpReceive exception + " + e.toString());
-                            listening = false;
-                            if(!server.isConnected())
-                            {
-                                server.close();
-                            }
+                            Log.e("Udp", "UdpReceive exception",e);
                             break;
-                            //   sendBroadcast(context);
                         }
                         udpReceived(packet,context);
                         data = new byte[bufferSize];
                     }
                     Log.d("Udp", "Stopping UDP listener");
-                    server.close();
-                    server = null;
-                    listening = false;
-                }
-            }).start();
-
+                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
+                });
+            } catch (SocketException e) {
+                Log.e("Udp","Error creating server socket",e);
+            }finally {
+                lock.unlock();
+            }
     }
 
 
 
-    public void udpReceived(DatagramPacket packet, Context context)
+    private void udpReceived(DatagramPacket packet, Context context)
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(pck);
-        if(np.getId().equals(android.os.Build.SERIAL))
-        {
+        if(np.getId().equals(NetworkPackage.getMyId()))
+        { // my own broadcast, ignore it
         }
         else if(np.getType().equals(BROADCAST_INTRODUCE))
-        {
-            Log.d("Udp","received package  + " + pck);
-            Log.d("udp","number of connects " + Device.getConnectedDevices().size());
             if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
-                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.port, np,context); //todo add in udp and tcp packet type of app (pc or phone) and handle phone separately on the phone, and pc on pc
+                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.getPort(), np,context);
             }
-        }
     }
 
 
-    public void stopUdpListener()
+    void stopUdpListener()
     {
+        lock.lock();
+        try{
         listening = false;
         if(server != null)
         server.close();
+        server = null;}
+        finally {
+            lock.unlock();
+        }
     }
 
 
-    public synchronized void startSendingTask(final Context context, final int port) {
+    void startSendingTask(final Context context, final int port) {
 
-        final ConnectivityManager connMgr = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (!checkWifiOnAndConnected(context)) return;
 
-        final android.net.NetworkInfo wifi =
-                connMgr.getActiveNetworkInfo();
-
-
-        if(wifi.getType() != ConnectivityManager.TYPE_WIFI && !wifi.isAvailable()) {
-            Log.d("udp","No Wifi network -- listener not started");
-            return;
-        }
-
-        if(!exitedFromSend)
-        {
-            sending = true;
-            return;
-        }
-        startSending();
-        exitedFromSend = false;
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
+        lock.lock();
         try {
+        startSending();
+        count = 0;
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
+
             final String message  = np.getMessage();
             if(socket == null) {
-                socket = new DatagramSocket();
-                socket.setReuseAddress(true);
-                socket.setBroadcast(true);
+                socket = configureManager();
             }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                count = 0;
-                    while (isSending()) {
-                        sendBroadcast(context, message, port);
-                        try {
-                            count++;
-                            Thread.sleep(getSend_period());
-                            if(count == 10)
-                            {
-                              setSend_period(send_period*2);
-                            }else if(count == 20)
-                            {
-                                setSend_period(send_period*2);
-                            }
+            sendingFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(() -> {
+                if(!isSending())
+                    return;
 
-                        } catch (InterruptedException e) {
-                            Log.e("Udp", "Error in sending loop");
-                            break;
+                    sendBroadcast(message, port);
+                        count++;
+                        if (count == 20) {
+                            setSend_period(send_period * 2);
+                            updateSender();
+                        } else if (count == 40) {
+                            setSend_period(send_period * 2);
+                            updateSender();
                         }
-                    }
-                    stopSending();
-                exitedFromSend = true;
-                }
-        }).start();
+            }, 0, getSend_period(), TimeUnit.MILLISECONDS);
         }
-        catch (Exception e)
-        {
-            Log.e("Udp",e.toString() + "here?1");
+        catch (IOException e) {
+            Log.e("Udp","Error in StartSendingTask",e);
+            stopSending();
+        }finally {
+            lock.unlock();
         }
     }
-    public static boolean isSending() {return sending;}
 
-    public void startSending() {sending = true;}
+    static boolean isSending() {return sending;}
 
-    public void stopSending()
-    {
-        sending = false;
+    void startSending() {sending = true;}
+
+    private void updateSender(){
+        lock.lock();
+        try {
+            BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopSendingPeriodicallyUdp);
+            BackgroundService.addCommandToQueue(BackgroundServiceCmds.startSendPeriodicallyUdp);
+        }finally {
+            lock.unlock();
+        }
     }
 
-    public int getSend_period() {
+    void stopSending() {
+        lock.lock();
+        try {
+            sending = false;
+            if (sendingFuture != null)
+                sendingFuture.cancel(true);
+                sendingFuture = null;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    int getSend_period() {
         return send_period;
     }
 
-    public void setSend_period(int send_period) {
+    void setSend_period(int send_period) {
+        lock.lock();
         this.send_period = send_period;
+        lock.unlock();
     }
 
     // todo rewrite class, it shit
-    public void onZeroConnections() {
+    void onZeroConnections() {
         setSend_period(15000);
        count = 0;
+    }
+
+    public static boolean isListening() {
+        return listening;
+    }
+
+    public static void setListening(boolean listening) {
+        UdpBroadcastManager.listening = listening;
     }
 }

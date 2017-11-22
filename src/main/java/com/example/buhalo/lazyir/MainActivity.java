@@ -5,12 +5,14 @@ package com.example.buhalo.lazyir;
  */
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
@@ -41,6 +43,7 @@ import com.example.buhalo.lazyir.old.IrMethods;
 import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private DevicesAdapter adapter;
     private SampleFragmentPagerAdapter sampleFragmentPagerAdapter;
     private static Lock lock = new ReentrantLock();
+    private static WeakReference<MainActivity> weakActivity;
 
     public static boolean isEditMode() {
         return editMode;
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        weakActivity = new WeakReference<>(this);
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                 PERMISSION_STORAGE);
@@ -128,6 +132,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        weakActivity.clear();
+        weakActivity = null;
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
@@ -152,8 +163,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        invalidateOptionsMenu();
-         adapter.notifyDataSetChanged();
         ActionBar supportActionBar = getSupportActionBar();
         if(supportActionBar != null)
         supportActionBar.setTitle(selected_id);
@@ -183,6 +192,8 @@ public class MainActivity extends AppCompatActivity {
        {
            TcpConnectionManager.sendPairing(selected_id);
        }
+        invalidateOptionsMenu();
+        adapter.notifyDataSetChanged();
 
 
         return super.onOptionsItemSelected(item);
@@ -231,6 +242,22 @@ public class MainActivity extends AppCompatActivity {
             lock.unlock();
         }
     }
+    public DevicesAdapter getAdapter() {
+        return adapter;
+    }
+
+    //todo
+    public static void updateActivity(){
+        if(weakActivity != null && weakActivity.get() != null) {
+            MainActivity activity = weakActivity.get();
+            activity.runOnUiThread(() -> {
+                activity.invalidateOptionsMenu();
+                activity.getAdapter().notifyDataSetChanged();
+            });
+        }
+    }
+
+
 
     private class DevicesAdapter extends BaseAdapter
     {
@@ -274,8 +301,9 @@ public class MainActivity extends AppCompatActivity {
                 view = lInflater.inflate(R.layout.pair_item, parent, false);
             }
             Device d = getProduct(position);
+            Device device = Device.getConnectedDevices().get(d.getId());
             ((TextView) view.findViewById(R.id.connected_device)).setText(d.getId());
-            if(d.isPaired())
+            if(device != null && device.isPaired())
             ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.mipmap.yes_pair);
             else
             {
@@ -291,5 +319,6 @@ public class MainActivity extends AppCompatActivity {
         Device getProduct(int position) {
             return ((Device) getItem(position));
         }
+
     }
 }

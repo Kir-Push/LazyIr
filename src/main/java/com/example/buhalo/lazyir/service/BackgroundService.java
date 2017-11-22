@@ -61,7 +61,7 @@ public class BackgroundService extends Service {
     private TcpConnectionManager tcp;
     private UdpBroadcastManager udp;
 
-    public static int port = 5667;
+    private static int port = 5667;
 
     // for android 8 notification
     public static final int NotifId = 454352354;
@@ -150,11 +150,11 @@ public class BackgroundService extends Service {
     private void startTasks(){
         if(started)
             return;
-        startUdpListener(port);
-        startSendPeriodicallyUdp(port);
-       // registerBatteryReceiver();
-        startClipboardListener();
         initConfig();
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startUdpListener);
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startSendPeriodicallyUdp);
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startClipboardListener);
+       // registerBatteryReceiver();
         started = true;
     }
 
@@ -262,8 +262,8 @@ public class BackgroundService extends Service {
     }
 
 
-    private void startUdpListener(final int port) {
-        executorService.submit(()->udp.startUdpListener(appContext,port));
+    private void startUdpListener() {
+        executorService.submit(()->udp.startUdpListener(appContext,getPort()));
     }
 
     private void stopUdpListener() {
@@ -272,8 +272,8 @@ public class BackgroundService extends Service {
 
 
 
-    private void startSendPeriodicallyUdp(int port) {
-        executorService.submit(()->udp.startSendingTask(appContext,port));
+    private void startSendPeriodicallyUdp() {
+        executorService.submit(()->udp.startSendingTask(appContext,getPort()));
     }
 
     private void stopSendingPeriodicallyUdp() {
@@ -410,9 +410,13 @@ public class BackgroundService extends Service {
             DBHelper.getInstance(appContext).deletePaired(id);
             NetworkPackage networkPackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_UNPAIR, TCP_UNPAIR);
             BackgroundService.sendToDevice(id,networkPackage.getMessage());
-            BackgroundService.unpairDevice(id);
             Device.getConnectedDevices().get(id).setPaired(false);
+            MainActivity.updateActivity(); // at this moment, server not respond to unpair, so update here
         });
+    }
+
+    public static int getPort() {
+        return port;
     }
 
 }

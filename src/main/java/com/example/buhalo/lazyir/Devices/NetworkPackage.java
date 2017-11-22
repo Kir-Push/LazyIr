@@ -144,6 +144,7 @@ public class NetworkPackage {
         return null;
     }
 
+    // Attention todo change from SERIAL to ID
     public static String getMyId() {
         return android.os.Build.SERIAL;
     }
