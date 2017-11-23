@@ -715,6 +715,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // first try getting enabledModulesBy device, if size 0, check if device non exist in db(first time connect, if true then fill by default list of enabled modules(all).
     // return enabledModules in each cases
     public List<String> checkAndSetDefaultIfNoInfo(Device dv) {
+        if(dv == null)
+            return new ArrayList<>();
         List<String> enabledModules = getEnabledModules(dv);
         if(enabledModules.size() == 0 && checkIfFirstTimeDevice(dv))
             enabledModules =  fillStandart(dv);
@@ -774,6 +776,8 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     public  List<String> getEnabledModules(Device dv){
         lock.writeLock().lock();
         List<String> result = new ArrayList<>();
+        if(dv == null)
+            return result;
         try(SQLiteDatabase db = getReadableDatabase()){
 
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_STATUS + " LIKE ?";

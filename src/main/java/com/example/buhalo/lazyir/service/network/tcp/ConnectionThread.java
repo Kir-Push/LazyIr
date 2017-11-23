@@ -191,7 +191,9 @@ public class ConnectionThread implements Runnable {
             if (timerFuture != null && !timerFuture.isDone()) {
                 timerFuture.cancel(true);
             }
-            for (Module module : Device.getConnectedDevices().get(deviceId).getEnabledModules().values()) {
+            Device device = Device.getConnectedDevices().get(deviceId);
+            if(device != null)
+            for (Module module : device.getEnabledModules().values()) {
                 if(module != null)
                     module.endWork();
             }
@@ -205,8 +207,9 @@ public class ConnectionThread implements Runnable {
             // call in finally becaus it may be called in end (after remove device from list)
             // but error can be throwed before it.
             BackgroundService.addCommandToQueue(onZeroConnections);
+            Log.d("ConnectionThread", deviceId + " - Stopped connection");
             lock.unlock();
-            Log.d("ConnectionThread", deviceId + " - Stopped connection");}
+        }
     }
 
     //check if connected
@@ -233,7 +236,7 @@ public class ConnectionThread implements Runnable {
                     DBHelper.getInstance(context).saveCommand(receivedCommand);
             }
         }catch (Exception e) {
-            Log.e("Tcp",e.toString() + "here?");
+            Log.e("Tcp",e.toString());
         }
     }
 
@@ -248,7 +251,7 @@ public class ConnectionThread implements Runnable {
             if(module != null)
             module.execute(np);
         }catch (Exception e) {
-            Log.e("Tcp",e.toString() + "here?");
+            Log.e("Tcp",e.toString());
         }
     }
 

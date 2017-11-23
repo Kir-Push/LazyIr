@@ -73,9 +73,9 @@ public class BackgroundService extends Service {
     private static Lock lock = new ReentrantLock();
 
 
-    private static Context appContext;
-
+    private static Context appContext = getAppContext();
     private static volatile boolean started;
+    private static volatile boolean inited;
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -85,6 +85,9 @@ public class BackgroundService extends Service {
         public void handleMessage(Message msg) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
+            if(!inited)
+                initConfig(getApplicationContext());
+            if(msg != null && msg.obj != null)
                 onHandleWork((Intent) msg.obj);
             // Stop the service using the startId, so that we don't stop
             // the service in the middle of handling another job
@@ -135,9 +138,10 @@ public class BackgroundService extends Service {
         return START_STICKY;
     }
 
-    private void initConfig(){
+     private void initConfig(Context context){
+        System.out.println("INITCOINFIG");
         if(appContext == null)
-        appContext = this.getApplicationContext();
+        appContext = context.getApplicationContext();
         // initialize and setting executors
         timerService.setRemoveOnCancelPolicy(true);
         timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
@@ -145,12 +149,12 @@ public class BackgroundService extends Service {
 
         ((ThreadPoolExecutor)executorService).setKeepAliveTime(600,TimeUnit.SECONDS);
         ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
+        inited = true;
     }
 
     private void startTasks(){
         if(started)
             return;
-        initConfig();
         BackgroundService.addCommandToQueue(BackgroundServiceCmds.startUdpListener);
         BackgroundService.addCommandToQueue(BackgroundServiceCmds.startSendPeriodicallyUdp);
         BackgroundService.addCommandToQueue(BackgroundServiceCmds.startClipboardListener);
@@ -164,9 +168,9 @@ public class BackgroundService extends Service {
       //  unregisterBatteryRecever();
         removeClipBoardListener();
         stopSftpServer();
-        executorService.shutdownNow();
-        timerService.shutdownNow();
-        appContext = null;
+        stopUdpListener();
+    //    executorService.shutdownNow();
+    //    timerService.shutdownNow();
         started = false;
     }
     /**
@@ -176,6 +180,7 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        inited = false;
       //  destroy(); // not now
     }
 
@@ -401,8 +406,7 @@ public class BackgroundService extends Service {
         return appContext;
     }
 
-    public static void setAppContext(Context appContext) {
-        BackgroundService.appContext = appContext;
+    public static void setAppContext(Context cntx) {appContext = cntx;
     }
 
     public static void unpairDevice(String id) {

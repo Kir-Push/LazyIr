@@ -21,6 +21,8 @@ public class BootListener extends BroadcastReceiver {
             return;
         String action = intent.getAction();
         if (action != null && Intent.ACTION_BOOT_COMPLETED.equals(action) && !registered) {
+            if(BackgroundService.getAppContext() == null)
+                BackgroundService.setAppContext(context.getApplicationContext());
            registerBroadcasts(context);
         }
     }

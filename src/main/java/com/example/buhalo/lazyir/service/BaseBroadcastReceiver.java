@@ -30,6 +30,8 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        if(BackgroundService.getAppContext() == null) // todo better sync
+            BackgroundService.setAppContext(context.getApplicationContext());
             String action = intent.getAction();
             if(action == null)
                 return;

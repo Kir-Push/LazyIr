@@ -163,7 +163,7 @@ public class UdpBroadcastManager  {
     {
         lock.lock();
         try{
-        listening = false;
+            setListening(false);
         if(server != null)
         server.close();
         server = null;}

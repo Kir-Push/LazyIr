@@ -52,6 +52,8 @@ public class ModuleFactory {
         lock.lock();
         ConcurrentHashMap<String,Module> resultMap = new ConcurrentHashMap<>();
         try {
+            if(dv == null)
+                return resultMap;
             // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
             List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(dv);
             // getting list of enabledModules names from Database;
@@ -141,7 +143,9 @@ public class ModuleFactory {
     {
         //to
         List<ModulesWrap> result = new ArrayList<>();
-        Map<String, Module> enabledModules = getEnabledModules(dv, context);
+        if(dv == null)
+            return result;
+                    Map<String, Module> enabledModules = getEnabledModules(dv, context);
         List<Class> registeredModules = getRegisteredModules();
         for (Class registeredModule : registeredModules) {
             if(!enabledModules.containsKey(registeredModule.getSimpleName()))
