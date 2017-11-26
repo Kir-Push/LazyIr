@@ -14,20 +14,10 @@ public class Player {
     private String readyTimeString;
     private String type;
     private String id;
+    private String link;//link for opening in browser! // todo new add it in server,
 
-    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString) {
-        this.name = name;
-        this.playbackStatus = playbackStatus;
-        this.title = title;
-        this.lenght = lenght;
-        this.volume = volume;
-        this.currTime = currTime;
-        this.readyTimeString = readyTimeString;
-        this.type = "dbus";
-        this.id = "-1";
-    }
 
-    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString, String type, String id) {
+    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString, String type, String id,String link) {
         this.name = name;
         this.playbackStatus = playbackStatus;
         this.title = title;
@@ -37,6 +27,11 @@ public class Player {
         this.readyTimeString = readyTimeString;
         this.type = type;
         this.id = id;
+        this.link = link;
+    }
+
+    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString) {
+        this(name,playbackStatus,title,lenght,volume,currTime,readyTimeString,"dbus","-1","-1");
     }
 
     public Player() {
@@ -106,6 +101,13 @@ public class Player {
 
     public void setCurrTime(double currTime) {
         this.currTime = currTime;
+    }
+
+    public String getLink() {
+        return link;
+    }
+    public void setLink(String link) {
+        this.link = link;
     }
 
     @Override

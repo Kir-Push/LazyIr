@@ -21,26 +21,21 @@ public class ClipBoard extends Module {
     private static volatile boolean inserted = false;
 
     private static ClipListener clipListener;
-    private static Lock lock = new ReentrantLock();
+    private static Lock staticlock = new ReentrantLock();
 
     @Override
     public void execute(NetworkPackage np) {
+        if(!working)
+            return;
         if(np.getData().equals(RECEIVE)) {
             onReceive(np);
         }
 
     }
 
-    // you actually do not need do something there, because
-    // module need be ended only when connected device are 0
-    // and this will be done by background onZeroConnections method.
-    @Override
-    public void endWork() {
-
-    }
 
     private void onReceive(NetworkPackage np) {
-        lock.lock();
+        staticlock.lock();
         try {
             inserted = true;
             ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -49,26 +44,26 @@ public class ClipBoard extends Module {
                 clipboard.setPrimaryClip(clip);
             }
         }finally {
-            lock.unlock();
+            staticlock.unlock();
         }
     }
 
     public static void setListener(Context context)
     {
-        lock.lock();
+        staticlock.lock();
         try{
         final ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
         if(clipboard != null) {
             clipListener = new ClipListener(clipboard);
             clipboard.addPrimaryClipChangedListener(clipListener);
         }}finally {
-            lock.unlock();
+            staticlock.unlock();
         }
     }
 
     public static void removeListener(Context context)
     {
-        lock.lock();
+        staticlock.lock();
         try {
             final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipListener == null || clipboard == null)
@@ -76,7 +71,7 @@ public class ClipBoard extends Module {
             clipboard.removePrimaryClipChangedListener(clipListener);
             clipListener = null;
         }finally {
-            lock.unlock();
+            staticlock.unlock();
         }
     }
 

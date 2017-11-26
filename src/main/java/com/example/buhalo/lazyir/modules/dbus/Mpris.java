@@ -38,6 +38,8 @@ public class Mpris extends Module {
     @Override
     public void execute(NetworkPackage np) {
         try {
+            if(!working)
+                return;
         switch (np.getData())
         {
             case ALL_PLAYERS:
@@ -105,6 +107,7 @@ public class Mpris extends Module {
     // Mpris actually doesn't have any state
     @Override
     public void endWork() {
+        working = false;
         serverAnswer = null;
     }
 

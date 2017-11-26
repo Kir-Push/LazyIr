@@ -1,20 +1,23 @@
-package com.example.buhalo.lazyir.service;
+package com.example.buhalo.lazyir.modules.notificationModule;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.modules.notificationModule.Messengers;
-import com.example.buhalo.lazyir.modules.notificationModule.Notification;
-import com.example.buhalo.lazyir.modules.notificationModule.Notifications;
-
-import java.util.List;
+import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**
  * Created by buhalo on 21.03.17.
@@ -24,7 +27,7 @@ import java.util.List;
     // todo you need work in separate thread, maybe in backgroundService
     //todo https://stackoverflow.com/questions/17926236/notificationlistenerservice-implementation
 public class NotificationListener extends NotificationListenerService {
-    public static NotificationListener notif;
+    private static NotificationListener notif;
     public static final String SHOW_NOTIFICATION = "ShowNotification";
     public static final String RECEIVE_NOTIFICATION = "receiveNotification";
     public static final String DELETE_NOTOFICATION = "deleteNotification";
@@ -35,10 +38,8 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onCreate() {
-
         super.onCreate();
         notif = this;
-
     }
 
     @Override
@@ -58,12 +59,11 @@ public class NotificationListener extends NotificationListenerService {
 
         //first check if notification is not smsMessage, if it is - send as sms
             if(!smsMessage(sbn)){
-                // after check if this  is not messenger message, if it is - send as message
-        if(!messengersMessage(sbn))
-            // if previous two false, this is notif, send to server
-                sendToserver(sbn, RECEIVE_NOTIFICATION);}
-        } catch (Exception e) {
-        Log.e("NotificationListener",e.toString());
+                if(!messengersMessage(sbn)) // after check if this  is not messenger message, if it is - send as message
+                  sendToserver(sbn, RECEIVE_NOTIFICATION);   // if previous two false, this is notif, send to server
+            }
+        } catch (Throwable e) { // i don't need crash app if something going wrong
+        Log.e("NotificationListener","onNotificationPosted error",e);
         }
 
     }
@@ -79,25 +79,16 @@ public class NotificationListener extends NotificationListenerService {
             if("android.wearable.EXTENSIONS".equals(key)){
 
                 if((sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) || !notification.getPack().equals("org.telegram.messenger")) {// telegram send second notif with id 1, it not contain action, therefore ignore it
-                    for (Device device : Device.getConnectedDevices().values()) {
-                        Messengers messenger = null;
-                        if(device != null && (messenger = (Messengers)device.getEnabledModules().get(Messengers.class.getSimpleName())) != null) {
-                            messenger.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
-                        }
-                    }
+                    Messengers.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
                     Messengers.sendToServer(notification);
                 }
                 return true;
             }
         }
-        // todo фигня выходит, верни обратно одну статическую pendingNotifs и не парь мозг
-        for (Device device : Device.getConnectedDevices().values()) {
-            Messengers messenger = null;
-            if(device != null && (messenger = (Messengers)device.getEnabledModules().get(Messengers.class.getSimpleName())) != null && messenger.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
-                Messengers.sendToServer(notification);
-                return true;
-            }
-        }
+       if( Messengers.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
+           Messengers.sendToServer(notification);
+           return true;
+       }
         return false;
     }
 
@@ -115,10 +106,11 @@ public class NotificationListener extends NotificationListenerService {
       return   notif == null ? null : notif.getActiveNotifications();
     }
 
+    // todo reverse notifs for image and text carefully
     public Notification castToMyNotification(StatusBarNotification sbn)
     {
         String pack = sbn.getPackageName();
-        if(pack.equals(SMS_TYPE))
+        if(smsMessage(sbn))
             return null;
         String text = "";
         String title;
@@ -128,32 +120,22 @@ public class NotificationListener extends NotificationListenerService {
         CharSequence charSequence = extras.getCharSequence("android.text");
         CharSequence tickerText = sbn.getNotification().tickerText;
         if(charSequence != null)
-        {
             text = charSequence.toString();
-        }
         if(txt != null)
-        {
             text = txt;
-        }
         if(tickerText != null)
-        {
             ticker = tickerText.toString();
-        }
         title = extras.getString("android.title");
-        if(title == null)
-        {
+        if(title == null) {
             CharSequence bigText = (CharSequence) extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
             if(bigText != null)
                 title = bigText.toString();
         }
         if(pack.equals("com.whatsapp") && txt == null)
-        {
             return null;
-        }
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
 //        if(pack.equals("org.telegram.messenger") && !title.contains("(\d new message)"))
         Notification notification = new Notification(text,title,pack,ticker, android.os.Build.MODEL);
-        Log.i(SHOW_NOTIFICATION,pack + "  " + title + "  " + text + "  " + ticker);
         return notification;
     }
 
@@ -213,11 +195,46 @@ public class NotificationListener extends NotificationListenerService {
             np.setValue("ticker",notification.getTicker());
             String message = np.getMessage();
             if(message != null && !message.equals(""))
-            TcpConnectionManager.getInstance().sendCommandToAll(np.getMessage());
+            BackgroundService.sendToAllDevices(np.getMessage());
         }catch (Exception e)
         {
             Log.e(SHOW_NOTIFICATION,e.toString());
         }
     }
+    //https://stackoverflow.com/questions/20522133/use-android-graphics-bitmap-from-java-without-android  --- bitmap to img (pixels)
+    private int[] getIcon(StatusBarNotification sbn){
+        android.app.Notification notification = sbn.getNotification();
+        Icon icon = notification.getLargeIcon() == null ? notification.getSmallIcon() : notification.getLargeIcon();
+        if(icon == null)
+            return new int[0];
+        try {
+            Context packageContext = createPackageContext(sbn.getPackageName(), CONTEXT_IGNORE_SECURITY);
+            Drawable drawable = icon.loadDrawable(packageContext);
+            Bitmap bitmap = drawableToBitmap(drawable);
+            int[] pixels = new int[bitmap.getWidth()*bitmap.getHeight()];
+            bitmap.getPixels(pixels,0,bitmap.getWidth(),0,0,bitmap.getWidth(),bitmap.getHeight());
+            return pixels;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("NotificationListener","getIcon",e);
+        }
+        return //todo don't return array, return some wrapper, with int, width,height and size
+    }
+
+    //https://stackoverflow.com/questions/37252119/how-to-convert-a-icon-to-bitmap-in-android    --- drawable to bitmap
+    public Bitmap drawableToBitmap (Drawable drawable) {
+        Bitmap bitmap = null;
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+        return bitmap;
 
 }

@@ -12,12 +12,12 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
-import static com.example.buhalo.lazyir.service.NotificationListener.SHOW_NOTIFICATION;
+import static com.example.buhalo.lazyir.modules.notificationModule.NotificationListener.SHOW_NOTIFICATION;
 
 /**
  * Created by buhalo on 14.03.17.
  */
-
+// todo separate broadcast for sms and call's, register only if module enabled
 public class BaseBroadcastReceiver extends BroadcastReceiver {
 
     private static boolean lastCheck;

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
@@ -83,6 +84,26 @@ public class NetworkPackage {
         for (String st : list) {
             arrayNode.add(st);
         }
+    }
+
+    public void addIntArray(String key, int[] ints){
+        ArrayNode arrayNode = idNode.putArray(key);
+        for (int anInt : ints) {
+            arrayNode.add(anInt);
+        }
+    }
+
+    public int[] getIntArray(String key){
+        JsonNode jsonNode = idNode.get(key);
+        if(jsonNode.isArray() && jsonNode.getNodeType().equals(JsonNodeType.ARRAY)){
+           ArrayNode arrayNode = (ArrayNode) jsonNode;
+           int result[] = new int[arrayNode.size()];
+            for (int i = 0;i<arrayNode.size();i++) {
+                result[i] = arrayNode.get(i).asInt();
+            }
+            return result;
+        }
+        return new int[0];
     }
 
     public String getMessage() {

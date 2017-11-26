@@ -4,15 +4,12 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.NotificationListener;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 /**
  * Created by buhalo on 20.04.17.
