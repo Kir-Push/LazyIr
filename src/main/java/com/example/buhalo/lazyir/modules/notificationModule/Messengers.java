@@ -102,14 +102,16 @@ public class Messengers extends Module {
     }
 
 
-    public static void sendToServer(Notification notification) {
+     static void sendToServer(Notification notification) {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Messengers.class.getSimpleName(),ANSWER);
         String typeName = notification.getPack()+":"+notification.getTitle();
-        np.setValue("typeName",typeName);
-        np.setValue("pack",tryExtractPack(notification.getPack()));
-        np.setValue("title",notification.getTitle());
-        np.setValue("ticker",notification.getTicker());
-        np.setValue("text",notification.getText());
+        notification.setPack(tryExtractPack(notification.getPack())); // todo change from setValue, you need change in server to correspond!
+        np.setObject(NetworkPackage.N_OBJECT,notification);
+//        np.setValue("typeName",typeName);
+//        np.setValue("pack",tryExtractPack(notification.getPack()));
+//        np.setValue("title",notification.getTitle());
+//        np.setValue("ticker",notification.getTicker());
+//        np.setValue("text",notification.getText());
         BackgroundService.sendToAllDevices(np.getMessage());
     }
 
@@ -118,7 +120,7 @@ public class Messengers extends Module {
        return (i = pack.lastIndexOf(".")) != -1 ? pack.substring(i) : pack;
     }
 
-    public static ConcurrentHashMap<String, StatusBarNotification> getPendingNotifsLocal() {
+    static ConcurrentHashMap<String, StatusBarNotification> getPendingNotifsLocal() {
         return pendingNotifsLocal;
     }
 }
