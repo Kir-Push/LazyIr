@@ -323,7 +323,7 @@ public class BackgroundService extends Service {
             MainActivity.setSelected_id("");
             stopSftpServer();
 //            unregisterBatteryRecever();
-            removeClipBoardListener();
+   //         removeClipBoardListener();
         } else {
             MainActivity.setSelected_id(Device.getConnectedDevices().values().iterator().next().getId());
         }

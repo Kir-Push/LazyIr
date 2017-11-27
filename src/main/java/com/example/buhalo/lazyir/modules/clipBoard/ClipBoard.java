@@ -96,6 +96,7 @@ public class ClipBoard extends Module {
                 String text = item.getText().toString();
                 NetworkPackage np =   NetworkPackage.Cacher.getOrCreatePackage(ClipBoard.class.getSimpleName(), RECEIVE);
                 np.setValue("text", text);
+                System.out.println("here");
                 BackgroundService.sendToAllDevices(np.getMessage());
             }
         }
