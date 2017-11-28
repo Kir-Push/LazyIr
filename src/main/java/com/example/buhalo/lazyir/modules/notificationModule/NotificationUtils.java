@@ -92,7 +92,6 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
         return result;
     }
 
-    //todo create test's for util method's
 
     //todo  EXTRA_SUB_TEXT create see Notification class
 

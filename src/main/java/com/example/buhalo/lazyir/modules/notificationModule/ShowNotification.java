@@ -30,20 +30,15 @@ public class ShowNotification extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-        if(np.getData().equals("ALL NOTIFS"))
-        {
+        if(np.getData().equals("ALL NOTIFS")) {
             Notifications notifications = new Notifications();
-            String ns = Context.NOTIFICATION_SERVICE;
+//            String ns = Context.NOTIFICATION_SERVICE;
             StatusBarNotification[] activeNotifications =NotificationListener.getAll();
-            if(activeNotifications == null)
-            {
+            if(activeNotifications == null) {
                 return;
             }
-            for(int i = 0;i<activeNotifications.length;i++)
-            {
-      //          System.out.println("\n\n\n\n\n\n\n\n" + activeNotifications[i].);
-                Notification notification =  NotificationUtils.castToMyNotification(activeNotifications[i]);
-                notifications.addNotification(notification);
+            for (StatusBarNotification activeNotification : activeNotifications) {
+                notifications.addNotification(NotificationUtils.castToMyNotification(activeNotification));
             }
             NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"ALL NOTIFS");
             nps.setObject(NetworkPackage.N_OBJECT,notifications);

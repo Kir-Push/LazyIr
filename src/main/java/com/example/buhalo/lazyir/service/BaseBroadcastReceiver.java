@@ -1,17 +1,27 @@
 package com.example.buhalo.lazyir.service;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import static com.example.buhalo.lazyir.modules.notificationModule.NotificationListener.SHOW_NOTIFICATION;
 
 /**
@@ -27,6 +37,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     private static String savedNumber;
 
 
+    // todo handle mms
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -187,4 +198,41 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
             return false; // Wi-Fi adapter is OFF
         }
     }
+
+    public InputStream openDisplayPhoto(long contactId) {
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
+        try {
+            AssetFileDescriptor fd =
+                    BackgroundService.getAppContext().getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
+            return fd != null ? fd.createInputStream() : null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public InputStream openPhoto(long contactId) {
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+        Cursor cursor =  BackgroundService.getAppContext().getContentResolver().query(photoUri,
+                new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        try {
+            if (cursor.moveToFirst()) {
+                byte[] data = cursor.getBlob(0);
+                if (data != null) {
+                    return new ByteArrayInputStream(data);
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+
+
+
 }

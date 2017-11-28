@@ -61,15 +61,17 @@ public class SmsModule extends Module {
         sendResponse("Message Sended",dvId);
     }
 
-    public String getPhoneNumber(String name, Context context) {
+    private String getPhoneNumber(String name, Context context) {
         String ret = null;
         String selection = ContactsContract.Contacts.DISPLAY_NAME+" like '" + name +"'";
         String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER};
         Cursor c = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, selection, null, ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
-        if (c.moveToFirst()) {
+        if (c != null && c.moveToFirst()) {
             ret = c.getString(0);
         }
-        c.close();
+        if (c != null) {
+            c.close();
+        }
         if(ret==null)
             ret = "Unsaved";
         return ret;
@@ -83,10 +85,12 @@ public class SmsModule extends Module {
         Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
         Cursor c = context.getContentResolver().query(contactUri,
                 projection, null, null, null);
-        if (c.moveToFirst()) {
+        if (c != null && c.moveToFirst()) {
             ret = c.getString(0);
         }
-        c.close();
+        if (c != null) {
+            c.close();
+        }
         if(ret==null)
             ret = number;
         return ret;

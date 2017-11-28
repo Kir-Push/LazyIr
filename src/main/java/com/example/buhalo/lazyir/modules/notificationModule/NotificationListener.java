@@ -56,7 +56,10 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         try {
-        if(notif == null)
+            if(BackgroundService.getAppContext() == null)
+                BackgroundService.setAppContext(getApplicationContext());
+
+            if(notif == null)
             notif = this;
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && sbn.getId() == BackgroundService.NotifId)

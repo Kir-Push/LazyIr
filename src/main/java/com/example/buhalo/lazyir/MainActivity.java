@@ -74,15 +74,15 @@ public class MainActivity extends AppCompatActivity {
     private static transient boolean editMode = false;
 
     private static final int PERMISSION_STORAGE = 567;
+    private static final int PERMISSION_ALL = 566;
+    String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.RECEIVE_SMS,Manifest.permission.SEND_SMS,Manifest.permission.READ_CONTACTS,Manifest.permission.READ_PHONE_STATE};
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         weakActivity = new WeakReference<>(this);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                PERMISSION_STORAGE);
+        requestPermissions();
 
 
         setContentView(R.layout.activity_main);
@@ -128,6 +128,13 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(sampleFragmentPagerAdapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this,
+                PERMISSIONS,
+                PERMISSION_ALL);
 
     }
 
