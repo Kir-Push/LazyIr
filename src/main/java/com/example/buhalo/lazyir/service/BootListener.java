@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
+import com.example.buhalo.lazyir.modules.notificationModule.SmsListener;
 
 /**
  * Created by buhalo on 19.11.17.
@@ -13,7 +14,7 @@ import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 
 public class BootListener extends BroadcastReceiver {
 
-    public static boolean registered;
+    public static volatile boolean registered;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -27,15 +28,20 @@ public class BootListener extends BroadcastReceiver {
         }
     }
 
-    public static void registerBroadcasts(Context context) {
+    public synchronized static void registerBroadcasts(Context context) {
+        if(registered)
+            return;
+        registered = true;
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.wifi.supplicant.STATE_CHANGE");
-        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
         filter.addAction("android.intent.action.PHONE_STATE");
         BaseBroadcastReceiver receiver = new BaseBroadcastReceiver();
         context.getApplicationContext().registerReceiver(receiver,filter);
+
         BatteryBroadcastReveiver batteryBroadcastReveiver = new BatteryBroadcastReveiver();
         context.getApplicationContext().registerReceiver(batteryBroadcastReveiver,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        registered = true;
+
+        SmsListener smsListener = new SmsListener();
+        context.getApplicationContext().registerReceiver(smsListener,new IntentFilter( "android.provider.Telephony.SMS_RECEIVED"));
     }
 }

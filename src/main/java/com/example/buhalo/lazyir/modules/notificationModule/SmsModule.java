@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
+import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
@@ -12,6 +13,8 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.ArrayList;
+
+import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getPhoneNumber;
 
 /**
  * Created by buhalo on 26.03.17.
@@ -29,8 +32,8 @@ public class SmsModule extends Module {
         if(np.getData().equals(SEND))
         {
             Sms message = np.getObject(NetworkPackage.N_OBJECT,Sms.class);
-            if(message.getName() != null)
-            send_sms(message.getName(),message.getText(),np.getId());
+            if(message != null)
+            send_sms(message);
         }
 
     }
@@ -39,68 +42,33 @@ public class SmsModule extends Module {
     public void endWork() {
 
     }
-
-    private void send_sms(String name,String text,String dvId) {
+ // todo create send_mms for sending pictures
+    private void send_sms(Sms sms) {
         String error = null;
         try {
-            String number = getPhoneNumber(name,context.getApplicationContext());
-            if(number.equals("Unsaved"))
-            {
-                number = name;
+            String number = getPhoneNumber(sms.getName(),context.getApplicationContext());
+            if(number.equals("Unsaved")) {
+                number = sms.getName();
             }
             SmsManager smsManager = SmsManager.getDefault();
-            ArrayList<String> messages = smsManager.divideMessage(text);
+            ArrayList<String> messages = smsManager.divideMessage(sms.getText());
             smsManager.sendMultipartTextMessage(number,null,messages,null,null);
           //  smsManager.sendTextMessage(number, null, text, null, null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            error = ex.getMessage();
-            sendResponse(error,dvId);
+        } catch (Exception e) {
+            Log.e("SmsModule","error in send_sms",e);
+            sendResponse("Message Not Sended");
             return;
         }
-        sendResponse("Message Sended",dvId);
-    }
-
-    private String getPhoneNumber(String name, Context context) {
-        String ret = null;
-        String selection = ContactsContract.Contacts.DISPLAY_NAME+" like '" + name +"'";
-        String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER};
-        Cursor c = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, selection, null, ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
-        if (c != null && c.moveToFirst()) {
-            ret = c.getString(0);
-        }
-        if (c != null) {
-            c.close();
-        }
-        if(ret==null)
-            ret = "Unsaved";
-        return ret;
+        sendResponse("Message Sended");
     }
 
 
-    public static String getName(String number, Context context) {
-        String ret = null;
-        String selection = ContactsContract.CommonDataKinds.Phone.NUMBER+" like " + number +"";
-        String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
-        Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-        Cursor c = context.getContentResolver().query(contactUri,
-                projection, null, null, null);
-        if (c != null && c.moveToFirst()) {
-            ret = c.getString(0);
-        }
-        if (c != null) {
-            c.close();
-        }
-        if(ret==null)
-            ret = number;
-        return ret;
-    }
 
-    private void sendResponse(String response,String dvId)
+    private void sendResponse(String response)
     {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SMS_TYPE,RESPONSE);
         np.setValue("response",response);
-        BackgroundService.sendToDevice(dvId,np.getMessage());
+        sendMsg(np.getMessage());
     }
 
 

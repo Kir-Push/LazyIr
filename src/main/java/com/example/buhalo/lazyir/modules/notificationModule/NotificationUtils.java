@@ -119,7 +119,7 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
         return bitmapToBase64(bmp);
     }
 
-    private static String bitmapToBase64(Bitmap bitmap){
+    public static String bitmapToBase64(Bitmap bitmap){
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         if(bitmap == null)
             return null;

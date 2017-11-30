@@ -1,6 +1,7 @@
 package com.example.buhalo.lazyir;
 
 import android.app.Application;
+import android.content.Context;
 
 
 import com.example.buhalo.lazyir.service.BackgroundService;
@@ -26,10 +27,11 @@ public class AppBoot extends Application {
 
         super.onCreate();
 
-        BootListener.registerBroadcasts(getApplicationContext());
+        Context applicationContext = getApplicationContext();
+        BootListener.registerBroadcasts(applicationContext);
 
         if(BackgroundService.getAppContext() == null)
-            BackgroundService.setAppContext(getApplicationContext());
+            BackgroundService.setAppContext(applicationContext);
        if(checkWifiOnAndConnected(this))
            BackgroundService.addCommandToQueue(BackgroundServiceCmds.startTasks);
 

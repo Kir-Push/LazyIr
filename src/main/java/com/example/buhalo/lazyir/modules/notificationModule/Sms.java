@@ -5,7 +5,7 @@ package com.example.buhalo.lazyir.modules.notificationModule;
  */
 
 public class Sms {
-    private int number;
+    private String number; // todo in server change from int to String
     private String name;
     private String text;
     private String icon; // todo in server
@@ -14,25 +14,27 @@ public class Sms {
     public Sms() {
     }
 
-    public Sms(String name, String text,String icon,String picture) {
+    public Sms(String name,String number, String text,String icon,String picture) {
         this.name = name;
         this.text = text;
         this.picture = picture;
         this.icon = icon;
+        this.number = number;
     }
 
-    public Sms(int number, String text,String icon,String picture) {
+
+    public Sms(String number, String text,String icon,String picture) {
         this.number = number;
         this.text = text;
         this.picture = picture;
         this.icon = icon;
     }
 
-    public int getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 

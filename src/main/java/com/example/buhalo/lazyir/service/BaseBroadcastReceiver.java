@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -22,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
 import static com.example.buhalo.lazyir.modules.notificationModule.NotificationListener.SHOW_NOTIFICATION;
 
 /**
@@ -46,16 +49,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
             String action = intent.getAction();
             if(action == null)
                 return;
-            if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
-                final Bundle bundle = intent.getExtras();
-                if (bundle == null) return;
-                final Object[] pdus = (Object[]) bundle.get("pdus");
-                for (Object pdu : pdus != null ? pdus : new Object[0]) {
-                    SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
-                    smsReceive(message, context);
-                }
-                return;
-            }
+
             if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 Bundle extras = intent.getExtras();
                 if(extras == null)
@@ -141,7 +135,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void onIncomingCallEnded(Context context, String savedNumber,String type) {
-        String name = SmsModule.getName(savedNumber,context.getApplicationContext());
+        String name = getName(savedNumber,context.getApplicationContext());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.endCall");
         np.setValue("number",name);
         np.setValue("callType",type);
@@ -153,7 +147,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void onIncomingCallReceived(Context context, String number,String type) {
-        String name = SmsModule.getName(number,context.getApplicationContext());
+        String name = getName(number,context.getApplicationContext());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.call");
         np.setValue("number",name);
         np.setValue("text","Incoming CALL");
@@ -165,72 +159,22 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private void smsReceive(SmsMessage sms,Context context)
-    {
-        String messageBody = sms.getMessageBody();
-        if (messageBody == null) {
-            messageBody = "";
-        }
-        String phoneNumber = sms.getOriginatingAddress();
-        if (phoneNumber == null) {
-            phoneNumber = "";
-        }
-
-        String name = SmsModule.getName(phoneNumber,context.getApplicationContext());
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
-        np.setValue("phoneNumber",phoneNumber);
-        np.setValue("numberName",name);
-        np.setValue("text",messageBody);
-        BackgroundService.sendToAllDevices(np.getMessage());
-    }
 
     public static boolean checkWifiOnAndConnected(Context context) {
         WifiManager wifiMgr = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (wifiMgr != null && wifiMgr.isWifiEnabled()) { // Wi-Fi adapter is ON
-
             WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
-
             return !(wifiInfo == null || wifiInfo.getNetworkId() == -1);
-
         }
         else {
             return false; // Wi-Fi adapter is OFF
         }
     }
 
-    public InputStream openDisplayPhoto(long contactId) {
-        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
-        Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
-        try {
-            AssetFileDescriptor fd =
-                    BackgroundService.getAppContext().getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
-            return fd != null ? fd.createInputStream() : null;
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
-    public InputStream openPhoto(long contactId) {
-        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
-        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
-        Cursor cursor =  BackgroundService.getAppContext().getContentResolver().query(photoUri,
-                new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
-        if (cursor == null) {
-            return null;
-        }
-        try {
-            if (cursor.moveToFirst()) {
-                byte[] data = cursor.getBlob(0);
-                if (data != null) {
-                    return new ByteArrayInputStream(data);
-                }
-            }
-        } finally {
-            cursor.close();
-        }
-        return null;
-    }
+
+
 
 
 
