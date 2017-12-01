@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.telephony.SmsMessage;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
@@ -19,6 +20,9 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
@@ -38,20 +42,31 @@ public class SmsListener extends BroadcastReceiver {
         if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
             final Bundle bundle = intent.getExtras();
             if (bundle == null) return;
+            StringBuilder stringBuilder = new StringBuilder();
             final Object[] pdus = (Object[]) bundle.get("pdus");
-            for (Object pdu : pdus != null ? pdus : new Object[0]) {
-                SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
-                smsReceive(message, context);
+            if(pdus == null)
+                return;
+            for (Object pdu :  pdus) {
+                SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
+                stringBuilder.append(smsMessage.getMessageBody());
             }
+            Sms resultMessage =  extractSms( SmsMessage.createFromPdu((byte[])pdus[0]),context);
+            resultMessage.setText(stringBuilder.toString());
+            smsReceive(resultMessage, context);
         }
     }
 
-    private void smsReceive(SmsMessage smsMessage,Context context) {
+    private Sms extractSms(SmsMessage smsMessage,Context context){
         String messageBody = smsMessage.getMessageBody();
         String name = getName( smsMessage.getOriginatingAddress(),context.getApplicationContext());
         String icon = getContactImage(context,smsMessage.getOriginatingAddress());
         String phoneNumber = getPhoneNumber(name,context);
-        Sms sms = new Sms(name,phoneNumber,messageBody,icon,null);
+        return new Sms(name,phoneNumber,messageBody,icon,null);
+    }
+
+    private void smsReceive(Sms sms, Context context) {
+        if(sms == null)
+            return;
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
         np.setObject(NetworkPackage.N_OBJECT,sms);
         BackgroundService.sendToAllDevices(np.getMessage());
