@@ -291,7 +291,8 @@ public class MediaRemoteActivity extends AppCompatActivity {
                     arg = seekBar.getProgress();
                 else
                     arg = (int) (seekBar.getProgress() - player.getCurrTime());
-               putCommand(2,"seek",arg); }});
+               putCommand(2,"seek",arg); }
+        });
 
     }
 

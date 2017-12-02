@@ -82,7 +82,7 @@ public class Mpris extends Module {
 
     void sendVolume(String player,int volume) {
         double vol = ((double)volume)/100;
-        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK).setValue(PLAYER,player).setValue(VOLUME,Double.toString(vol)).getMessage());
+        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),VOLUME).setValue(PLAYER,player).setValue(VOLUME,Double.toString(vol)).getMessage());
     }
 
     // hard to read, but one string ;)
