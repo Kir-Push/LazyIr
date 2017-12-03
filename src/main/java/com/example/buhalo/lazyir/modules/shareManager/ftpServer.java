@@ -54,8 +54,7 @@ public class ftpServer {
     private static HashMap<String,String> pass;
     public static boolean ftpServerOn = false;
 
-    public int setupFtpServer(Context context, NetworkPackage np)
-    {
+    public int setupFtpServer(Context context, NetworkPackage np) {
         if(ftpServerOn) {
            return port;
         }

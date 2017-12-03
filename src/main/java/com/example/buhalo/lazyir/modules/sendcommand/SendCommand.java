@@ -23,7 +23,7 @@ public class SendCommand extends Module {
     public void execute(final NetworkPackage np) {
         BackgroundService.submitNewTask(() -> {
             if(np.getData().equals(EXECUTE)) {
-                sendCommands(np);
+                sendMsg(np.getMessage());
             }
             else if(np.getData().equals(RECEIVED_COMMAND)) {
                 final List<Command> args = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
@@ -37,17 +37,9 @@ public class SendCommand extends Module {
 
     }
 
-    private void sendCommands(NetworkPackage np)
-    {
-        String message;
-        message = np.getMessage();
-        BackgroundService.sendToDevice(device.getId(),message);
-    }
 
-    private void saveCommand(List<Command> args)
-    {
-        for(Command command : args)
-        {
+    private void saveCommand(List<Command> args) {
+        for(Command command : args) {
             DBHelper.getInstance(context).saveCommand(command);
         }
         // for save comamnd protocol is data is type command, arg-1 is cmd name, arg-2 cmd, arg-3 type(ir or pc);

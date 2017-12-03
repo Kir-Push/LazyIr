@@ -12,7 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Base64;
 
 import com.example.buhalo.lazyir.R;
-import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,7 +69,7 @@ public class NotificationUtilsTest {
         String base64 = bitmapToBase64(bitmap);
         String base642 = bitmapToBase64(drawableToBitmap(notification2.getSmallIcon().loadDrawable(appContext)));
         StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
-        Notification notification1 = NotificationUtils.castToMyNotification(activeNotifications[0]);
+        com.example.buhalo.lazyir.modules.notificationModule.notifications.Notification notification1 = NotificationUtils.castToMyNotification(activeNotifications[0]);
         assertEquals(activeNotifications.length,1);
         System.out.println(notification1.getIcon());
         assertEquals(notification1.getText(),"Hello World!");
@@ -82,7 +81,7 @@ public class NotificationUtilsTest {
         notificationManager.notify(2,notification2);
         Thread.sleep(10);
         activeNotifications = notificationManager.getActiveNotifications();
-        Notification notification3 = NotificationUtils.castToMyNotification(activeNotifications[1].getId() != 2 ? activeNotifications[0] : activeNotifications[1]);
+        com.example.buhalo.lazyir.modules.notificationModule.notifications.Notification notification3 = NotificationUtils.castToMyNotification(activeNotifications[1].getId() != 2 ? activeNotifications[0] : activeNotifications[1]);
         System.out.println(notification3.getIcon());
         assertNotEquals(notification3.getIcon(),base64);
         assertEquals(notification3.getIcon(),base642);

@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.shareManager;
+package com.example.buhalo.lazyir.old;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -16,6 +16,9 @@ import android.widget.Toast;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.modules.shareManager.FileWrap;
+import com.example.buhalo.lazyir.modules.shareManager.FolderAdater;
+import com.example.buhalo.lazyir.old.ShareModule;
 
 import java.io.File;
 import java.util.List;
@@ -27,7 +30,7 @@ import java.util.List;
 public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener,AdapterView.OnItemLongClickListener,AdapterView.OnItemClickListener,AbsListView.MultiChoiceModeListener {
 
     private ShareModule module;
-    private  FolderAdater android_adapter;
+    private FolderAdater android_adapter;
     private FolderAdater server_adapter;
     private ListView android_list;
 
@@ -250,7 +253,6 @@ public class ShareActivity extends AppCompatActivity implements TabLayout.OnTabS
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            System.out.println("dadada");
             FileWrap item = server_adapter.getFile(position);
             server_adapter.clear();
             String temp = getCurrPaths()+"/"+item.getPath();

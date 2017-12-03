@@ -5,13 +5,14 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.modules.notificationModule.call.CallModule;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
 import com.example.buhalo.lazyir.modules.sendIr.SendIr;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.dbus.Mpris;
-import com.example.buhalo.lazyir.modules.notificationModule.Messengers;
-import com.example.buhalo.lazyir.modules.notificationModule.ShowNotification;
-import com.example.buhalo.lazyir.modules.notificationModule.SmsModule;
+import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNotification;
+import com.example.buhalo.lazyir.modules.notificationModule.sms.SmsModule;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
 
@@ -104,6 +105,7 @@ public class ModuleFactory {
         registeredModules.add(Messengers.class);
         registeredModules.add(ShowNotification.class);
         registeredModules.add(SynchroModule.class);
+        registeredModules.add(CallModule.class);
     }
 
     private static Module instantiateModuleByName(Device dv,String name) throws  IllegalAccessException,InstantiationException

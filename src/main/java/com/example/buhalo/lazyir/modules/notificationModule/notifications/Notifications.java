@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
 import java.util.ArrayList;
 import java.util.List;

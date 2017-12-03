@@ -1,25 +1,12 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
-import android.os.Build;
-import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
-import com.example.buhalo.lazyir.service.BackgroundService;
-
-import java.io.ByteArrayOutputStream;
-
-import static android.content.Context.CONTEXT_IGNORE_SECURITY;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.Notifications;
 
 /**
  * Created by buhalo on 20.04.17.
@@ -27,13 +14,15 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
 
 public class ShowNotification extends Module {
     public static final String SHOW_NOTIFICATION = "ShowNotification";
+    public static final String ALL_NOTIFICATIONS = "ALL NOTIFS";
+    public static final String REMOVE_NOTIFICATION = "RemoveNotification";
 
     @Override
     public void execute(NetworkPackage np) {
-        if(np.getData().equals("ALL NOTIFS")) {
+        if(np.getData().equals(ALL_NOTIFICATIONS)) {
             Notifications notifications = new Notifications();
 //            String ns = Context.NOTIFICATION_SERVICE;
-            StatusBarNotification[] activeNotifications =NotificationListener.getAll();
+            StatusBarNotification[] activeNotifications = NotificationListener.getAll();
             if(activeNotifications == null) {
                 return;
             }
@@ -43,6 +32,8 @@ public class ShowNotification extends Module {
             NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"ALL NOTIFS");
             nps.setObject(NetworkPackage.N_OBJECT,notifications);
             sendMsg(nps.getMessage());
+        }else if(np.getData().equals(REMOVE_NOTIFICATION)){
+            //todo
         }
     }
 

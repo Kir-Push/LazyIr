@@ -2,10 +2,12 @@ package com.example.buhalo.lazyir.modules.shareManager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.os.EnvironmentCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,11 +26,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.support.v4.content.ContextCompat.getExternalFilesDirs;
 import static com.example.buhalo.lazyir.modules.shareManager.ftpServer.ftpServerOn;
 
 /**
@@ -41,25 +45,11 @@ public class ShareModule extends Module {
     public static final String SHARE_TYPE = "share_type";
     public static final String SETUP_SERVER_AND_SEND_ME_PORT = "setup server and send me port";
     public static final String CONNECT_TO_ME_AND_RECEIVE_FILES = "connect to me and receive files"; // first arg port,second number of files - others files
-    public static final String GET_PATH = "get path";  // actually it means list files on path;
-    public static final String SEND_PATH = "post path";
-    public static final String GET_FILE = "get file";
-    public static final String POST_FILE = "post file";
-    public static final String GET_DIRECTORY = "get directory";
-    public static final String POST_DIRECORY = "post directory";
     public static final String PORT = "port";
-    public static final String PATH = "path";
 
 
-    public static final String FIRST_ARG_NUMBER_OF_FILES ="nf {?,?}";// first ? wil be you curr file, second overral files ( which you need to receive
-    public static final String CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE = "CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE";
 
 
-    private Socket fileSocket;
-    private DataInputStream in;
-    private String serverPath;
-    private String clientPath;
-    private boolean waitingForServerAnswerForConnect = false;
     private static SftpServer sftpServer;
     private static ftpServer ftpServer;
     private static boolean sftServerOn = false;
@@ -74,20 +64,12 @@ public class ShareModule extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-        if(np.getData().equals(SEND_PATH))
-        {
-            responseList = receiveFromServer(np);
-        }
-        else if(np.getData().equals(CONNECT_TO_ME_AND_RECEIVE_FILES))
-        {
-            ParseDownload(np);
-        }
-        else if(np.getData().equals(SETUP_SERVER_AND_SEND_ME_PORT))
-        {
+
+        if(np.getData().equals(SETUP_SERVER_AND_SEND_ME_PORT)) {
             if(np.getValue("os").equals("nix"))
             setupSftp(np,context.getApplicationContext());
             else if(np.getValue("os").equals("win"))
-            setupftp(np,context.getApplicationContext());
+                setupSftp(np,context.getApplicationContext()); // now win too use's sftp
         }
     }
 
@@ -97,8 +79,7 @@ public class ShareModule extends Module {
     }
 
     private void setupftp(NetworkPackage np, Context context) {
-        if(ftpServer == null)
-        {
+        if(ftpServer == null) {
             ftpServer = new ftpServer();
         }
         NetworkPackage pack = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
@@ -112,7 +93,7 @@ public class ShareModule extends Module {
         BackgroundService.sendToDevice(np.getId(),pack.getMessage());
     }
 
-    public static void setupSftp(NetworkPackage np, Context context) {
+    private   void setupSftp(NetworkPackage np, Context context) {
         if (sftpServer == null) {
             sftpServer = new SftpServer();
         }
@@ -126,300 +107,101 @@ public class ShareModule extends Module {
         pack.setValue(PORT,Integer.toString(port));
         pack.setValue("userName",SftpServer.USER);
         pack.setValue("pass",sftpServer.pass);
-        BackgroundService.sendToDevice(np.getId(),pack.getMessage());
+        pack.setValue("mainDir",BackgroundService.getAppContext().getFilesDir().getAbsolutePath()); // todo test
+        pack.setObject("externalPath",new PathWrapper(getExternalStorageDirectories())); // todo in server
+        sendMsg(pack.getMessage());
     }
-//todo ftp method stop, now it will not stop
-    public static void stopSftpServer()
-    {
-        if(sftpServer!= null)
-        {
+    public static void stopSftpServer() {
+        if(sftpServer!= null) {
             sftpServer.stopSftpServer();
-
-         //   sftpServer = null;
         }
         sftServerOn = false;
-        if(ftpServer != null)
-        {
+        if(ftpServer != null) {
             ftpServer.stopFtp();
         }
         ftpServerOn = false;
     }
 
-    public List<FileWrap> getFilesList(String path)
-    {
-        List<FileWrap> fileList = new ArrayList<>();
-        Log.d("ShareModule", "Path: " + path);
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        if(files == null)
-        {
-            return fileList;
+    /* returns external storage paths (directory of external memory card) as array of Strings */
+    // https://stackoverflow.com/questions/36766016/how-to-get-sd-card-path-in-android6-0-programmatically
+    public String[] getExternalStorageDirectories() {
+
+        List<String> results = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //Method 1 for KitKat & above
+            File[] externalDirs = BackgroundService.getAppContext().getExternalFilesDirs(null);
+
+            for (File file : externalDirs) {
+                String path = file.getPath().split("/Android")[0];
+
+                boolean addPath = false;
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    addPath = Environment.isExternalStorageRemovable(file);
+                }
+                else{
+                    addPath = Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(file));
+                }
+
+                if(addPath){
+                    results.add(path);
+                }
+            }
         }
-        Log.d("ShareModule", "Size: "+ files.length);
-        fileList.add(new FileWrap(false,false,"....."));
-        for(int i =0;i<files.length;i++)
-        {
-            fileList.add(new FileWrap(false,files[i].isFile(),files[i].getName()));
+
+        if(results.isEmpty()) { //Method 2 for all versions
+            // better variation of: http://stackoverflow.com/a/40123073/5002496
+            StringBuilder output = new StringBuilder();
+            try {
+                final Process process = new ProcessBuilder().command("mount | grep /dev/block/vold")
+                        .redirectErrorStream(true).start();
+                process.waitFor();
+                final InputStream is = process.getInputStream();
+                final byte[] buffer = new byte[1024];
+                while (is.read(buffer) != -1) {
+                    output.append(new String(buffer));
+                }
+                is.close();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+            if(!output.toString().trim().isEmpty()) {
+                String devicePoints[] = output.toString().split("\n");
+                for(String voldPoint: devicePoints) {
+                    results.add(voldPoint.split(" ")[2]);
+                }
+            }
         }
-        return fileList;
+
+        //Below few lines is to remove paths which may not be external memory card, like OTG (feel free to comment them out)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (int i = 0; i < results.size(); i++) {
+                if (!results.get(i).toLowerCase().matches(".*[0-9a-f]{4}[-][0-9a-f]{4}")) {
+                    Log.d("ShareModule", results.get(i) + " might not be extSDcard");
+                    results.remove(i--);
+                }
+            }
+        } else {
+            for (int i = 0; i < results.size(); i++) {
+                if (!results.get(i).toLowerCase().contains("ext") && !results.get(i).toLowerCase().contains("sdcard")) {
+                    Log.d("ShareModule", results.get(i)+" might not be extSDcard");
+                    results.remove(i--);
+                }
+            }
+        }
+
+        String[] storageDirectories = new String[results.size()];
+        for(int i=0; i<results.size(); ++i) storageDirectories[i] = results.get(i);
+
+        return storageDirectories;
     }
 
-    public List<FileWrap> getFilesListFromServer(String path)
-    {
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, GET_PATH);
-        FileWrap fileWrap = new FileWrap(false,false,path);
-        FileWraps fileWraps = new FileWraps();
-        fileWraps.addCommand(fileWrap);
-        np.setObject(NetworkPackage.N_OBJECT,fileWraps);
-        String fromTypeAndData;
-        try {
-           fromTypeAndData = np.getMessage();
-            BackgroundService.sendToDevice(MainActivity.getSelected_id(),fromTypeAndData);
-            responseList = null;
-            waitResponse = true;
-            int count =0;
-            while(responseList == null || responseList.size() == 0)
-            {
-                if(count > 10)
-                {
-                    break;
-                }
-                Thread.sleep(500);
-                count++;
-            }
-            waitResponse = false;
-            if(path.equals("root") && responseList != null)
-            {
-                rootPathFromServer = lastRootPathFromServer;
-            }
-            if(responseList == null)
-            {
-                responseList = new ArrayList<>();
-                responseList.add(new FileWrap(false,false,"....."));
-            }
-            return responseList;
-        } catch (InterruptedException Error) {
-            Error.printStackTrace();
-        }
-        return null;
-    }
+
 
     public String getRootPath()
     {
         return Environment.getExternalStorageDirectory().toString();
     }
 
-    public String receivedPackage(NetworkPackage np)
-    {
-
-        return "";
-    }
-
-
-    public List<FileWrap> receiveFromServer(NetworkPackage np)
-    {
-        List<FileWrap> fileWraps = new ArrayList<>();
-        List<FileWrap> args = np.getObject(NetworkPackage.N_OBJECT,FileWraps.class).getFiles();
-        fileWraps.add(new FileWrap(false,false,"....."));
-        int count=0;
-        for(FileWrap arg : args)
-        {
-            count++;
-            if(count == 1)
-            {
-                continue;
-            }
-            if(count == 2)
-            {
-                lastRootPathFromServer = arg.getPath();
-                continue;
-            }
-            fileWraps.add(new FileWrap(true,arg.isFile(),arg.getPath()));
-        }
-        return fileWraps;
-    }
-
-
-
-
-
-    public synchronized File downloadFile(String path,String fileName)
-    {
-        if(fileSocket == null || !fileSocket.isConnected())
-        {
-            return null;
-        }
-        File file = new File(path,fileName);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            byte[] bytes = new byte[16*1024];
-            int count;
-            String name = in.readUTF();
-            long fileSize = in.readLong();
-            while (fileSize > 0 && (count = in.read(bytes, 0, (int)Math.min(bytes.length, fileSize))) != -1) {
-                System.out.println("write " + count);
-
-                final int finalCount = count;
-//                ((Activity)device.getContext().getApplicationContext()).runOnUiThread(new Runnable() {
-//                    public void run() {
-//                        Toast.makeText(device.getContext(),"Download: " + finalCount,Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-
-
-                    if(new String(bytes,0,count).equals("endFile!!!$$$!!!"))
-                    {
-                        System.out.println("file break    count "  + count);
-                        System.out.println(bytes);
-                        break;
-                    }
-
-                out.write(bytes, 0, count);
-                fileSize -= count;
-            }
-            System.out.println("I'm in download file jaja   " + path + "   " + fileName);
-          //  Toast.makeText(device.getContext(),"Download: Done",Toast.LENGTH_SHORT).show();
-            out.close();
-        } catch (IOException e) {
-           Log.e("ShareModule",e.toString());
-        }
-        return file;
-    }
-
-    private List<File> fileList;
-
-    public List<File> ParseDownload(final NetworkPackage np) // if np.data == CONNECT_TO_ME_AND_RECEIVE_FILES
-    {
-        final List<FileWrap> args = np.getObject(NetworkPackage.N_OBJECT,FileWraps.class).getFiles();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int port = Integer.parseInt(np.getValue(PORT));
-                String secondArgFirst = args.get(0).getPath();
-//                List<FileWrap> fileWraps = new ArrayList<>();
-//                for(int i = 0;i<args.size();i++)
-//                {
-//                    String arg = args.get(i).getPath();
-//                        if(args.get(i).isFile()){
-//                            fileWraps.add(new FileWrap(true,args.get(i).isFile(),args.get(i).getPath()));
-//                    }
-//                }
-
-                String id = np.getId();
-                Device device = Device.getConnectedDevices().get(id);
-                try {
-                    fileSocket = new Socket(device.getSocket().getInetAddress(),port);
-                    in = new DataInputStream(new BufferedInputStream(fileSocket.getInputStream()));
-                    fileList= downloadFiles(clientPath, args, null);
-                    in.close();
-                    fileSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-        return fileList;
-    }
-
-    public List<File> downloadFiles(String path,List<FileWrap> fileWraps,String externalPath)
-    {
-        List<File> downloadedFiles = new ArrayList<>();
-
-
-        for(FileWrap fileWrap : fileWraps)
-        {
-        //    if(fileWrap.isFile()) {//
-            System.out.println("tut");
-                downloadedFiles.add(downloadFile(path, fileWrap.getPath()));
-       //     }
-        }
-        return downloadedFiles;
-    }
-
-    public String getRootPathFromServer() {
-        return rootPathFromServer;
-    }
-
-    public void setRootPathFromServer(String rootPathFromServer) {
-        this.rootPathFromServer = rootPathFromServer;
-    }
-
-    public void startDownloading(String currPath, String currPaths, List<FileWrap> files) {
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, SETUP_SERVER_AND_SEND_ME_PORT);
-        List<FileWrap> args = new ArrayList<>();
-        args.add(new FileWrap(false,false,currPaths));
-        for(FileWrap fileWrap : files)
-        {
-
-            args.add(fileWrap);
-        }
-        FileWraps fileWraps = new FileWraps(args);
-        np.setObject(NetworkPackage.N_OBJECT,fileWraps);
-        String fromTypeAndData = np.getMessage();
-        BackgroundService.sendToDevice(MainActivity.getSelected_id(),fromTypeAndData);
-        serverPath = currPaths;
-        clientPath = currPath;
-        waitingForServerAnswerForConnect = true;
-    }
-
-    public void startSending(String currPaths, String currPath, final List<FileWrap> checked) {
-
-        serverPath = currPaths;
-        clientPath = currPath;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try (ServerSocket serverSocket  = new ServerSocket(5675)) {
-                    fileSocket = serverSocket.accept();
-                    System.out.println("commected " + fileSocket.getLocalAddress());
-                    String currPath = checked.get(0).getPath();
-                    DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fileSocket.getOutputStream()));
-                    for(int i = 0; i< checked.size(); i++)
-                    {
-                        String s = checked.get(i).getPath();
-                         System.out.println(currPath +"/" +  s);
-                        File file = new File(clientPath,s);
-                        try {
-                            FileInputStream in = new FileInputStream(file);
-                            byte[] bytes = new byte[16*1024];
-                            int count;
-                            out.writeUTF(s);
-                            System.out.println("Write +" + s);
-                            out.writeLong(file.length());
-                            while ((count = in.read(bytes)) > 0) {
-                                out.write(bytes, 0, count);
-                                out.flush();
-                            //    Toast.makeText(device.getContext(),"Sending:" + count,Toast.LENGTH_SHORT).show();
-
-                            }
-                            in.close();
-                          //  Toast.makeText(device.getContext(),"Sending: Done",Toast.LENGTH_SHORT).show();
-                            //   System.out.println("endFile!!!$$$!!!".getBytes());
-
-                        } catch (IOException e) {
-                            Log.e("ShareModule",e.toString());
-                        }
-                    }
-                    if(out != null)
-                        out.close();
-
-                }catch (IOException e)
-                {
-                    Log.e("SHAREMODULE",e.toString());
-                }
-            }
-        }).start();
-        try {
-            NetworkPackage napa = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, CONNECT_TO_ME_AND_RECEIVE_FILES_REVERSE);
-            napa.setValue(PORT,"5675");
-            napa.setObject(NetworkPackage.N_OBJECT,new FileWraps(checked));
-            napa.setValue("Whom",clientPath);
-            napa.setValue("Where",serverPath);
-            String fromTypeAndData = napa.getMessage();
-            BackgroundService.sendToDevice(device.getId(),fromTypeAndData);
-        } catch (Exception error) {
-            Log.e("SHAREMANAGER",error.toString());
-        }
-    }
  }
 

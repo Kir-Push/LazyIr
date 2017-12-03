@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
 /**
  * Created by buhalo on 26.03.17.
@@ -11,7 +11,7 @@ public class Notification {
     private String pack;
     private String ticker;
     private String id;
-    private String icon; // todo in server
+    private String icon;
     private String picture;
 
     public Notification() {

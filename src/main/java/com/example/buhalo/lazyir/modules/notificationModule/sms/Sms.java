@@ -1,14 +1,14 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.sms;
 
 /**
  * Created by buhalo on 26.03.17.
  */
 
 public class Sms {
-    private String number; // todo in server change from int to String
+    private String number;
     private String name;
     private String text;
-    private String icon; // todo in server
+    private String icon;
     private String picture;
 
     public Sms() {

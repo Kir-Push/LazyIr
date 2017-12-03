@@ -1,27 +1,23 @@
 package com.example.buhalo.lazyir.service;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import android.os.StrictMode;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.example.buhalo.lazyir.service.BaseBroadcastReceiver.checkWifiOnAndConnected;
+import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 19.02.17.
@@ -246,7 +242,6 @@ public class UdpBroadcastManager  {
         lock.unlock();
     }
 
-    // todo rewrite class, it shit
     void onZeroConnections() {
         setSend_period(15000);
        count = 0;

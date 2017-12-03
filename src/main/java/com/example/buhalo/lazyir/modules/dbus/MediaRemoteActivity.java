@@ -53,7 +53,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
     private final DbusCommand cachedGetPlayers = new DbusCommand(7, null, 0, null, null);
     private static volatile boolean pendingUserAction = false;
 
-    //todo it work, don't touch it for time
+    // it work, don't touch it for time
     // task which will be executed by timer, with some delay between
     // poll command's from commanQueque and execute them
     // if Queque null, add to queque main commands (sendGetAll and getPlayers)

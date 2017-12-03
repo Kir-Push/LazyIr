@@ -101,7 +101,7 @@ public class Mpris extends Module {
     }
 
     void sendRepeat(String player){
-        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(), REPEAT).setValue(PLAYER,player).getMessage());
+        send(player,REPEAT);
     }
 
     // Mpris actually doesn't have any state

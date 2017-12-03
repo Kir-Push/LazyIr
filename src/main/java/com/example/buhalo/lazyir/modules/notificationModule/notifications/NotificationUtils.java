@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.ByteArrayOutputStream;
@@ -22,9 +23,9 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
  * Created by buhalo on 26.11.17.
  */
 
- class NotificationUtils {
+ public class NotificationUtils {
     // todo reverse notifs for image and text carefully
-    static Notification castToMyNotification(StatusBarNotification sbn)
+    public static Notification castToMyNotification(StatusBarNotification sbn)
     {
         String pack = sbn.getPackageName();
         String text = extractText(sbn);
@@ -36,7 +37,7 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
             return null;
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
 //        if(pack.equals("org.telegram.messenger") && !title.contains("(\d new message)"))
-        return  new Notification(text,title,pack,ticker, android.os.Build.MODEL,icon,picture);
+        return  new Notification(text,title,pack,ticker, NetworkPackage.getMyId(),icon,picture);
     }
 
     private static String extractTicker(StatusBarNotification sbn) {

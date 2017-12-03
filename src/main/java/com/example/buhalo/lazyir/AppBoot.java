@@ -8,7 +8,7 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 import com.example.buhalo.lazyir.service.BootListener;
 
-import static com.example.buhalo.lazyir.service.BaseBroadcastReceiver.checkWifiOnAndConnected;
+import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 21.02.17.
@@ -24,9 +24,7 @@ public class AppBoot extends Application {
     @Override
     public void onCreate() {
 
-
         super.onCreate();
-
         Context applicationContext = getApplicationContext();
         BootListener.registerBroadcasts(applicationContext);
 

@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.messengers;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -8,20 +8,13 @@ import android.support.v4.app.RemoteInput;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.Notification;
 import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by buhalo on 18.04.17.
@@ -102,7 +95,7 @@ public class Messengers extends Module {
     }
 
 
-     static void sendToServer(Notification notification) {
+     public static void sendToServer(Notification notification) {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Messengers.class.getSimpleName(),ANSWER);
         String typeName = notification.getPack()+":"+notification.getTitle();
         notification.setPack(tryExtractPack(notification.getPack())); // todo change from setValue, you need change in server to correspond!
@@ -120,7 +113,7 @@ public class Messengers extends Module {
        return (i = pack.lastIndexOf(".")) != -1 ? pack.substring(i) : pack;
     }
 
-    static ConcurrentHashMap<String, StatusBarNotification> getPendingNotifsLocal() {
+    public static ConcurrentHashMap<String, StatusBarNotification> getPendingNotifsLocal() {
         return pendingNotifsLocal;
     }
 }

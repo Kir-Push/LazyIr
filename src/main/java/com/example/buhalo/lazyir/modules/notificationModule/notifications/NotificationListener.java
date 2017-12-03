@@ -1,36 +1,22 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
-
-import java.io.ByteArrayOutputStream;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by buhalo on 21.03.17.
  */
 
 // todo thread problem, it work in main thread, you don't need that,
-    // todo you need work in separate thread, maybe in backgroundService
-    //todo https://stackoverflow.com/questions/17926236/notificationlistenerservice-implementation
+    //  you need work in separate thread, maybe in backgroundService
+    // https://stackoverflow.com/questions/17926236/notificationlistenerservice-implementation
 public class NotificationListener extends NotificationListenerService {
     private static NotificationListener notif;
     public static final String SHOW_NOTIFICATION = "ShowNotification";

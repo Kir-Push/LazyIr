@@ -8,9 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.telephony.SmsMessage;
 
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.ByteArrayInputStream;

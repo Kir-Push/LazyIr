@@ -42,8 +42,8 @@ import java.util.List;
 public class SftpServer {
 
     private  SshServer sshd;
-    public static String USER;
-    public String pass;
+     static String USER;
+     String pass;
     public int setupSftpServer(Context context){
         int countTry = 0;
         int port = 9000;

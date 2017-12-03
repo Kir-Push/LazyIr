@@ -30,7 +30,6 @@ import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.sendcommand.CommandActivity;
 import com.example.buhalo.lazyir.modules.sendIr.IrActivity;
 import com.example.buhalo.lazyir.modules.dbus.MediaRemoteActivity;
-import com.example.buhalo.lazyir.modules.shareManager.ShareActivity;
 import com.example.buhalo.lazyir.R;
 
 import java.lang.reflect.Field;
@@ -173,13 +172,13 @@ public class PageFragment extends Fragment implements View.OnTouchListener, View
     private View createSecondPage(LayoutInflater inflater, final ViewGroup container)
     {
         View vv = inflater.inflate(R.layout.page_two, container, false);
-        vv.findViewById(R.id.share_start_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), ShareActivity.class);
-                startActivity(intent);
-            }
-        });
+//        vv.findViewById(R.id.share_start_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(getActivity(), ShareActivity.class);
+//                startActivity(intent);
+//            }
+//        });
         vv.findViewById(R.id.media_start_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

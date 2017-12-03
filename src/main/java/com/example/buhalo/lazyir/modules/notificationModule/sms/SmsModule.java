@@ -1,16 +1,10 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.modules.notificationModule.sms;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
-import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 import java.util.ArrayList;
 

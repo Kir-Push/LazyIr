@@ -76,7 +76,7 @@ public class SynchroModule extends Module {
         if(commands == null || commands.size() < 1)
             return;
         for(Command command : commands) {
-            DBHelper.getInstance(context).deleteCommand(command); //todo
+            DBHelper.getInstance(context).deleteCommand(command);
         }
     }
 

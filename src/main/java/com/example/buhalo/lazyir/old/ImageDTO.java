@@ -1,4 +1,4 @@
-package com.example.buhalo.lazyir.modules.notificationModule;
+package com.example.buhalo.lazyir.old;
 
 /**
  * Created by buhalo on 26.11.17.
