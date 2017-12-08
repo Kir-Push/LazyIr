@@ -55,6 +55,7 @@ public class SmsListener extends BroadcastReceiver {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
         np.setObject(NetworkPackage.N_OBJECT,sms);
         System.out.println("sending sms: " + sms);
+
         BackgroundService.sendToAllDevices(np.getMessage());
     }
 

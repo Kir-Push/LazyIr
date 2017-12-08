@@ -107,7 +107,8 @@ public class ShareModule extends Module {
         pack.setValue(PORT,Integer.toString(port));
         pack.setValue("userName",SftpServer.USER);
         pack.setValue("pass",sftpServer.pass);
-        pack.setValue("mainDir",BackgroundService.getAppContext().getFilesDir().getAbsolutePath()); // todo test
+        System.out.println("STORAGE " + Environment.getExternalStorageDirectory().getAbsolutePath()); // todo
+        pack.setValue("mainDir", Environment.getExternalStorageDirectory().getAbsolutePath()); // todo test
         pack.setObject("externalPath",new PathWrapper(getExternalStorageDirectories())); // todo in server
         sendMsg(pack.getMessage());
     }

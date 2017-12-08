@@ -38,6 +38,7 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
 //        if(pack.equals("org.telegram.messenger") && !title.contains("(\d new message)"))
         return  new Notification(text,title,pack,ticker, NetworkPackage.getMyId(),icon,picture);
+
     }
 
     private static String extractTicker(StatusBarNotification sbn) {

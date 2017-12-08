@@ -27,8 +27,8 @@ public class UdpBroadcastManager  {
 
     public static final String BROADCAST_INTRODUCE = "broadcast introduce";
     public static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
-    private DatagramSocket socket;
-    private  DatagramSocket server;
+    private static DatagramSocket socket;
+    private static volatile DatagramSocket server;
     private volatile int send_period = 15000;
     private int  count = 0;
 
