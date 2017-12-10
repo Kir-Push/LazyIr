@@ -10,6 +10,9 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.smsMessage;
+
 /**
  * Created by buhalo on 21.03.17.
  */
@@ -52,7 +55,12 @@ public class NotificationListener extends NotificationListenerService {
             snoozeNotification(sbn.getKey(), 600000);
 
             if(!smsMessage(sbn)){                        //first check if notification is not smsMessage, if it is - send as sms
-                if(!messengersMessage(sbn))              // after check if this  is not messenger message, if it is - send as message
+                if(messengersMessage(sbn)) {
+                    Notification notification = NotificationUtils.castToMyNotification(sbn);
+                    if(notification != null && notification.getPack() != null  && !notification.getPack().equals("com.google.android.googlequicksearchbox"))
+                    Messengers.sendToServer(notification);    // after check if this  is not messenger message, if it is - send as message
+                }
+                else
                   sendToAll(sbn, RECEIVE_NOTIFICATION);  // if previous two false, this is notif, send to server
             }
         } catch (Throwable e) {                          // i don't need crash app if something going wrong
@@ -60,35 +68,8 @@ public class NotificationListener extends NotificationListenerService {
         }
 
     }
- // i here add new methods after testing change old to new
-    private boolean messengersMessage(StatusBarNotification sbn) {
-        Bundle bundle = sbn.getNotification().extras;
-        Notification notification = NotificationUtils.castToMyNotification(sbn);
-        if(notification == null || notification.getPack() == null  || notification.getPack().equals("com.google.android.googlequicksearchbox"))
-            return true;
 
-        for (String key : bundle.keySet()) {
-            if("android.wearable.EXTENSIONS".equals(key)){
 
-                if((sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) || !notification.getPack().equals("org.telegram.messenger")) {        // telegram send second notif with id 1, it not contain action, therefore ignore it
-                    Messengers.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
-                    Messengers.sendToServer(notification);
-                }
-                return true;
-            }
-        }
-       if( Messengers.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
-           Messengers.sendToServer(notification);
-           return true;
-       }
-        return false;
-    }
-
-    //check if notification is SmsMessage or not
-    private boolean smsMessage(StatusBarNotification sbn) {
-        String pack = sbn.getPackageName();
-        return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
-    }
     public static StatusBarNotification[] getAll() {
       return   notif == null ? null : notif.getActiveNotifications();
     }

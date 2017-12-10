@@ -13,11 +13,14 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.ByteArrayOutputStream;
 
 import static android.content.Context.CONTEXT_IGNORE_SECURITY;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SMS_TYPE;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SMS_TYPE_2;
 
 /**
  * Created by buhalo on 26.11.17.
@@ -33,12 +36,49 @@ import static android.content.Context.CONTEXT_IGNORE_SECURITY;
         String ticker = extractTicker(sbn);
         String icon = extractIcon(sbn);
         String picture = extractImage(sbn);
+        String type = extractType(sbn);
         if(pack.equals("com.whatsapp") && text == null)
             return null;
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
 //        if(pack.equals("org.telegram.messenger") && !title.contains("(\d new message)"))
-        return  new Notification(text,title,pack,ticker, NetworkPackage.getMyId(),icon,picture);
+   //     return  new Notification(text,title,pack,ticker, NetworkPackage.getMyId(),icon,picture); //todo attention
+        return new Notification(text,type,title,pack,ticker, String.valueOf(sbn.getId()),icon,picture);
 
+    }
+
+     static boolean smsMessage(StatusBarNotification sbn) {
+        String pack = sbn.getPackageName();
+        return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
+    }
+
+    private static String extractType(StatusBarNotification sbn){
+        if(smsMessage(sbn))
+            return "sms";
+        else if(messengersMessage(sbn))
+            return "messenger";
+        return "notification";
+    }
+
+    // i here add new methods after testing change old to new
+     static boolean messengersMessage(StatusBarNotification sbn) {
+        Bundle bundle = sbn.getNotification().extras;
+        Notification notification = NotificationUtils.castToMyNotification(sbn);
+        if(notification == null || notification.getPack() == null  || notification.getPack().equals("com.google.android.googlequicksearchbox"))
+            return true;
+
+        for (String key : bundle.keySet()) {
+            if("android.wearable.EXTENSIONS".equals(key)){
+
+                if((sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) || !notification.getPack().equals("org.telegram.messenger")) {        // telegram send second notif with id 1, it not contain action, therefore ignore it
+                    Messengers.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                }
+                return true;
+            }
+        }
+        if( Messengers.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
+            return true;
+        }
+        return false;
     }
 
     private static String extractTicker(StatusBarNotification sbn) {

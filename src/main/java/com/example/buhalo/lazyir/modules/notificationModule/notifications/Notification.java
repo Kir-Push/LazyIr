@@ -11,14 +11,16 @@ public class Notification {
     private String pack;
     private String ticker;
     private String id;
+    private String type;
     private String icon;
     private String picture;
 
     public Notification() {
     }
 
-    public Notification(String text, String title, String pack, String ticker, String id,String icon,String picture) {
+    public Notification(String text,String type, String title, String pack, String ticker, String id,String icon,String picture) {
         this.text = text;
+        this.type = type;
         this.title = title;
         this.pack = pack;
         this.ticker = ticker;
@@ -81,5 +83,14 @@ public class Notification {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
