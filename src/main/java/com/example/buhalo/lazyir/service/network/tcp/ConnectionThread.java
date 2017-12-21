@@ -244,6 +244,8 @@ public class ConnectionThread implements Runnable {
     public void commandFromClient(NetworkPackage np) {
         try {
             Device device = Device.getConnectedDevices().get(np.getId());
+            if(device == null)
+                return;
             if(!device.isPaired()) {
                 return;
             }

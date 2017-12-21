@@ -80,10 +80,14 @@ public class CallSmsUtils {
     }
 
     private static InputStream openPhoto(long contactId) {
-        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
-        InputStream stream = ContactsContract.Contacts.openContactPhotoInputStream(
-                BackgroundService.getAppContext().getContentResolver(), contactUri);
-        return stream;
+        try {
+            Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+            return ContactsContract.Contacts.openContactPhotoInputStream(
+                    BackgroundService.getAppContext().getContentResolver(), contactUri);
+        }
+        catch (IllegalArgumentException e){
+            return null;
+        }
 //        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
 //        Cursor cursor =  BackgroundService.getAppContext().getContentResolver().query(photoUri,
 //                new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);

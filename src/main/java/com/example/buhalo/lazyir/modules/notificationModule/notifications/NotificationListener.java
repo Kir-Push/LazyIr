@@ -55,9 +55,9 @@ public class NotificationListener extends NotificationListenerService {
             snoozeNotification(sbn.getKey(), 600000);
 
             if(!smsMessage(sbn)){                        //first check if notification is not smsMessage, if it is - send as sms
-                if(messengersMessage(sbn)) {
-                    Notification notification = NotificationUtils.castToMyNotification(sbn);
-                    if(notification != null && notification.getPack() != null  && !notification.getPack().equals("com.google.android.googlequicksearchbox"))
+                Notification notification = NotificationUtils.castToMyNotification(sbn);
+                if(notification != null && messengersMessage(sbn,notification.getPack(),notification.getTitle(),notification.getText())) {
+                    if(!notification.getPack().equals("com.google.android.googlequicksearchbox"))
                     Messengers.sendToServer(notification);    // after check if this  is not messenger message, if it is - send as message
                 }
                 else

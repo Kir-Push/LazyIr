@@ -36,7 +36,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
         String ticker = extractTicker(sbn);
         String icon = extractIcon(sbn);
         String picture = extractImage(sbn);
-        String type = extractType(sbn);
+        String type = extractType(sbn,pack,title,text);
         if(pack.equals("com.whatsapp") && text == null)
             return null;
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist
@@ -51,31 +51,31 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
         return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
     }
 
-    private static String extractType(StatusBarNotification sbn){
+    private static String extractType(StatusBarNotification sbn,String pack,String title,String text){
         if(smsMessage(sbn))
             return "sms";
-        else if(messengersMessage(sbn))
+        else if(messengersMessage(sbn,pack,title,text))
             return "messenger";
         return "notification";
     }
 
     // i here add new methods after testing change old to new
-     static boolean messengersMessage(StatusBarNotification sbn) {
+     static boolean messengersMessage(StatusBarNotification sbn,String pack,String title,String text) {
         Bundle bundle = sbn.getNotification().extras;
-        Notification notification = NotificationUtils.castToMyNotification(sbn);
-        if(notification == null || notification.getPack() == null  || notification.getPack().equals("com.google.android.googlequicksearchbox"))
+      //  Notification notification = NotificationUtils.castToMyNotification(sbn);
+        if(pack == null  ||pack.equals("com.whatsapp") && text == null ||pack.equals("com.google.android.googlequicksearchbox"))
             return true;
 
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
 
-                if((sbn.getId() > 1 && notification.getPack().equals("org.telegram.messenger")) || !notification.getPack().equals("org.telegram.messenger")) {        // telegram send second notif with id 1, it not contain action, therefore ignore it
-                    Messengers.getPendingNotifsLocal().put(notification.getPack() + ":" + notification.getTitle(), sbn);
+                if((sbn.getId() > 1 && pack.equals("org.telegram.messenger")) || !pack.equals("org.telegram.messenger")) {        // telegram send second notif with id 1, it not contain action, therefore ignore it
+                    Messengers.getPendingNotifsLocal().put(pack + ":" + title, sbn);
                 }
                 return true;
             }
         }
-        if( Messengers.getPendingNotifsLocal().containsKey(notification.getPack()+":"+notification.getTitle())) {
+        if( Messengers.getPendingNotifsLocal().containsKey(pack+":"+title)) {
             return true;
         }
         return false;
