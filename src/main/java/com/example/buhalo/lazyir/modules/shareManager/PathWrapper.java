@@ -1,21 +1,26 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
+import java.util.List;
+
 /**
  * Created by buhalo on 03.12.17.
  */
 
 public class PathWrapper {
-    String[] paths;
+    private List<String> paths;
 
-    public PathWrapper(String[] paths) {
+    public PathWrapper() {
+    }
+
+    public PathWrapper(List<String> paths) {
         this.paths = paths;
     }
 
-    public String[] getPaths() {
+    public List<String> getPaths() {
         return paths;
     }
 
-    public void setPaths(String[] paths) {
+    public void setPaths(List<String>  paths) {
         this.paths = paths;
     }
 }

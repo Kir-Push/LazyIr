@@ -2,21 +2,34 @@ package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Random;
 
 import static android.content.Context.CONTEXT_IGNORE_SECURITY;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SMS_TYPE;
@@ -139,13 +152,16 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
 
     private static String extractIcon(StatusBarNotification sbn) {
         android.app.Notification notification = sbn.getNotification();
+        boolean smallIcon = true;
+        if(notification.getLargeIcon() != null)
+            smallIcon = false;
         Icon icon = (icon = notification.getLargeIcon()) == null ? notification.getSmallIcon() : icon;
         if(icon == null)
             return null;
         try {
             Context packageContext = BackgroundService.getAppContext().createPackageContext(sbn.getPackageName(), CONTEXT_IGNORE_SECURITY);
             Drawable drawable = icon.loadDrawable(packageContext);
-            Bitmap bitmap = drawableToBitmap(drawable);
+            Bitmap bitmap = drawableToBitmap(drawable,smallIcon);
             return bitmapToBase64(bitmap);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e("NotificationListener","getIcon",e);
@@ -172,12 +188,24 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     }
 
     //https://stackoverflow.com/questions/37252119/how-to-convert-a-icon-to-bitmap-in-android    --- drawable to bitmap
-    private static Bitmap drawableToBitmap (Drawable drawable) {
+    private static Bitmap drawableToBitmap (Drawable drawable,boolean smallIcon) {
         Bitmap bitmap = null;
+
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
+            Bitmap bitmap1 = bitmapDrawable.getBitmap();
+            if (bitmap1 != null) {
+                if(smallIcon) {
+                    Paint paint = new Paint();
+                    int[] colors = {android.R.color.darker_gray, android.R.color.holo_blue_light, android.R.color.holo_green_light, android.R.color.holo_orange_dark};
+                    ColorFilter filter = new PorterDuffColorFilter(ContextCompat.getColor(BackgroundService.getAppContext(), colors[new Random().nextInt(4)]), PorterDuff.Mode.SRC_IN);
+                    paint.setColorFilter(filter);
+                    Bitmap mutableBitmap = bitmap1.copy(Bitmap.Config.ARGB_8888, true);
+                    Canvas canvas = new Canvas(mutableBitmap);
+                    canvas.drawBitmap(mutableBitmap, 0, 0, paint);
+                    return mutableBitmap;
+                }
+                return bitmap1;
             }
         }
         if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {

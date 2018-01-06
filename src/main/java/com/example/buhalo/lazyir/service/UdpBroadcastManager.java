@@ -29,7 +29,7 @@ public class UdpBroadcastManager  {
     public static final String BROADCAST_INTRODUCE_MSG = "I search Adventures";
     private static DatagramSocket socket;
     private static volatile DatagramSocket server;
-    private volatile int send_period = 15000;
+    private static volatile int send_period = 15000;
     private int  count = 0;
 
 
@@ -189,10 +189,10 @@ public class UdpBroadcastManager  {
 
                     sendBroadcast(message, port);
                         count++;
-                        if (count == 20) {
+                        if (count == 20 && send_period < 30000) {
                             setSend_period(send_period * 2);
                             updateSender();
-                        } else if (count == 40) {
+                        } else if (count == 40 && send_period <= 30000) {
                             setSend_period(send_period * 2);
                             updateSender();
                         }

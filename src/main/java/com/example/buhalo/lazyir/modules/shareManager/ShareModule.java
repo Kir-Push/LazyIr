@@ -1,38 +1,21 @@
 package com.example.buhalo.lazyir.modules.shareManager;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.v4.os.EnvironmentCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static android.support.v4.content.ContextCompat.getExternalFilesDirs;
 import static com.example.buhalo.lazyir.modules.shareManager.ftpServer.ftpServerOn;
 
 /**
@@ -109,7 +92,7 @@ public class ShareModule extends Module {
         pack.setValue("pass",sftpServer.pass);
         System.out.println("STORAGE " + Environment.getExternalStorageDirectory().getAbsolutePath()); // todo
         pack.setValue("mainDir", Environment.getExternalStorageDirectory().getAbsolutePath()); // todo test
-        pack.setObject("externalPath",new PathWrapper(getExternalStorageDirectories())); // todo in server
+        pack.setObject("externalPath",new PathWrapper(Arrays.asList(getExternalStorageDirectories()))); // todo in server
         sendMsg(pack.getMessage());
     }
     public static void stopSftpServer() {

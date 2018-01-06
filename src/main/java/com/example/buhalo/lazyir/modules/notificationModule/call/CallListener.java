@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
+import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SHOW_NOTIFICATION;
 
@@ -19,6 +21,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
 public class CallListener extends BroadcastReceiver {
 
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
+    public static final String ANSWER = "answer";
     private static boolean isIncoming;
     private static String savedNumber;
 
@@ -59,34 +62,47 @@ public class CallListener extends BroadcastReceiver {
             case TelephonyManager.CALL_STATE_RINGING:
                 isIncoming = true;
                 savedNumber = number;
-                onIncomingCallReceived(context, number,"incoming");
+                onIncomingCallReceived(context, number,callTypes.incoming.name());
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 if(lastState != TelephonyManager.CALL_STATE_RINGING){ //Transition of ringing->offhook are pickups of incoming calls.  Nothing done on them
                     isIncoming = false;
-                    onIncomingCallReceived(context, number,"outgoing"); // test   // onOutgoingCallStarted(context, savedNumber, callStartTime);
+                    onIncomingCallReceived(context, number,callTypes.outgoing.name()); // test   // onOutgoingCallStarted(context, savedNumber, callStartTime);
                 }
                 else if(isIncoming) {
                     isIncoming = true;
+                    onAnswered(context,number,callTypes.answer.name());
+                    //todo when answer call send command
                 }
                 else {
                     isIncoming = false;
-                    onIncomingCallEnded(context, savedNumber,"outgoing");
+                    onIncomingCallEnded(context, savedNumber,callTypes.outgoing.name());
                 }
                 break;
             case TelephonyManager.CALL_STATE_IDLE:
                 if(lastState == TelephonyManager.CALL_STATE_RINGING){ //Went to idle-  this is the end of a call.  What type depends on previous state(s)
-                    onIncomingCallEnded(context, savedNumber,"missedIn");       //Ring but no pickup-  a miss
+                    onIncomingCallEnded(context, savedNumber,callTypes.missedIn.name());       //Ring but no pickup-  a miss
                 }
                 else if(isIncoming){
-                    onIncomingCallEnded(context, savedNumber,"incoming");
+                    onIncomingCallEnded(context, savedNumber,callTypes.incoming.name());
                 }
                 else{
-                    onIncomingCallEnded(context, savedNumber,"outgoing");
+                    onIncomingCallEnded(context, savedNumber,callTypes.outgoing.name());
                 }
                 break;
         }
         lastState = state;
+    }
+
+    private void onAnswered(Context context, String number, String type) {
+        String name = getName(number,context.getApplicationContext());
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,ANSWER);
+        np.setValue("number",name);
+        np.setValue("callType",type);
+        String message = np.getMessage();
+        if(message != null && !message.equals("")) {
+            BackgroundService.sendToAllDevices(np.getMessage());
+        }
     }
 
     private void onIncomingCallEnded(Context context, String savedNumber,String type) {
@@ -98,14 +114,20 @@ public class CallListener extends BroadcastReceiver {
         if(message != null && !message.equals("")) {
             BackgroundService.sendToAllDevices(np.getMessage());
         }
+
+        //todo some reminder when call missed!
     }
 
     private void onIncomingCallReceived(Context context, String number,String type) {
         String name = getName(number,context.getApplicationContext());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.call");
         np.setValue("number",name);
+        if(type.equals(callTypes.outgoing.name()))
+            np.setValue("text","Outgoing CALL");
+        else
         np.setValue("text","Incoming CALL");
         np.setValue("callType",type);
+        np.setValue("icon", getContactImage(context,number));
         String message = np.getMessage();
         if(message != null && !message.equals("")) {
             BackgroundService.sendToAllDevices(np.getMessage());

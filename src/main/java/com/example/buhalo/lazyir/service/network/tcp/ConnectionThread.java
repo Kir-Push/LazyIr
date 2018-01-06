@@ -201,6 +201,7 @@ public class ConnectionThread implements Runnable {
             // calling after because can throw exception and remove from hashmap won't be done
             in.close();
             out.close();
+            System.out.println();
             connection.close();
         }catch (Exception e) {Log.e("ConnectionThread","Error in stopped connection",e);}
         finally {
