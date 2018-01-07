@@ -23,9 +23,11 @@ import android.widget.Toast;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.Devices.ModuleSetting;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
+import com.example.buhalo.lazyir.modules.ModuleFactory;
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
@@ -35,6 +37,9 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -394,6 +399,19 @@ public class BackgroundService extends Service {
         takQueue.add(task);
         intent.setAction("task");
         startServiceOrForeground(intent);
+    }
+
+    public static HashSet<String> getMyEnabledModules(){
+        return ModuleFactory.getMyEnabledModules(getAppContext());
+    }
+
+    public static List<ModuleSetting> getMyEnabledModulesToModuleSetting(){
+        HashSet<String> myEnabledModules = ModuleFactory.getMyEnabledModules(getAppContext());
+        List<ModuleSetting> list = new ArrayList<>();
+        for (String myEnabledModule : myEnabledModules) {
+            list.add(new ModuleSetting(myEnabledModule,true,"*",true));
+        }
+        return list;
     }
 
 

@@ -27,26 +27,8 @@ public class ModulesActivity extends AppCompatActivity {
 
         setContentView(R.layout.modules_setting);
         moduleListView = findViewById(R.id.module_list);
-        if(MainActivity.getSelected_id() == null || MainActivity.getSelected_id().equals("") || Device.getConnectedDevices().size() == 0) {
-            CharSequence text = "No connection! ";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(getApplicationContext(), text, duration);
-            toast.show();
-            finish();
-            return;
-        }
-        // mock device for test purposes
-      //  MainActivity.setSelected_id("dadada");
-      //  Device.getConnectedDevices().put("dadada",new Device(null,"dadada","agasjka",null,null,null,this));
 
-
-        Device device = Device.getConnectedDevices().get(MainActivity.getSelected_id());
-        if(device == null){
-            Toast toast = Toast.makeText(getApplicationContext(), "Sorry no connection",Toast.LENGTH_SHORT );
-            toast.show();
-            finish();
-        }
-        moduleSettingAdapter = new ModuleSettingAdapter(this,ModuleFactory.getModulesNamesWithStatus(device,this));
+        moduleSettingAdapter = new ModuleSettingAdapter(this,ModuleFactory.getModulesNamesWithStatus(this));
         moduleListView.setAdapter(moduleSettingAdapter);
     }
 

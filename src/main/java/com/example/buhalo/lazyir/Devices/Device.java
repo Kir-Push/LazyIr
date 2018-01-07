@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,9 +36,10 @@ public class Device {
     private volatile boolean pinging;
     private volatile boolean answer;
     private ConcurrentHashMap<String,Module> enabledModules = new ConcurrentHashMap<>();
+    private List<ModuleSetting> enabledModulesConfig;
 
 
-    public Device(Socket socket, String id, String name, InetAddress ip, ConnectionThread thread,Context context) {
+    public Device(Socket socket, String id, String name, InetAddress ip, ConnectionThread thread,List<ModuleSetting> enabledModules,Context context) {
         this.socket = socket;
         this.id = id;
         this.name = name;
@@ -48,13 +50,16 @@ public class Device {
         this.pinging = false;
         this.answer = false;
         this.deviceType = "pc";   // by default device type is PC;
-
-        // todo do same in server!
-        enableModules();
+        this.enabledModulesConfig = enabledModules;
+        if(enabledModules != null)
+        for (ModuleSetting registeredModule : enabledModules) {
+            if(registeredModule.isEnabled()){
+                enableModule(registeredModule.getName());
+            } }
     }
 
-    public Device(Socket socket, String id, String name, InetAddress ip, String deviceType, ConnectionThread thread,Context context) {
-       this(socket,id,name,ip,thread,context);
+    public Device(Socket socket, String id, String name, InetAddress ip, String deviceType, ConnectionThread thread,List<ModuleSetting> enabledModules,Context context) {
+       this(socket,id,name,ip,thread,enabledModules,context);
        this.deviceType = deviceType;
     }
 
@@ -150,15 +155,17 @@ public class Device {
         return thread.getContext();
     }
 
-    public void enableModule(String moduleName, Module module) {
-        enabledModules.put(moduleName,module);
+    public void enableModule(String moduleName) {
+        Module module = ModuleFactory.instantiateModuleByName(this, moduleName);
+        if(module != null)
+            enabledModules.put(name, module);
     }
 
     public void disableModule(String moduleName) {
+        enabledModules.get(moduleName).endWork();
         enabledModules.remove(moduleName);
     }
 
-    public void enableModules() {enabledModules = ModuleFactory.getEnabledModules(this,thread.getContext());}
 
     public String getDeviceType() {
         return deviceType;
@@ -166,5 +173,26 @@ public class Device {
 
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public void refreshEnabledModules(List<ModuleSetting> moduleSettingList) {
+        setEnabledModulesConfig(moduleSettingList);
+        for (ModuleSetting moduleSetting : moduleSettingList) {
+            String name = moduleSetting.getName();
+            if(enabledModules.containsKey(name) && !moduleSetting.isEnabled()){ // if contain in enabledModules, but in income list is disabled
+                disableModule(name);
+            }else if(!enabledModules.containsKey(name) && moduleSetting.isEnabled()){ // opposite case, don't contain in enabledModules, but in list is enabled
+                enableModule(name);                                             // instantiate module, and put to enabledModules!
+            }
+        }
+
+    }
+
+    public List<ModuleSetting> getEnabledModulesConfig() {
+        return enabledModulesConfig;
+    }
+
+    public void setEnabledModulesConfig(List<ModuleSetting> enabledModulesConfig) {
+        this.enabledModulesConfig = enabledModulesConfig;
     }
 }

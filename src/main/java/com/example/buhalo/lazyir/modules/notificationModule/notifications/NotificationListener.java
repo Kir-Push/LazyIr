@@ -10,6 +10,8 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
+import java.util.HashMap;
+
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.smsMessage;
 
@@ -30,9 +32,12 @@ public class NotificationListener extends NotificationListenerService {
     //---------------------------------------------
     public static final String SMS_TYPE_2 = "com.android.messaging";
 
+    private static HashMap<String,Long> notifsToFrequent = new HashMap<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
+        // todo fill notifsToFrequent with notification's name's which you don't have too frequent show (charging);
         notif = this;
     }
 
@@ -98,14 +103,30 @@ public class NotificationListener extends NotificationListenerService {
             }
             NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,method);
             Notification notification = NotificationUtils.castToMyNotification(sbn);
-            if(notification == null)
+            boolean duplicate = checkNotificationForDuplicates(notification);
+            if(notification == null || duplicate)
                 return;
-            np.setObject(NetworkPackage.N_OBJECT,notification); // todo change from setValue, you need change in server to correspond!
+            np.setObject(NetworkPackage.N_OBJECT,notification);
             String message = np.getMessage();
             if(message != null && !message.equals(""))
                BackgroundService.sendToAllDevices(np.getMessage());
         }catch (Exception e) {
             Log.e(SHOW_NOTIFICATION,e.toString());
+        }
+    }
+
+    private boolean checkNotificationForDuplicates(Notification notification) {
+        String text = notification.getText() + notification.getTitle();
+        long currTime = System.currentTimeMillis();
+        Long aLong = notifsToFrequent.get(text);
+        if (notifsToFrequent.size() >= 20)
+            notifsToFrequent.clear();  // don't store too many object's
+        notifsToFrequent.put(text, currTime);
+        if (aLong == null) {
+            return false;
+        } else {
+            long difference = currTime - aLong;
+            return difference < 20000;
         }
     }
     //https://stackoverflow.com/questions/20522133/use-android-graphics-bitmap-from-java-without-android  --- bitmap to img (pixels)

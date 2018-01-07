@@ -73,7 +73,7 @@ public class ModuleSettingAdapter extends BaseAdapter {
            ModulesWrap modulesWrap = ((ModulesWrap)getItem((Integer) buttonView.getTag()));
            modulesWrap.setStatus(isChecked);
             String moduleName = modulesWrap.getModuleName();
-            ModuleFactory.changeModuleStatus(Device.getConnectedDevices().get(modulesWrap.getDvId()), moduleName,lInflater.getContext(),isChecked);
+            ModuleFactory.changeModuleStatus( moduleName,lInflater.getContext(),isChecked);
             // todo hanbdle change status, turn on or off module,
         }
     };

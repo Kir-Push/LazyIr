@@ -171,7 +171,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         lenghtTxt.setText(player.getReadyTimeString());
         lenghtTxt.refreshDrawableState();
 
-        if(player.getPlaybackStatus().equals("\"Playing\""))
+        if(player.getPlaybackStatus().equals("\"Playing\"") || player.getPlaybackStatus().equals("\"Playing\""))
             play.setBackgroundResource(R.mipmap.pause_btn);
         else
             play.setBackgroundResource(R.mipmap.play_btn);

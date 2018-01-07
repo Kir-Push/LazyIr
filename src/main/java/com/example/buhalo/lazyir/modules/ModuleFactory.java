@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.call.CallModule;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
 import com.example.buhalo.lazyir.modules.sendIr.SendIr;
@@ -15,8 +16,10 @@ import com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNo
 import com.example.buhalo.lazyir.modules.notificationModule.sms.SmsModule;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
+import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,61 +36,62 @@ public class ModuleFactory {
     private static Lock lock = new ReentrantLock();
     // container of all refistedModulesclasses
     private static List<Class> registeredModules;
+    private static boolean myEnabledModulesUpdate;
+    private static HashSet<String> myEnabledModules;
 
-    private static Module instantiateModule(Device dv, Class registeredModule) throws IllegalAccessException,InstantiationException
-    {
-        Module module = null;
-        if(registeredModules == null)
-        {
-            registerModulesInit();
-        }
-            module = (Module)registeredModule.newInstance();
-            module.setDevice(dv);
-            module.setContext(dv.getContext());
-        return module;
-    }
-
-    //method return fully instanced modules, ready to work.
-    public static ConcurrentHashMap<String,Module> getEnabledModules(Device dv, Context context)
+    private static Module instantiateModule(Device dv, Class registeredModule)
     {
         lock.lock();
-        ConcurrentHashMap<String,Module> resultMap = new ConcurrentHashMap<>();
         try {
-            if(dv == null)
-                return resultMap;
-            // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
-            List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(dv);
-            // getting list of enabledModules names from Database;
-            if(enabledModulesNames == null || enabledModulesNames.size() == 0)
-            enabledModulesNames = DBHelper.getInstance(context).getEnabledModules(dv);
-            //instantiate modules. Modules must itself handle multiple instances and so.
-            for (String ModuleName : enabledModulesNames) {
-                Module module = instantiateModuleByName(dv, ModuleName);
-                // check module to null before add to hashMap. If you add null, it may cause some bad things in future.
-                if(module != null)
-                resultMap.put(ModuleName,module);
+            if (registeredModules == null) {
+                registerModulesInit();
             }
+            Module module = null;
+            try {
+                module = (Module) registeredModule.newInstance();
+                module.setDevice(dv);
+                module.setContext(dv.getContext());
+            } catch (IllegalAccessException | InstantiationException e) {
+                Log.e("ModuleFactory", e.toString());
 
-        }catch (IllegalAccessException | InstantiationException e) {
-            Log.e("ModuleFactory","getEnabledModules",e);
+            }
+            return module;
         }finally {
             lock.unlock();
         }
-        return resultMap;
+    }
+
+    //method return fully instanced modules, ready to work.
+    public static  HashSet<String> getMyEnabledModules(Context context)
+    {
+        lock.lock();
+        if(!myEnabledModulesUpdate && myEnabledModules != null) {
+            return myEnabledModules;
+        }
+        String myId = NetworkPackage.getMyId();
+        HashSet<String> result;
+        try {
+            // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
+            List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(myId);
+            // getting list of enabledModules names from Database;
+            if(enabledModulesNames == null || enabledModulesNames.size() == 0)
+            enabledModulesNames = DBHelper.getInstance(context).getEnabledModules(myId);
+            result = new HashSet<>(enabledModulesNames);
+            myEnabledModulesUpdate = false;
+            myEnabledModules = result;
+        }finally {
+            lock.unlock();
+        }
+        return result;
     }
     //enable or disable module. Change value on Db and call method
     // if enableOrDisable true, then enable and instanciate module, otherwise disable
-    public static void changeModuleStatus(Device dv,String moduleName,Context context,boolean enableOrDisable)
+    public static void changeModuleStatus(String moduleName,Context context,boolean enableOrDisable)
     {
         lock.lock();
         try{
-            DBHelper.getInstance(context).changeModuleStatus(dv,moduleName,enableOrDisable);
-            if(enableOrDisable)
-                dv.enableModule(moduleName,instantiateModuleByName(dv,moduleName));
-            else
-            dv.disableModule(moduleName);
-        }catch (IllegalAccessException | InstantiationException e) {
-            Log.e("ModuleFactory","disableModule",e);
+            DBHelper.getInstance(context).changeModuleStatus(NetworkPackage.getMyId(),moduleName,enableOrDisable);
+            myEnabledModulesUpdate = true;
         }finally {
             lock.unlock();
         }
@@ -108,7 +112,7 @@ public class ModuleFactory {
         registeredModules.add(CallModule.class);
     }
 
-    private static Module instantiateModuleByName(Device dv,String name) throws  IllegalAccessException,InstantiationException
+    public static Module instantiateModuleByName(Device dv,String name)
     {
         if(registeredModules == null)
         {
@@ -141,20 +145,18 @@ public class ModuleFactory {
     // use Module wrapper which is simple class with string name,dv id - (needed in internal logic) and bool status (enabled:disabled);
     // alghorithm not efficient, but number of modules very small - around 10, maximum 15 items,
     // it's not very bad for that. alghorithm has O(2n) difficulty.
-    public static List<ModulesWrap> getModulesNamesWithStatus(Device dv,Context context)
+    public static List<ModulesWrap> getModulesNamesWithStatus(Context context)
     {
         //to
         List<ModulesWrap> result = new ArrayList<>();
-        if(dv == null)
-            return result;
-                    Map<String, Module> enabledModules = getEnabledModules(dv, context);
+        HashSet<String> enabledModules = getMyEnabledModules(context);
         List<Class> registeredModules = getRegisteredModules();
         for (Class registeredModule : registeredModules) {
-            if(!enabledModules.containsKey(registeredModule.getSimpleName()))
-            result.add(new ModulesWrap(registeredModule.getSimpleName(),false, dv.getId()));
+            if(!enabledModules.contains(registeredModule.getSimpleName()))
+            result.add(new ModulesWrap(registeredModule.getSimpleName(),false, NetworkPackage.getMyId()));
         }
-        for (String s : enabledModules.keySet()) {
-            result.add(new ModulesWrap(s,true, dv.getId()));
+        for (String s : enabledModules) {
+            result.add(new ModulesWrap(s,true,NetworkPackage.getMyId()));
         }
 
         return result;

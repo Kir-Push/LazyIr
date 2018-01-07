@@ -714,7 +714,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
     // first try getting enabledModulesBy device, if size 0, check if device non exist in db(first time connect, if true then fill by default list of enabled modules(all).
     // return enabledModules in each cases
-    public List<String> checkAndSetDefaultIfNoInfo(Device dv) {
+    public List<String> checkAndSetDefaultIfNoInfo(String dv) {
         if(dv == null)
             return new ArrayList<>();
         List<String> enabledModules = getEnabledModules(dv);
@@ -727,7 +727,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // it's called when device connect for the fisrt time,and no setting's for device in db
     // return list of enabled modules names by this method - actually all modules
     // lock for write and read
-    private List<String> fillStandart(Device dv) {
+    private List<String> fillStandart(String dv) {
             lock.writeLock().lock();
             lock.readLock().lock();
             List<String> result = new ArrayList<>();
@@ -735,7 +735,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 for (Class moduleClass : ModuleFactory.getRegisteredModules()) {
                     ContentValues values = new ContentValues();
                     values.put(COLUMN_NAME_MODULE_NAME,moduleClass.getSimpleName());
-                    values.put(COLUMN_NAME_MODULE_DEVICE,dv.getId());
+                    values.put(COLUMN_NAME_MODULE_DEVICE,dv);
                     values.put(COLUMN_NAME_MODULE_STATUS,statusOn);
                     long  newRowId = db.insert(
                             TABLE_NAME_MODULE,
@@ -755,12 +755,12 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // simply checking module table for device id.
     // lock for write but not for read.
     // return true if non exist, otherwise false.
-    private boolean checkIfFirstTimeDevice(Device dv) {
+    private boolean checkIfFirstTimeDevice(String dv) {
         lock.writeLock().lock();
         try(SQLiteDatabase db = getReadableDatabase()){
             String[] projection = {COLUMN_NAME_MODULE_DEVICE};
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ?";
-            String[] selectionArgs = {dv.getId()};
+            String[] selectionArgs = {dv};
 
             try(Cursor c = db.query(TABLE_NAME_MODULE,projection,selection,selectionArgs,null,null,null)) {
                 return c.getCount() <= 0;
@@ -773,15 +773,13 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // get Enabled Modules for specific device,
     // lock for write but not for read.
     // return list of modules names
-    public  List<String> getEnabledModules(Device dv){
+    public  List<String> getEnabledModules(String dv){
         lock.writeLock().lock();
         List<String> result = new ArrayList<>();
-        if(dv == null)
-            return result;
         try(SQLiteDatabase db = getReadableDatabase()){
 
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_STATUS + " LIKE ?";
-            String[] selectionArgs = {dv.getId(),statusOn};
+            String[] selectionArgs = {dv,statusOn};
 
             try(Cursor c = db.query(TABLE_NAME_MODULE,moduleProjectionSimple,selection,selectionArgs,null,null,null)) {
                 while (c.moveToNext()){
@@ -799,16 +797,16 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // lock read and write
     // arg status if true - on, false - off
     // method does not check whether such entry exist, maybe need carefully testing
-    public void changeModuleStatus(Device dv, String moduleName,boolean status) {
+    public void changeModuleStatus(String dv, String moduleName,boolean status) {
         lock.writeLock().lock();
         lock.readLock().lock();
         try(SQLiteDatabase db = getWritableDatabase()){
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_MODULE_NAME,moduleName);
-            values.put(COLUMN_NAME_MODULE_DEVICE,dv.getId());
+            values.put(COLUMN_NAME_MODULE_DEVICE,dv);
             values.put(COLUMN_NAME_MODULE_STATUS,status ? statusOn : statusOff);
             String selection = COLUMN_NAME_MODULE_DEVICE + " LIKE ? AND " + COLUMN_NAME_MODULE_NAME + " LIKE ?";
-            String[] args = new String[]{dv.getId(),moduleName};
+            String[] args = new String[]{dv,moduleName};
             db.update(TABLE_NAME_MODULE,values,selection,args);
         }finally {
             lock.readLock().unlock();

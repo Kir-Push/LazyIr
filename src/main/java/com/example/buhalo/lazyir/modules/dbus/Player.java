@@ -14,10 +14,12 @@ public class Player {
     private String readyTimeString;
     private String type;
     private String id;
-    private String link;//link for opening in browser! // todo new add it in server,
+    private String link;
+    private String url;
+    private String webId;
 
 
-    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString, String type, String id,String link) {
+    public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString, String type, String id,String link,String url,String webId) {
         this.name = name;
         this.playbackStatus = playbackStatus;
         this.title = title;
@@ -28,10 +30,12 @@ public class Player {
         this.type = type;
         this.id = id;
         this.link = link;
+        this.url = url;
+        this.webId = webId;
     }
 
     public Player(String name, String playbackStatus, String title, double lenght, double volume, double currTime, String readyTimeString) {
-        this(name,playbackStatus,title,lenght,volume,currTime,readyTimeString,"dbus","-1","-1");
+        this(name,playbackStatus,title,lenght,volume,currTime,readyTimeString,"dbus","-1","-1","-1","-1");
     }
 
     public Player() {
@@ -132,5 +136,21 @@ public class Player {
 
     public void setReadyTimeString(String readyTimeString) {
         this.readyTimeString = readyTimeString;
+    }
+
+    public String getWebId() {
+        return webId;
+    }
+
+    public void setWebId(String webId) {
+        this.webId = webId;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

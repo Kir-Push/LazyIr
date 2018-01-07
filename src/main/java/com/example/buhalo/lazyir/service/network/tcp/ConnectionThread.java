@@ -7,6 +7,8 @@ import com.example.buhalo.lazyir.DbClasses.DBHelper;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
+import com.example.buhalo.lazyir.Devices.ModuleSetting;
+import com.example.buhalo.lazyir.Devices.ModuleSettingList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
@@ -20,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLSocket;
 
+import static com.example.buhalo.lazyir.Devices.NetworkPackage.N_OBJECT;
 import static com.example.buhalo.lazyir.service.BackgroundServiceCmds.onZeroConnections;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
@@ -100,9 +104,14 @@ public class ConnectionThread implements Runnable {
 
 
     // get myId and send introduce package to device
-    private void sendIntroduce() {
+    private void sendIntroduce(boolean paired) {
             String temp =String.valueOf(android.os.Build.SERIAL.hashCode());
+            if(!paired)
+                temp = "nonPaired";
             NetworkPackage networkPackage =  NetworkPackage.Cacher.getOrCreatePackage(TCP_INTRODUCE,temp);
+            ModuleSettingList moduleSettingList = new ModuleSettingList();
+            moduleSettingList.setModuleSettingList(BackgroundService.getMyEnabledModulesToModuleSetting());
+            networkPackage.setObject(N_OBJECT,moduleSettingList);  // set myModuleConfig's to introduce package, android do the same
             printToOut(networkPackage.getMessage());
     }
 
@@ -133,18 +142,22 @@ public class ConnectionThread implements Runnable {
 
  // pair result from device
     public void pairResult(NetworkPackage np) {
+        Device device = Device.getConnectedDevices().get(deviceId);
         if(np.getData() != null &&  deviceId != null) {
             if(np.getValue(RESULT).equals(OK)) {
                 DBHelper.getInstance(context).savePairedDevice(deviceId,np.getData());
-                Device.getConnectedDevices().get(deviceId).setPaired(true);
+                if(device != null)
+                device.setPaired(true);
                 Battery.sendBatteryLevel(deviceId,context); // send battery level first after pairing, or maybe after sync?
             }
             else if(np.getValue(RESULT).equals(REFUSE)) {
                 DBHelper.getInstance(context).deletePaired(deviceId);
-                Device.getConnectedDevices().get(deviceId).setPaired(false);
+                if(device != null)
+                device.setPaired(false);
             }
         } else {
-            Device.getConnectedDevices().get(deviceId).setPaired(false); // todo check for nullPointer
+            if(device != null)
+            device.setPaired(false);
         }
         MainActivity.updateActivity();
     }
@@ -162,7 +175,9 @@ public class ConnectionThread implements Runnable {
     {
         if(deviceId == null) {
             deviceId = np.getId();
-            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,context);
+            boolean paired = true;
+            ModuleSettingList object = np.getObject(N_OBJECT, ModuleSettingList.class);
+            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,object.getModuleSettingList(),context);
             Device.getConnectedDevices().put(deviceId, device);
             if(MainActivity.getSelected_id().equals("")) {
                 MainActivity.setSelected_id(deviceId);
@@ -170,11 +185,17 @@ public class ConnectionThread implements Runnable {
             if(np.getData() != null) {
                 String pairedCode = np.getData();
                 List<String> savedPairedCode = DBHelper.getInstance(context).getPairedCode(deviceId);
-                if(savedPairedCode.size() != 0 && savedPairedCode.get(0).equals(pairedCode)) {
-                    device.setPaired(true);
+                if(savedPairedCode.size() != 0) {
+                    if( savedPairedCode.get(0).equals(pairedCode)) {
+                        device.setPaired(true);
+                        paired = true;
+                    }else{
+                        device.setPaired(false);
+                        paired = false;
+                    }
                 }
             }
-            sendIntroduce();
+            sendIntroduce(paired);
             //  startPingPong(deviceId);
         }
     }
@@ -226,7 +247,7 @@ public class ConnectionThread implements Runnable {
     // this method does not used at this time, maybe in future, but you will need rewrite it
     private void receiveSync(NetworkPackage np) {
         try {
-            List<Command> receivedCommands = np.getObject(NetworkPackage.N_OBJECT, CommandsList.class).getCommands();
+            List<Command> receivedCommands = np.getObject(N_OBJECT, CommandsList.class).getCommands();
             if(receivedCommands == null)
                 return;
             //  DBHelper.getInstance(context).removeCommandsPcAll();
@@ -250,7 +271,12 @@ public class ConnectionThread implements Runnable {
             if(!device.isPaired()) {
                 return;
             }
-            Module module = device.getEnabledModules().get(np.getType());
+            String moduleType = np.getType();
+            boolean myModuleSetting = BackgroundService.getMyEnabledModules().contains(moduleType);
+            if(!myModuleSetting){
+                return;
+            }
+            Module module = device.getEnabledModules().get(moduleType);
             if(module != null)
             module.execute(np);
         }catch (Exception e) {
