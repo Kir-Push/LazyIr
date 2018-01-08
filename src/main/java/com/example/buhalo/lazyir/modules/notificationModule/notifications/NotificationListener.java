@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.SparseLongArray;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
@@ -32,12 +34,12 @@ public class NotificationListener extends NotificationListenerService {
     //---------------------------------------------
     public static final String SMS_TYPE_2 = "com.android.messaging";
 
-    private static HashMap<String,Long> notifsToFrequent = new HashMap<>();
+    private static SparseLongArray notifsToFrequent = new SparseLongArray();
+    private static HashMap<String,AbstractMap.SimpleEntry<Long,Integer>> spamDefender = new HashMap<>();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // todo fill notifsToFrequent with notification's name's which you don't have too frequent show (charging);
         notif = this;
     }
 
@@ -115,19 +117,58 @@ public class NotificationListener extends NotificationListenerService {
         }
     }
 
+    //check whether duplicate notificatione was posted around 60 second ago
     private boolean checkNotificationForDuplicates(Notification notification) {
-        String text = notification.getText() + notification.getTitle();
         long currTime = System.currentTimeMillis();
-        Long aLong = notifsToFrequent.get(text);
+        int hash = notification.hashCode();
+        Long aLong = notifsToFrequent.get(hash);
         if (notifsToFrequent.size() >= 20)
             notifsToFrequent.clear();  // don't store too many object's
-        notifsToFrequent.put(text, currTime);
-        if (aLong == null) {
+        notifsToFrequent.put(hash, currTime);
+        if (aLong == 0) { // if zero - no data, that means after clearing this notification first - return false
             return false;
         } else {
             long difference = currTime - aLong;
-            return difference < 20000;
+            if(!checkSpecialNotifs(notification))
+            return difference < 60000;
         }
+        return false;
+    }
+
+    // method try to prevent notification's spam, which post very quickly on ~same time
+    // save timestamp and count number ot specific packet posted for 2 sec interval
+    // return true if spam, false otherwise
+    private boolean checkSpecialNotifs(Notification notification) {
+        boolean result = false;
+        String pack = notification.getPack();
+        long currTime = System.currentTimeMillis();
+        AbstractMap.SimpleEntry<Long, Integer> longIntegerSimpleEntry = spamDefender.get(pack);
+        Integer count = 0;
+        if(longIntegerSimpleEntry != null) {
+            Long prevTime = longIntegerSimpleEntry.getKey();
+            count = longIntegerSimpleEntry.getValue();
+            if (count == null)
+                count = 0;
+            if (currTime - prevTime >= 2000) {
+                spamDefender.remove(pack);
+                result = false;
+                count = 0;
+            } else if (count >= 5) { // if number of that package appearance - 5
+                if (currTime - prevTime <= 2000) {  // if 3 time counted only for 2 second's
+                    currTime = prevTime;
+                    result = true;
+                    if (count >= 7) { // too hard spam
+                        currTime -= 5000; // we take 5 sec, now 5 more sec ignore this packet
+                    }
+                }
+            }
+        }
+        if(spamDefender.size() >= 19) // actually 20, after you put another value
+            spamDefender.clear();
+        count++;
+        AbstractMap.SimpleEntry<Long,Integer> store = new AbstractMap.SimpleEntry<Long,Integer>(currTime,count);
+        spamDefender.put(pack,store);
+        return result;
     }
     //https://stackoverflow.com/questions/20522133/use-android-graphics-bitmap-from-java-without-android  --- bitmap to img (pixels)
 //    private ImageDTO getIcon(StatusBarNotification sbn){

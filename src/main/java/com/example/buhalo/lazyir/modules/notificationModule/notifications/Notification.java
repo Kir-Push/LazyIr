@@ -93,4 +93,29 @@ public class Notification {
     public void setType(String type) {
         this.type = type;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Notification that = (Notification) o;
+
+        if (text != null ? !text.equals(that.text) : that.text != null) return false;
+        if (title != null ? !title.equals(that.title) : that.title != null) return false;
+        if (pack != null ? !pack.equals(that.pack) : that.pack != null) return false;
+        if (ticker != null ? !ticker.equals(that.ticker) : that.ticker != null) return false;
+        return id != null ? id.equals(that.id) : that.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = text != null ? text.hashCode() : 0;
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (pack != null ? pack.hashCode() : 0);
+        result = 31 * result + (ticker != null ? ticker.hashCode() : 0);
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
+    }
 }
