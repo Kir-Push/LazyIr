@@ -130,7 +130,6 @@ public class ConnectionThread implements Runnable {
             if(out == null) {
                 return;
             }
-            System.out.println("MEssage send " + message);
             out.println(message);
             out.flush();
         }finally {
@@ -177,7 +176,7 @@ public class ConnectionThread implements Runnable {
             deviceId = np.getId();
             boolean paired = true;
             ModuleSettingList object = np.getObject(N_OBJECT, ModuleSettingList.class);
-            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,object.getModuleSettingList(),context);
+            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,  object.getModuleSettingList(),context);
             Device.getConnectedDevices().put(deviceId, device);
             if(MainActivity.getSelected_id().equals("")) {
                 MainActivity.setSelected_id(deviceId);
@@ -222,7 +221,6 @@ public class ConnectionThread implements Runnable {
             // calling after because can throw exception and remove from hashmap won't be done
             in.close();
             out.close();
-            System.out.println();
             connection.close();
         }catch (Exception e) {Log.e("ConnectionThread","Error in stopped connection",e);}
         finally {

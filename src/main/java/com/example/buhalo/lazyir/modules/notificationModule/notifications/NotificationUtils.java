@@ -67,7 +67,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     private static String extractType(StatusBarNotification sbn,String pack,String title,String text){
         if(smsMessage(sbn))
             return "sms";
-        else if(messengersMessage(sbn,pack,title,text))
+        else if(messengersMessage(sbn,pack,title,text) && !messengerDupStrangeCheck(pack,text))
             return "messenger";
         return "notification";
     }
@@ -76,9 +76,6 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
      static boolean messengersMessage(StatusBarNotification sbn,String pack,String title,String text) {
         Bundle bundle = sbn.getNotification().extras;
       //  Notification notification = NotificationUtils.castToMyNotification(sbn);
-        if(pack == null  ||pack.equals("com.whatsapp") && text == null ||pack.equals("com.google.android.googlequicksearchbox"))
-            return true;
-
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
 
@@ -88,10 +85,40 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
                 return true;
             }
         }
-        if( Messengers.getPendingNotifsLocal().containsKey(pack+":"+title)) {
-            return true;
-        }
+
         return false;
+    }
+
+    static boolean messengerMessageCheckAndSend(StatusBarNotification sbn,String pack,String title,String text,Notification notification){
+        Bundle bundle = sbn.getNotification().extras;
+        if(pack == null  ||pack.equals("com.whatsapp") && text == null ||pack.equals("com.google.android.googlequicksearchbox"))
+            return true;
+
+        for (String key : bundle.keySet()) {
+            if("android.wearable.EXTENSIONS".equals(key)){
+
+                if((sbn.getId() > 1 && pack.equals("org.telegram.messenger")) || !pack.equals("org.telegram.messenger")) {        // telegram send second notif with id 1, it not contain action, therefore ignore it
+                    Messengers.getPendingNotifsLocal().put(pack + ":" + title, sbn);
+                    Messengers.sendToServer(notification);
+                }
+                return true;
+            }
+        }
+
+        if( Messengers.getPendingNotifsLocal().containsKey(pack+":"+title))
+            return true;
+
+        return false;
+    }
+
+    static boolean messengerDupStrangeCheck(String pack,String text){
+        if(pack == null  ||pack.equals("com.whatsapp") && text == null ||pack.equals("com.google.android.googlequicksearchbox"))
+            return true;
+        return false;
+    }
+
+    static boolean containsInMap(String pack,String title){
+      return   Messengers.getPendingNotifsLocal().containsKey(pack+":"+title);
     }
 
     private static String extractTicker(StatusBarNotification sbn) {

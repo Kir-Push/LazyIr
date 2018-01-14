@@ -83,6 +83,10 @@ public class BackgroundService extends Service {
     private static volatile boolean started;
     private static volatile boolean inited;
 
+    public static SettingService getSettingManager() {
+        return null; // todo
+    }
+
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
             super(looper);

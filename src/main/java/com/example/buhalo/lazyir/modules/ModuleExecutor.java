@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.modules.sendIr.SendIr;
+import com.example.buhalo.lazyir.modules.sendIr.IrModule;
 
 /**
  * Created by buhalo on 05.03.17.
@@ -29,7 +29,7 @@ public class ModuleExecutor {
         if(Device.getConnectedDevices().get(np.getDvId()) == null) // if null maybe it's only ir command? trying to do
         {
             Log.d("ModuleExecutor","Start ir executore offline");
-            SendIr ir = new SendIr();
+            IrModule ir = new IrModule();
             ir.setContext(context);
             ir.execute(np);
         }

@@ -32,8 +32,13 @@ public class Messengers extends Module {
 
     private static boolean taskStarted = false;
 
+    public Messengers() {
+        working = true;
+    }
+
     @Override
     public void execute(NetworkPackage np) {
+        System.out.println("AA " + np.getMessage());
         if(!working)
             return;
         if(np.getData().equals(ANSWER)) {
@@ -98,7 +103,7 @@ public class Messengers extends Module {
      public static void sendToServer(Notification notification) {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Messengers.class.getSimpleName(),ANSWER);
         String typeName = notification.getPack()+":"+notification.getTitle();
-        notification.setPack(tryExtractPack(notification.getPack())); // todo change from setValue, you need change in server to correspond!
+        notification.setPack(notification.getPack()); // todo change from setValue, you need change in server to correspond!
         np.setObject(NetworkPackage.N_OBJECT,notification);
 //        np.setValue("typeName",typeName);
 //        np.setValue("pack",tryExtractPack(notification.getPack()));

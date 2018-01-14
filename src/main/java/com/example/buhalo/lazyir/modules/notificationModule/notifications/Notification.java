@@ -118,4 +118,6 @@ public class Notification {
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
     }
+
+
 }

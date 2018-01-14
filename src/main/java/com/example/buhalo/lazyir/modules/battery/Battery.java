@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
@@ -15,7 +16,7 @@ import com.example.buhalo.lazyir.service.TcpConnectionManager;
 
 // you use it only in one place, when introduce received, maybe you don't need it, you have batterybroadcastreceiver which send to all device battery when system push it
 @Deprecated
-public class Battery { // it not implement module because it one for all, send message when connected device , and after send to all when broadcast received
+public class Battery extends Module { // it not implement module because it one for all, send message when connected device , and after send to all when broadcast received
     public static final String STATUS = "status";
     public static final String PERCENTAGE = "percentage";
 
@@ -37,4 +38,8 @@ public class Battery { // it not implement module because it one for all, send m
         BackgroundService.sendToDevice(id,np.getMessage());
     }
 
+    @Override
+    public void execute(NetworkPackage np) {
+
+    }
 }

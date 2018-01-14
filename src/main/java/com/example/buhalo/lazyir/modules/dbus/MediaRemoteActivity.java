@@ -101,7 +101,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
                 }
             }catch (InterruptedException e)
             {
-                //todo
+               Log.e("MediaRemoteActivity","Error in select command (run) ",e);
             }
 
         }

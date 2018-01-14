@@ -12,7 +12,7 @@ import java.util.List;
  * Created by buhalo on 05.03.17.
  */
 
-public class SendIr extends Module {
+public class IrModule extends Module {
     public static final String SEND_IR_COMMAND = "sendIrCommand";
 
     @Override

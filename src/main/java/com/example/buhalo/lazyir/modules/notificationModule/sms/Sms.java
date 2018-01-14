@@ -69,4 +69,15 @@ public class Sms {
     public void setIcon(String icon) {
         this.icon = icon;
     }
+
+    @Override
+    public String toString() {
+        return "Sms{" +
+                "number='" + number + '\'' +
+                ", name='" + name + '\'' +
+                ", text='" + text + '\'' +
+                ", icon='" + icon + '\'' +
+                ", picture='" + picture + '\'' +
+                '}';
+    }
 }

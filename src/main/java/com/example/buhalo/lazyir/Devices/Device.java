@@ -54,6 +54,7 @@ public class Device {
         if(enabledModules != null)
         for (ModuleSetting registeredModule : enabledModules) {
             if(registeredModule.isEnabled()){
+                System.out.println(registeredModule.getName());
                 enableModule(registeredModule.getName());
             } }
     }
@@ -158,7 +159,7 @@ public class Device {
     public void enableModule(String moduleName) {
         Module module = ModuleFactory.instantiateModuleByName(this, moduleName);
         if(module != null)
-            enabledModules.put(name, module);
+            enabledModules.put(moduleName, module);
     }
 
     public void disableModule(String moduleName) {

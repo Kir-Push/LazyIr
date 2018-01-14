@@ -1,7 +1,6 @@
 package com.example.buhalo.lazyir.Executors;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
@@ -10,14 +9,14 @@ import com.example.buhalo.lazyir.Devices.CommandsList;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.ModuleExecutor;
-import com.example.buhalo.lazyir.modules.sendIr.SendIr;
+import com.example.buhalo.lazyir.modules.sendIr.IrModule;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.EXECUTE;
 import static com.example.buhalo.lazyir.modules.sendcommand.SendCommand.SEND_COMMAND;
-import static com.example.buhalo.lazyir.modules.sendIr.SendIr.SEND_IR_COMMAND;
+import static com.example.buhalo.lazyir.modules.sendIr.IrModule.SEND_IR_COMMAND;
 
 
 public class ButtonExecutor {
@@ -41,7 +40,7 @@ public class ButtonExecutor {
         Device device = Device.getConnectedDevices().get(dvId);
         npPc.setDvId(dvId);
 
-        NetworkPackage npIr = NetworkPackage.Cacher.getOrCreatePackage(SendIr.class.getSimpleName(),SEND_IR_COMMAND);
+        NetworkPackage npIr = NetworkPackage.Cacher.getOrCreatePackage(IrModule.class.getSimpleName(),SEND_IR_COMMAND);
         CommandsList irCommandsList = new CommandsList(ir);
         npIr.setObject(NetworkPackage.N_OBJECT,irCommandsList);
         npIr.setDvId(dvId);

@@ -1,7 +1,11 @@
 package com.example.buhalo.lazyir.modules.notificationModule.notifications;
 
+import android.app.NotificationManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.CallLog;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -10,10 +14,16 @@ import android.util.SparseLongArray;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.SettingService;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.containsInMap;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengerDupStrangeCheck;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengerMessageCheckAndSend;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.smsMessage;
 
@@ -36,6 +46,7 @@ public class NotificationListener extends NotificationListenerService {
 
     private static SparseLongArray notifsToFrequent = new SparseLongArray();
     private static HashMap<String,AbstractMap.SimpleEntry<Long,Integer>> spamDefender = new HashMap<>();
+    private  Pattern chargeRegex;
 
     @Override
     public void onCreate() {
@@ -61,11 +72,17 @@ public class NotificationListener extends NotificationListenerService {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && sbn.getId() == BackgroundService.NotifId)
             snoozeNotification(sbn.getKey(), 600000);
 
+
+        //todo filter com.android.incallui -- incoming call notification's!
+            // todo in pc in log file log notifs pack and some info (without text ) чтобы знать какие pack если что игнорить!
+        //    SettingService.checkForIgnore(sbn); // todo
+
+//            if(sbn.getPackageName().equals("com.android.systemui")){
+//                cancelNotification(sbn.getKey());
+//            }
             if(!smsMessage(sbn)){                        //first check if notification is not smsMessage, if it is - send as sms
                 Notification notification = NotificationUtils.castToMyNotification(sbn);
-                if(notification != null && messengersMessage(sbn,notification.getPack(),notification.getTitle(),notification.getText())) {
-                    if(!notification.getPack().equals("com.google.android.googlequicksearchbox"))
-                    Messengers.sendToServer(notification);    // after check if this  is not messenger message, if it is - send as message
+                if(messengerMessageCheckAndSend(sbn,notification.getPack(),notification.getTitle(),notification.getText(),notification)) {
                 }
                 else
                   sendToAll(sbn, RECEIVE_NOTIFICATION);  // if previous two false, this is notif, send to server
@@ -105,9 +122,13 @@ public class NotificationListener extends NotificationListenerService {
             }
             NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,method);
             Notification notification = NotificationUtils.castToMyNotification(sbn);
-            boolean duplicate = checkNotificationForDuplicates(notification);
-            if(notification == null || duplicate)
-                return;
+            if(!method.equals(DELETE_NOTOFICATION)) {
+                boolean duplicate = checkNotificationForDuplicates(notification);
+                boolean charging = checkChargingNotification(notification);
+                boolean spam = checkSpecialNotifs(notification);
+                if (duplicate || charging || spam)
+                    return;
+            }
             np.setObject(NetworkPackage.N_OBJECT,notification);
             String message = np.getMessage();
             if(message != null && !message.equals(""))
@@ -129,9 +150,25 @@ public class NotificationListener extends NotificationListenerService {
             return false;
         } else {
             long difference = currTime - aLong;
-            if(!checkSpecialNotifs(notification))
             return difference < 60000;
         }
+    }
+
+    // charging notification show each time when percent update, we don't want to see it
+    // so filter it
+    private boolean checkChargingNotification(Notification notification) {
+        if(notification.getPack().equals("com.android.systemui")){ // charging notifs have this packageName
+            NotificationManager notificationManager = (NotificationManager)  getSystemService(NOTIFICATION_SERVICE);
+            System.out.println("JA TUT!!!  " + notification.getId());
+            notificationManager.cancel(Integer.parseInt(notification.getId()));
+            if(chargeRegex == null) {
+                String regex = "^.+\\d{1,3}%.+$"; // on lg q6 title of notification - Charging (10%)
+                chargeRegex = Pattern.compile(regex);
+            }
+            Matcher matcher = chargeRegex.matcher(notification.getTitle());
+            return matcher.matches();
+        }
+        else
         return false;
     }
 
@@ -140,7 +177,7 @@ public class NotificationListener extends NotificationListenerService {
     // return true if spam, false otherwise
     private boolean checkSpecialNotifs(Notification notification) {
         boolean result = false;
-        String pack = notification.getPack();
+        String pack = notification.getPack() + notification.getTitle();
         long currTime = System.currentTimeMillis();
         AbstractMap.SimpleEntry<Long, Integer> longIntegerSimpleEntry = spamDefender.get(pack);
         Integer count = 0;
@@ -153,11 +190,11 @@ public class NotificationListener extends NotificationListenerService {
                 spamDefender.remove(pack);
                 result = false;
                 count = 0;
-            } else if (count >= 5) { // if number of that package appearance - 5
+            } else if (count >= 3) { // if number of that package appearance - 3
                 if (currTime - prevTime <= 2000) {  // if 3 time counted only for 2 second's
                     currTime = prevTime;
                     result = true;
-                    if (count >= 7) { // too hard spam
+                    if (count >= 5) { // too hard spam
                         currTime -= 5000; // we take 5 sec, now 5 more sec ignore this packet
                     }
                 }
@@ -170,26 +207,7 @@ public class NotificationListener extends NotificationListenerService {
         spamDefender.put(pack,store);
         return result;
     }
-    //https://stackoverflow.com/questions/20522133/use-android-graphics-bitmap-from-java-without-android  --- bitmap to img (pixels)
-//    private ImageDTO getIcon(StatusBarNotification sbn){
-//        android.app.Notification notification = sbn.getNotification();
-//        Icon icon = (icon = notification.getLargeIcon()) == null ? notification.getSmallIcon() : icon;
-//        ImageDTO imageDTO;
-//        if(icon == null)
-//            return null;
-//        try {
-//            Context packageContext = createPackageContext(sbn.getPackageName(), CONTEXT_IGNORE_SECURITY);
-//            Drawable drawable = icon.loadDrawable(packageContext);
-//            Bitmap bitmap = drawableToBitmap(drawable);
-//            int[] pixels = new int[bitmap.getWidth()*bitmap.getHeight()];
-//            bitmap.getPixels(pixels,0,bitmap.getWidth(),0,0,bitmap.getWidth(),bitmap.getHeight());
-//            imageDTO = new ImageDTO(pixels,bitmap.getWidth(),bitmap.getHeight());
-//            return imageDTO;
-//        } catch (PackageManager.NameNotFoundException e) {
-//            Log.e("NotificationListener","getIcon",e);
-//            return  null;
-//        }
-//    }
+
 
 
 

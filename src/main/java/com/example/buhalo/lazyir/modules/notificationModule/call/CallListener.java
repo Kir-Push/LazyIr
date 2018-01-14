@@ -12,8 +12,6 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
-import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SHOW_NOTIFICATION;
-
 /**
  * Created by buhalo on 03.12.17.
  */
@@ -21,6 +19,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
 public class CallListener extends BroadcastReceiver {
 
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
+    private static String CALL_MODULE = "CallModule";
     public static final String ANSWER = "answer";
     private static boolean isIncoming;
     private static String savedNumber;
@@ -58,6 +57,7 @@ public class CallListener extends BroadcastReceiver {
         if(lastState == state){
             return; //No change, debounce extras
         }
+        System.out.println(state + "   " + number);
         switch (state) {
             case TelephonyManager.CALL_STATE_RINGING:
                 isIncoming = true;
@@ -72,7 +72,6 @@ public class CallListener extends BroadcastReceiver {
                 else if(isIncoming) {
                     isIncoming = true;
                     onAnswered(context,number,callTypes.answer.name());
-                    //todo when answer call send command
                 }
                 else {
                     isIncoming = false;
@@ -96,7 +95,7 @@ public class CallListener extends BroadcastReceiver {
 
     private void onAnswered(Context context, String number, String type) {
         String name = getName(number,context.getApplicationContext());
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,ANSWER);
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(CALL_MODULE,ANSWER);
         np.setValue("number",name);
         np.setValue("callType",type);
         String message = np.getMessage();
@@ -107,7 +106,7 @@ public class CallListener extends BroadcastReceiver {
 
     private void onIncomingCallEnded(Context context, String savedNumber,String type) {
         String name = getName(savedNumber,context.getApplicationContext());
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.endCall");
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(CALL_MODULE,"com.android.endCall");
         np.setValue("number",name);
         np.setValue("callType",type);
         String message = np.getMessage();
@@ -120,7 +119,7 @@ public class CallListener extends BroadcastReceiver {
 
     private void onIncomingCallReceived(Context context, String number,String type) {
         String name = getName(number,context.getApplicationContext());
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"com.android.call");
+        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(CALL_MODULE,"com.android.call");
         np.setValue("number",name);
         if(type.equals(callTypes.outgoing.name()))
             np.setValue("text","Outgoing CALL");

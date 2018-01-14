@@ -39,13 +39,17 @@ public class SmsModule extends Module {
  // todo create send_mms for sending pictures
     private void send_sms(Sms sms) {
         String error = null;
+        System.out.println(sms);
         try {
             String number = getPhoneNumber(sms.getName(),context.getApplicationContext());
             if(number.equals("Unsaved")) {
                 number = sms.getName();
+            }else{
+                number = number.replaceAll("-","");
             }
             SmsManager smsManager = SmsManager.getDefault();
             ArrayList<String> messages = smsManager.divideMessage(sms.getText());
+            System.out.println(number);
             smsManager.sendMultipartTextMessage(number,null,messages,null,null);
           //  smsManager.sendTextMessage(number, null, text, null, null);
         } catch (Exception e) {

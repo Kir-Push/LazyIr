@@ -5,11 +5,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.provider.CallLog;
 import android.util.Log;
 import android.widget.RelativeLayout;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
+import com.example.buhalo.lazyir.modules.reminder.MissedCall;
+import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,10 +29,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
+
 
 public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
-        private static final int DATABASE_VERSION = 27;
+        private static final int DATABASE_VERSION = 28;
         private static String DB_PATH = "";
         private static final String DATABASE_NAME = "Buttons.db";
         private static DBHelper instance;
@@ -584,7 +590,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     // Button's commands action's - delete, add, remove and so on
 
     // remove specific command from specific button
-    public void removeCommandBtn(String id, String commandName) { //todo test here
+    public void removeCommandBtn(String id, String commandName) {
         try (SQLiteDatabase db = getWritableDatabase()) {
             String selelection = COLUMN_NAME_ENTRY_ID + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ?";
             String[] split = commandName.split("_");
@@ -815,5 +821,30 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
     }
 
 
+
     //*************************************************************************************************************************
+
+    public List<MissedCall> getMissedCalls(){
+        List<MissedCall> list = new ArrayList<>();
+        String PATH = "content://call_log/calls";
+        String[] projection = new String[] { CallLog.Calls.CACHED_NAME,
+                CallLog.Calls.NUMBER, CallLog.Calls.DATE, CallLog.Calls.TYPE,CallLog.Calls._ID };
+        String sortOrder = CallLog.Calls.DATE + " DESC";
+        StringBuffer sb = new StringBuffer();
+        sb.append(CallLog.Calls.TYPE).append("=?").append(" and ").append(CallLog.Calls.IS_READ).append("=?");
+        Cursor cursor = BackgroundService.getAppContext().getContentResolver().query(
+                Uri.parse(PATH),
+                projection,
+                sb.toString(),
+                new String[] { String.valueOf(CallLog.Calls.MISSED_TYPE), "0" },sortOrder);
+        if(cursor == null)
+            return list;
+        cursor.moveToFirst();
+            while (cursor.moveToNext()) {
+                int count = cursor.getCount();
+                String number = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
+                list.add(new MissedCall(number, cursor.getString(cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)), count, cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DATE)), getContactImage(BackgroundService.getAppContext(),number), cursor.getString(cursor.getColumnIndex(CallLog.Calls._ID))));
+            }
+        return list;
+    }
 }
