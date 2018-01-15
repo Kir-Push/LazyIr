@@ -16,6 +16,10 @@ import com.example.buhalo.lazyir.service.SettingService;
 
 public class Reminder extends Module {
 
+    // todo check notification's for messenger and also set remind about that.
+    // todo you need way to identify message notification (or call) from other messenger notifs(like some ad's or messenger specific notification)
+    // todo create strategies for most popular messenger's,
+    // todo for others just remind when it show on android wear!
     private static boolean callTask = false;
 
     @Override
@@ -29,21 +33,9 @@ public class Reminder extends Module {
      SettingService settingService = BackgroundService.getSettingManager();
         int callFrequency = Integer.parseInt(settingService.getValue("callFrequency"));
         Runnable task = () -> {
-           
+
         };
     }
 
 
-    public static void markCallLogRead(int id) { // todo !!
-
-//        Uri CALLLOG_URI = CallLog.Calls.CONTENT_URI;
-//        ContentValues values = new ContentValues();
-//        values.put("is_read", true);
-//        try{
-//           BackgroundService.getAppContext().getContentResolver().update(CALLLOG_URI, values, "_id=?",
-//                    new String[] { String.valueOf(id) });
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
-    }
 }

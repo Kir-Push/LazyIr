@@ -10,6 +10,7 @@ public class Sms {
     private String text;
     private String icon;
     private String picture;
+    private long date; // todo add to server
 
     public Sms() {
     }
@@ -28,6 +29,19 @@ public class Sms {
         this.text = text;
         this.picture = picture;
         this.icon = icon;
+    }
+
+    public Sms(String number, String text,Long date,String icon,String picture) {
+        this.number = number;
+        this.text = text;
+        this.picture = picture;
+        this.icon = icon;
+        this.date = date;
+    }
+
+    public Sms(String name,String number, String text,Long date,String icon,String picture){
+        this(name,number,text,icon,picture);
+        this.date = date;
     }
 
     public String getNumber() {
@@ -68,6 +82,15 @@ public class Sms {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 
     @Override

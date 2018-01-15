@@ -1,5 +1,6 @@
 package com.example.buhalo.lazyir.DbClasses;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.widget.RelativeLayout;
 import com.example.buhalo.lazyir.Devices.Command;
 import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
+import com.example.buhalo.lazyir.modules.notificationModule.sms.Sms;
 import com.example.buhalo.lazyir.modules.reminder.MissedCall;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
@@ -824,6 +826,7 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
 
     //*************************************************************************************************************************
 
+    // getMissed calls from CallLog
     public List<MissedCall> getMissedCalls(){
         List<MissedCall> list = new ArrayList<>();
         String PATH = "content://call_log/calls";
@@ -839,7 +842,6 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
                 new String[] { String.valueOf(CallLog.Calls.MISSED_TYPE), "0" },sortOrder);
         if(cursor == null)
             return list;
-        cursor.moveToFirst();
             while (cursor.moveToNext()) {
                 int count = cursor.getCount();
                 String number = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
@@ -847,4 +849,54 @@ public class DBHelper extends SQLiteOpenHelper implements  DbCommands {
             }
         return list;
     }
+
+    // set call as read, used id of MissedCall (CallLog.Calls._ID)
+    // can throw security exception(if no write log permission granted)
+    // return true if execution normally, false if exception throwned and catched
+    public boolean markCallLogRead(int id) {
+
+        Uri CALLLOG_URI = CallLog.Calls.CONTENT_URI;
+        ContentValues values = new ContentValues();
+        values.put("is_read", true);
+        try{
+            BackgroundService.getAppContext().getContentResolver().update(CALLLOG_URI, values, "_id=?",
+                    new String[] { String.valueOf(id) });
+            return true;
+        }catch(SecurityException e){
+           Log.e("DBHELPER","markCallLogRead ",e);
+           return false;
+        }
+    }
+
+    // mark sms read or unread (read argument)
+    // identifies by body and address
+    public void markSmsRead(String body,String address,boolean read){
+        Uri uri = Uri.parse("content://sms/inbox");  // todo you also need handle mms !
+        String selection = "address = ? AND body = ? AND read = ?";
+        String[] selectionArgs = {address, body, "0"};
+
+        ContentValues values = new ContentValues();
+        values.put("read", read);
+
+        BackgroundService.getAppContext().getContentResolver().update(uri, values, selection, selectionArgs);
+    }
+
+    // return list of unread messages
+    public List<Sms> getUnreadMessages(){
+        List<Sms> result = new ArrayList<>();
+        Uri uriSMSURI = Uri.parse("content://sms/inbox"); // todo you also need fetch mms !
+        ContentResolver cr =  BackgroundService.getAppContext().getContentResolver();
+        Cursor cur =cr.query(uriSMSURI, null, "read = 0", null, null);
+        while(cur.moveToNext()){
+            String text = cur.getString(cur.getColumnIndexOrThrow("body"));
+            String adress = cur.getString(cur.getColumnIndexOrThrow("address"));
+            long date = cur.getLong(cur.getColumnIndexOrThrow("date"));
+            String icon = getContactImage(BackgroundService.getAppContext(),adress);
+            String picture = null; // todo check if exist some mms, and get it // you need to check if it's mms https://stackoverflow.com/questions/17591081/fetch-image-from-mms-android
+            result.add(new Sms(adress,text,date,icon,picture));
+        }
+        return result;
+    }
+
+    //todo unread email!! from notification only, because it's not android case
 }
