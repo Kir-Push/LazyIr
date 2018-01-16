@@ -40,6 +40,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -82,6 +84,8 @@ public class BackgroundService extends Service {
     private static Context appContext = getAppContext();
     private static volatile boolean started;
     private static volatile boolean inited;
+
+    private static ConcurrentHashMap<String,String> messagesCache = new ConcurrentHashMap<>(); // to avoid (android.os.TransactionTooLargeException: data parcel size 3563360 bytes)
 
     public static SettingService getSettingManager() {
         return null; // todo
@@ -227,6 +231,11 @@ public class BackgroundService extends Service {
 
     private void sendToDeviceAction(Intent intent){
         String msg = intent.getStringExtra("message");
+        if(msg == null){
+            String cacheId = intent.getStringExtra("cacheId");
+            msg = messagesCache.get(cacheId);
+            messagesCache.remove(cacheId);
+        }
         String id = intent.getStringExtra("dvId");
         sendToOneDevice(id,msg);
     }
@@ -234,6 +243,11 @@ public class BackgroundService extends Service {
 
     private void sendToAllAction(Intent intent) {
         String msg = intent.getStringExtra("message");
+        if(msg == null){
+            String cacheId = intent.getStringExtra("cacheId");
+            msg = messagesCache.get(cacheId);
+            messagesCache.remove(cacheId);
+        }
         sendToAll(msg);
     }
 
@@ -386,6 +400,13 @@ public class BackgroundService extends Service {
     public static void sendToAllDevices(String message){
         Intent intent = new Intent(appContext, BackgroundService.class);
         intent.setAction("sendToAll");
+        if(message.length() >= 512000){
+            UUID uuid = UUID.randomUUID();
+            String s = uuid.toString();
+            messagesCache.put(s,message);
+            intent.putExtra("cacheId",s);
+        }
+        else
         intent.putExtra("message",message);
         startServiceOrForeground(intent);
     }
@@ -394,6 +415,13 @@ public class BackgroundService extends Service {
         Intent intent = new Intent(appContext, BackgroundService.class);
         intent.setAction("sendToDevice");
         intent.putExtra("dvId",id);
+        if(message.length() >= 512000){
+            UUID uuid = UUID.randomUUID();
+            String s = uuid.toString();
+            messagesCache.put(s,message);
+            intent.putExtra("cacheId",s);
+        }
+        else
         intent.putExtra("message",message);
         startServiceOrForeground(intent);
     }

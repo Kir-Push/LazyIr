@@ -198,7 +198,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     //https://stackoverflow.com/questions/40325307/how-to-get-an-image-from-another-apps-notification
     private static String extractImage(StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-        if(bundle == null || bundle.containsKey(android.app.Notification.EXTRA_PICTURE))
+        if(!bundle.containsKey(android.app.Notification.EXTRA_PICTURE))
             return null;
         Bitmap bmp = (Bitmap) bundle.get(android.app.Notification.EXTRA_PICTURE);
         return bitmapToBase64(bmp);
