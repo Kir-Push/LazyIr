@@ -153,7 +153,6 @@ public class BackgroundService extends Service {
     }
 
      private void initConfig(Context context){
-        System.out.println("INITCOINFIG");
         if(appContext == null)
         appContext = context.getApplicationContext();
         // initialize and setting executors

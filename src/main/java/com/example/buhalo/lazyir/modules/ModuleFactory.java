@@ -72,6 +72,7 @@ public class ModuleFactory {
         try {
             // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
             List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(myId);
+
             // getting list of enabledModules names from Database;
             if(enabledModulesNames == null || enabledModulesNames.size() == 0)
             enabledModulesNames = DBHelper.getInstance(context).getEnabledModules(myId);

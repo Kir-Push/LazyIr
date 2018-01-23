@@ -6,7 +6,7 @@ package com.example.buhalo.lazyir.service;
 
 public class SettingService {
 
-    public String getValue(String key){
+    public String getValue(String key){ // return some standart value if null
         return null;
     }
 

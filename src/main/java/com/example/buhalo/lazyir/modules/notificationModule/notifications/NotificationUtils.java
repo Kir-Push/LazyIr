@@ -29,7 +29,10 @@ import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messenger
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static android.content.Context.CONTEXT_IGNORE_SECURITY;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener.SMS_TYPE;
@@ -241,5 +244,14 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         }
         return bitmap;
+    }
+
+    public static List<Notification> getPendingNotifications(){
+        ConcurrentHashMap<String, StatusBarNotification> pendingNotifsLocal = Messengers.getPendingNotifsLocal();
+        List<Notification> result = new ArrayList<>();
+        for (StatusBarNotification statusBarNotification : pendingNotifsLocal.values()) {
+            result.add(castToMyNotification(statusBarNotification));
+        }
+        return getPendingNotifications();
     }
 }

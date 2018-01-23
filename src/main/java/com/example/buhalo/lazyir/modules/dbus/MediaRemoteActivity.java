@@ -124,6 +124,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         playerNameToAdapter.clear();
         int counter = 0;
         for(Player player : players) {
+            System.out.println(player.getName() + "   ------------         " + player.getTitle());
             StringBuilder name;
             if (player.getName().startsWith("js9876528:")) {     // some number to identify browser or dbus
                 name = new StringBuilder(player.getTitle());
@@ -308,7 +309,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
 
     private void putCommand(int i,String commandName,int arg) {
         if(selectedPlayer >= playerNameToAdapter.size()) return;
-        try {commandQueque.push(new DbusCommand(i, null, arg, null, getPlayerName())); pendingUserAction = true;
+        try {commandQueque.push(new DbusCommand(i, null, arg, null, getPlayerName())); pendingUserAction = true; //todo in server with multiplevideos on page you use id, here you use name
         } catch (Exception e) {Log.e("MediaRemoteActivity","Error when put command "+ commandName + " in commandQueque!",e);}
     }
 

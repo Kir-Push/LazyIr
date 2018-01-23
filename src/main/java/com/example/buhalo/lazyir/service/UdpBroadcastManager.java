@@ -243,7 +243,9 @@ public class UdpBroadcastManager  {
     }
 
     void onZeroConnections() {
+        stopSending();
         setSend_period(15000);
+        updateSender();
        count = 0;
     }
 

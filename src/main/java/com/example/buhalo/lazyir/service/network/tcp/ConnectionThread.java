@@ -110,7 +110,8 @@ public class ConnectionThread implements Runnable {
                 temp = "nonPaired";
             NetworkPackage networkPackage =  NetworkPackage.Cacher.getOrCreatePackage(TCP_INTRODUCE,temp);
             ModuleSettingList moduleSettingList = new ModuleSettingList();
-            moduleSettingList.setModuleSettingList(BackgroundService.getMyEnabledModulesToModuleSetting());
+        List<ModuleSetting> myEnabledModulesToModuleSetting = BackgroundService.getMyEnabledModulesToModuleSetting();
+        moduleSettingList.setModuleSettingList(myEnabledModulesToModuleSetting);
             networkPackage.setObject(N_OBJECT,moduleSettingList);  // set myModuleConfig's to introduce package, android do the same
             printToOut(networkPackage.getMessage());
     }
