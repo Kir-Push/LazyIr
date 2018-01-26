@@ -27,7 +27,6 @@ public class Messengers extends Module {
     // you get one, answer, remove, and second answer will be skipped
   //  private Lock lock = new ReentrantLock();
 
-    // todo remove from here when removing notification!
     private static ConcurrentHashMap<String,StatusBarNotification> pendingNotifsLocal = new ConcurrentHashMap<>();
 
     private static boolean taskStarted = false;
@@ -38,7 +37,6 @@ public class Messengers extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-        System.out.println("AA " + np.getMessage());
         if(!working)
             return;
         if(np.getData().equals(ANSWER)) {

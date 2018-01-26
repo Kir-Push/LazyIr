@@ -31,9 +31,6 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
  * Created by buhalo on 21.03.17.
  */
 
-// todo thread problem, it work in main thread, you don't need that,
-    //  you need work in separate thread, maybe in backgroundService
-    // https://stackoverflow.com/questions/17926236/notificationlistenerservice-implementation
 public class NotificationListener extends NotificationListenerService {
     private static NotificationListener notif;
     public static final String SHOW_NOTIFICATION = "ShowNotification";
@@ -73,13 +70,10 @@ public class NotificationListener extends NotificationListenerService {
             snoozeNotification(sbn.getKey(), 600000);
 
 
-        //todo filter com.android.incallui -- incoming call notification's!
             // todo in pc in log file log notifs pack and some info (without text ) чтобы знать какие pack если что игнорить!
         //    SettingService.checkForIgnore(sbn); // todo
 
-//            if(sbn.getPackageName().equals("com.android.systemui")){
-//                cancelNotification(sbn.getKey());
-//            }
+
             if(!smsMessage(sbn)){                        //first check if notification is not smsMessage, if it is - send as sms
                 Notification notification = NotificationUtils.castToMyNotification(sbn);
                 if(messengerMessageCheckAndSend(sbn,notification.getPack(),notification.getTitle(),notification.getText(),notification)) {
@@ -159,7 +153,8 @@ public class NotificationListener extends NotificationListenerService {
     private boolean checkChargingNotification(Notification notification) {
         if(notification.getPack().equals("com.android.systemui")){ // charging notifs have this packageName
             NotificationManager notificationManager = (NotificationManager)  getSystemService(NOTIFICATION_SERVICE);
-            System.out.println("JA TUT!!!  " + notification.getId());
+            if(notificationManager == null)
+                return false;
             notificationManager.cancel(Integer.parseInt(notification.getId()));
             if(chargeRegex == null) {
                 String regex = "^.+\\d{1,3}%.+$"; // on lg q6 title of notification - Charging (10%)
