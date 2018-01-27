@@ -40,7 +40,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.
 
 public class DBHelper extends SQLiteOpenHelper implements DbCommands {
 
-    private static final int DATABASE_VERSION = 29;
+    private static final int DATABASE_VERSION = 30;
     private static String DB_PATH = "";
     private static final String DATABASE_NAME = "Buttons.db";
     private static DBHelper instance;

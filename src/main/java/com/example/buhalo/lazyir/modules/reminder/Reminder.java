@@ -34,10 +34,12 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class Reminder extends Module {
 
-    private static String REMINDER_TYPE = "Reminder";
-    private static String MISSED_CALLS = "MissedCalls";
-    private static String UNREAD_MESSAGES = "UnreadMessages";
-    private static Lock staticLock = new ReentrantLock();
+    private final static String REMINDER_TYPE = "Reminder";
+    private final static String MISSED_CALLS = "MissedCalls";
+    private final static String UNREAD_MESSAGES = "UnreadMessages";
+    private final static String DISSMIS_ALL_CALLS = "dismissAllCalls";
+    private final static String DISSMIS_ALL_MESSAGES = "dismissAllMessages";
+    private final static Lock staticLock = new ReentrantLock();
     private static boolean callTask = false;
     private static boolean smsTask = false;
     private static  ScheduledFuture<?> callTaskFuture;
@@ -45,21 +47,36 @@ public class Reminder extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-        String type = np.getType();
+        String type = np.getData();
         switch (type){
             case "dismissCall":
                 dismissCalls(np);
                 break;
-            case "dismissMessage":
+            case DISSMIS_ALL_CALLS:
+                dismissAllCalls(np);
+                break;
+            case DISSMIS_ALL_MESSAGES:
                 dismissMessage(np);
                 break;
             case "recall":
                 recall(np);
                 break;
+            default:
+                break;
 
         }
     }
 
+
+    private void dismissAllCalls(NetworkPackage np) {
+        String value = np.getValue(MISSED_CALLS);
+        if(value != null){
+            String[] split = value.split(":::");
+            for (String s : split) {
+                setCallUnMissed(Integer.parseInt(s));
+            }
+        }
+    }
 
 
     // call to number from missedCall object.
@@ -106,15 +123,22 @@ public class Reminder extends Module {
             }
         }
     }
-    
+
     private void setCallUnMissed(MissedCall missed){
+        setCallUnMissed(Integer.parseInt(missed.getId()));
+    }
+
+    private void setCallUnMissed(int id){
         Context appContext = BackgroundService.getAppContext();
-        DBHelper.getInstance(appContext).markCallLogRead(Integer.parseInt(missed.getId()));
+        DBHelper.getInstance(appContext).markCallLogRead(id);
     }
 
     private void setMessageUnread(Sms sms){
         Context appContext = BackgroundService.getAppContext();
         DBHelper.getInstance(appContext).setMessageRead(appContext,Long.valueOf(sms.getId()),true,sms.getType().equals("mms"));
+    }
+    private void setSMSunread(long id){
+
     }
 
     private void setMessageUnread(Notification notification,NotificationManager notificationManager){

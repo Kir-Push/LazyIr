@@ -8,6 +8,7 @@ import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.notificationModule.call.CallModule;
+import com.example.buhalo.lazyir.modules.reminder.Reminder;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
 import com.example.buhalo.lazyir.modules.sendIr.IrModule;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
@@ -112,6 +113,7 @@ public class ModuleFactory {
         registeredModules.add(CallModule.class);
         registeredModules.add(Battery.class);
         registeredModules.add(TouchControl.class);
+        registeredModules.add(Reminder.class);
     }
 
     public static Module instantiateModuleByName(Device dv,String name)

@@ -6,7 +6,7 @@ import java.util.List;
  * Created by buhalo on 18.01.18.
  */
 
-public class SmsPack { // todo in server
+public class SmsPack {
     private List<Sms> sms;
 
     public SmsPack(List<Sms> sms) {
