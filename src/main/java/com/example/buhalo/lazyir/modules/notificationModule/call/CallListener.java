@@ -113,8 +113,6 @@ public class CallListener extends BroadcastReceiver {
         if(message != null && !message.equals("")) {
             BackgroundService.sendToAllDevices(np.getMessage());
         }
-
-        //todo some reminder when call missed!
     }
 
     private void onIncomingCallReceived(Context context, String number,String type) {

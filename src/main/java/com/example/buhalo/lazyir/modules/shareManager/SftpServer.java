@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.service.BackgroundService;
+
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
@@ -46,7 +48,7 @@ public class SftpServer {
      String pass;
     public int setupSftpServer(Context context){
         int countTry = 0;
-        int port = 9000;
+        int port = Integer.parseInt(BackgroundService.getSettingManager().getValue("Sftp-port")); // 9000
         SecurityUtils.setRegisterBouncyCastle(false);
         sshd = SshServer.setUpDefaultServer();
      //   sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));

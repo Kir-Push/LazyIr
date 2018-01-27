@@ -53,6 +53,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static android.os.Build.VERSION_CODES.N;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.getInstance;
 
 
 public class BackgroundService extends Service {
@@ -68,8 +69,9 @@ public class BackgroundService extends Service {
 
     private TcpConnectionManager tcp;
     private UdpBroadcastManager udp;
+    private static SettingService settingService;
 
-    private static int port = 5667;
+    private static int port = 0;
 
     // for android 8 notification
     public static final int NotifId = 454352354;
@@ -88,8 +90,16 @@ public class BackgroundService extends Service {
     private static ConcurrentHashMap<String,String> messagesCache = new ConcurrentHashMap<>(); // to avoid (android.os.TransactionTooLargeException: data parcel size 3563360 bytes)
 
     public static SettingService getSettingManager() {
-        return null; // todo
+        lock.lock();
+        try {
+            if (settingService == null)
+                settingService = new SettingService();
+            return settingService;
+        }finally {
+            lock.unlock();
+        }
     }
+
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -470,6 +480,13 @@ public class BackgroundService extends Service {
     }
 
     public static int getPort() {
+        lock.lock();
+        try{
+            if(port == 0)
+                port = Integer.parseInt(getSettingManager().getValue("TCP-port"));
+        }finally {
+            lock.unlock();
+        }
         return port;
     }
 

@@ -49,7 +49,6 @@ public class SmsModule extends Module {
             }
             SmsManager smsManager = SmsManager.getDefault();
             ArrayList<String> messages = smsManager.divideMessage(sms.getText());
-            System.out.println(number);
             smsManager.sendMultipartTextMessage(number,null,messages,null,null);
           //  smsManager.sendTextMessage(number, null, text, null, null);
         } catch (Exception e) {

@@ -57,7 +57,7 @@ public class CallModule extends Module {
 
         if (tm == null) {
             // whether you want to handle this is up to you really
-            throw new NullPointerException("tm == null");
+            throw new NullPointerException("TelecomManager == null");
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
