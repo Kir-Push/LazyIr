@@ -20,21 +20,27 @@ public class ShowNotification extends Module {
     @Override
     public void execute(NetworkPackage np) {
         if(np.getData().equals(ALL_NOTIFICATIONS)) {
-            Notifications notifications = new Notifications();
-//            String ns = Context.NOTIFICATION_SERVICE;
-            StatusBarNotification[] activeNotifications = NotificationListener.getAll();
-            if(activeNotifications == null) {
-                return;
+            Notifications notifications = getAllNotifications();
+            if(notifications != null) {
+                NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION, "ALL NOTIFS");
+                nps.setObject(NetworkPackage.N_OBJECT, notifications);
+                sendMsg(nps.getMessage());
             }
-            for (StatusBarNotification activeNotification : activeNotifications) {
-                notifications.addNotification(NotificationUtils.castToMyNotification(activeNotification));
-            }
-            NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION,"ALL NOTIFS");
-            nps.setObject(NetworkPackage.N_OBJECT,notifications);
-            sendMsg(nps.getMessage());
         }else if(np.getData().equals(REMOVE_NOTIFICATION)){
             //todo
         }
+    }
+
+    private Notifications getAllNotifications(){
+        Notifications notifications = new Notifications();
+        StatusBarNotification[] activeNotifications = NotificationListener.getAll();
+        if(activeNotifications == null) {
+            return null;
+        }
+        for (StatusBarNotification activeNotification : activeNotifications) {
+            notifications.addNotification(NotificationUtils.castToMyNotification(activeNotification));
+        }
+        return notifications;
     }
 
     @Override
