@@ -17,6 +17,7 @@ import static android.content.Context.ACTIVITY_SERVICE;
 import static android.os.Environment.MEDIA_BAD_REMOVAL;
 import static android.os.Environment.MEDIA_NOFS;
 import static android.os.Environment.MEDIA_REMOVED;
+import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.getExternalStorageState;
 
 /**
@@ -45,6 +46,8 @@ public class Memory extends Module {
     private void sendCrt() {
         ActivityManager actManager = (ActivityManager) BackgroundService.getAppContext().getSystemService(ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        if(actManager != null)
+        actManager.getMemoryInfo(memInfo);
         int cpu = getCpuLoad();
         long ram = getAllRam(memInfo);
         long freeRam = getFreeRam(memInfo);
@@ -93,9 +96,10 @@ public class Memory extends Module {
 
                 String[] toks = load.split(" ");
 
-                long idle1 = Long.parseLong(toks[5]);
-                long cpu1 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[4])
-                        + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
+                long idle1 =Long.parseLong(toks[5]);
+                long total1 = Long.parseLong(toks[2])+ Long.parseLong(toks[3]) + Long.parseLong(toks[4]) +
+                        Long.parseLong(toks[5]) + Long.parseLong(toks[6])
+                        + Long.parseLong(toks[7]) + Long.parseLong(toks[8]) + Long.parseLong(toks[9]);
 
                 try {
                     Thread.sleep(50);
@@ -108,11 +112,16 @@ public class Memory extends Module {
 
                 toks = load.split(" ");
 
-                long idle2 = Long.parseLong(toks[5]);
-                long cpu2 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[4])
-                        + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
+                long idle2 =Long.parseLong(toks[5]);
+                long total2 = Long.parseLong(toks[2])+ Long.parseLong(toks[3]) + Long.parseLong(toks[4]) +
+                        Long.parseLong(toks[5]) + Long.parseLong(toks[6])
+                        + Long.parseLong(toks[7]) + Long.parseLong(toks[8]) + Long.parseLong(toks[9]);
 
-                return (int) ((int)(cpu2 - cpu1) / ((cpu2 + idle2) - (cpu1 + idle1)));
+                if ((total2 - total1) == 0)
+                    return 0;
+                if(idle2 - idle1 == 0)
+                    return 100;
+                return (int) (100-(((float)(idle2 - idle1) / ((total2 - total1)))*100));
 
             } catch (IOException e) {
                 Log.e("Memory module","Error in getCpuLoad",e);
@@ -124,12 +133,15 @@ public class Memory extends Module {
 
     private List<MemPair> getExtMemory() {
         List<MemPair> result = new ArrayList<>();
+        String internalPath =    getExternalStorageDirectory().getPath();
         File[] externalFilesDirs = BackgroundService.getAppContext().getExternalFilesDirs(null);
         for (File externalFilesDir : externalFilesDirs) {
             if(externalFilesDir == null)
                 continue;
             String state = getExternalStorageState(externalFilesDir);
             if(state.equals(MEDIA_REMOVED) || state.equals(MEDIA_NOFS) || state.equals(MEDIA_BAD_REMOVAL))
+                continue;
+            if(externalFilesDir.getPath().startsWith(internalPath))
                 continue;
             String path = externalFilesDir.getPath();
             long freeSpace = externalFilesDir.getFreeSpace();

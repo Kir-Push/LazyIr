@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.CallLog;
+import android.provider.Telephony;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
@@ -837,7 +838,9 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         List<Sms> result = new ArrayList<>();
         Uri uriSMSURI = Uri.parse("content://sms/inbox");
         ContentResolver cr = BackgroundService.getAppContext().getContentResolver();
-        try (Cursor cur = cr.query(uriSMSURI, null, "read = 0", null, null)) {
+        final String[] projection = new String[]{"*"};
+        try (Cursor cur = cr.query(Telephony.Sms.CONTENT_URI,  projection,
+                Telephony.TextBasedSmsColumns.READ + " = ?", new String[]{"0"}, Telephony.Sms.Conversations.DEFAULT_SORT_ORDER)) {
             while (cur.moveToNext()) {
                 String id = cur.getString(cur.getColumnIndex("_id"));
                 String text = cur.getString(cur.getColumnIndexOrThrow("body"));
@@ -847,6 +850,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
                 Sms sms = new Sms(adress, text, date, icon, null);
                 sms.setType("sms");
                 sms.setId(id);
+                System.out.println("OUT ID " + id);
                 result.add(sms);
             }
         }
@@ -879,6 +883,32 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
             if(messageID == 0){
                 return false;
             }
+            if(mms)
+                return setMMSREAD(messageID,isViewed);
+            ContentValues contentValues = new ContentValues();
+            if(isViewed){
+                contentValues.put("read", true);
+            }else{
+                contentValues.put("read", false);
+            }
+            String selection = null;
+            String[] selectionArgs = null;
+            BackgroundService.getAppContext().getContentResolver().update(
+                    Uri.parse("content://sms/inbox"),
+                    contentValues,
+                    "_id="+String.valueOf(messageID),null);
+            return true;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean setMMSREAD(long messageID,boolean isViewed){
+        try{
+            if(messageID == 0){
+                return false;
+            }
             ContentValues contentValues = new ContentValues();
             if(isViewed){
                 contentValues.put("READ", 1);
@@ -888,7 +918,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
             String selection = null;
             String[] selectionArgs = null;
             BackgroundService.getAppContext().getContentResolver().update(
-                    Uri.parse(mms ? "content://mms/" : "content://sms/" + messageID),
+                    Uri.parse("content://mms/" + messageID),
                     contentValues,
                     selection,
                     selectionArgs);

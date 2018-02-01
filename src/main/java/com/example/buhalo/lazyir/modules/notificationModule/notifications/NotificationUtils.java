@@ -78,6 +78,8 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     // i here add new methods after testing change old to new
      static boolean messengersMessage(StatusBarNotification sbn,String pack,String title,String text) {
         Bundle bundle = sbn.getNotification().extras;
+        if(pack.equals("com.google.android.googlequicksearchbox"))
+            return false;
       //  Notification notification = NotificationUtils.castToMyNotification(sbn);
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
@@ -95,7 +97,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     static boolean messengerMessageCheckAndSend(StatusBarNotification sbn,String pack,String title,String text,Notification notification){
         Bundle bundle = sbn.getNotification().extras;
         if(pack == null  ||pack.equals("com.whatsapp") && text == null ||pack.equals("com.google.android.googlequicksearchbox"))
-            return true;
+            return false;
 
         for (String key : bundle.keySet()) {
             if("android.wearable.EXTENSIONS".equals(key)){
@@ -252,6 +254,6 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
         for (StatusBarNotification statusBarNotification : pendingNotifsLocal.values()) {
             result.add(castToMyNotification(statusBarNotification));
         }
-        return getPendingNotifications();
+        return result;
     }
 }

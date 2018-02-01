@@ -170,9 +170,7 @@ public class UdpBroadcastManager  {
 
 
     void startSendingTask(final Context context, final int port) {
-
         if (!checkWifiOnAndConnected(context)) return;
-
         lock.lock();
         try {
         startSending();
@@ -186,7 +184,6 @@ public class UdpBroadcastManager  {
             sendingFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(() -> {
                 if(!isSending())
                     return;
-
                     sendBroadcast(message, port);
                         count++;
                         if (count == 20 && send_period < 30000) {

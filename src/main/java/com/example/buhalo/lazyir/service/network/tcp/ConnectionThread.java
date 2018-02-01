@@ -13,6 +13,7 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
+import com.example.buhalo.lazyir.modules.reminder.Reminder;
 import com.example.buhalo.lazyir.service.BackgroundService;
 
 import java.io.BufferedReader;
@@ -179,6 +180,7 @@ public class ConnectionThread implements Runnable {
             ModuleSettingList object = np.getObject(N_OBJECT, ModuleSettingList.class);
             Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,  object.getModuleSettingList(),context);
             Device.getConnectedDevices().put(deviceId, device);
+            Reminder.startReminderTasks();
             if(MainActivity.getSelected_id().equals("")) {
                 MainActivity.setSelected_id(deviceId);
             }

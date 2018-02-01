@@ -15,13 +15,13 @@ public class SettingService {
     SharedPreferences sharedPreferences;
     private ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
     public String getValue(String key){ // return some standart value if null
-        reentrantReadWriteLock.readLock().lock();
+        reentrantReadWriteLock.writeLock().lock();
         try {
             if (sharedPreferences == null)
                 initialInit();
             return sharedPreferences.getString(key, null);
         }finally {
-            reentrantReadWriteLock.readLock().unlock();
+            reentrantReadWriteLock.writeLock().unlock();
         }
     }
 

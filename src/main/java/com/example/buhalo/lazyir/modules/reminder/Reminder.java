@@ -20,7 +20,13 @@ import com.example.buhalo.lazyir.modules.notificationModule.sms.SmsPack;
 import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.SettingService;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -39,6 +45,7 @@ public class Reminder extends Module {
     private final static String UNREAD_MESSAGES = "UnreadMessages";
     private final static String DISSMIS_ALL_CALLS = "dismissAllCalls";
     private final static String DISSMIS_ALL_MESSAGES = "dismissAllMessages";
+    private final static ConcurrentHashMap<String,Boolean> ignored = new ConcurrentHashMap<>();
     private final static Lock staticLock = new ReentrantLock();
     private static boolean callTask = false;
     private static boolean smsTask = false;
@@ -73,9 +80,14 @@ public class Reminder extends Module {
         if(value != null){
             String[] split = value.split(":::");
             for (String s : split) {
-                setCallUnMissed(Integer.parseInt(s));
+             //   setCallUnMissed(Integer.parseInt(s));
+                setCallIgnored(s);
             }
         }
+    }
+
+    private void setCallIgnored(String i) {
+        ignored.put(i,false);
     }
 
 
@@ -98,7 +110,8 @@ public class Reminder extends Module {
         List<Notification> notificationList;
         if(smsPack != null &&(smsList = smsPack.getSms()) != null && smsList.size() > 0){
             for (Sms sms : smsList) {
-                setMessageUnread(sms);
+            //    setMessageUnread(sms); sorry didn't work if you app is not default message app
+                setMessageIgnored(sms);
             }
         }
         if(notifications != null && (notificationList = notifications.getNotifications()) != null && notificationList.size() > 0){
@@ -109,6 +122,10 @@ public class Reminder extends Module {
             }
         }
 
+    }
+
+    private void setMessageIgnored(Sms sms) {
+        ignored.put(sms.getId(),false);
     }
 
     // remove call from missed log's, if list contain more than one missedCall, removing all of it.
@@ -149,23 +166,42 @@ public class Reminder extends Module {
     private static void setCallReminerTask(){
         staticLock.lock();
         try {
-            if (callTask || callTaskFuture == null)
+            if (callTask || callTaskFuture != null)
                 return;
             SettingService settingService = BackgroundService.getSettingManager();
             int callFrequency = Integer.parseInt(settingService.getValue("callFrequency")); // getting int - frequency of timer from setting's in seconds
             Runnable task = () -> {
                 DBHelper db = DBHelper.getInstance(BackgroundService.getAppContext());
                 List<MissedCall> missedCalls = db.getMissedCalls(); // fetch missed call's
+                Iterator<MissedCall> iterator = missedCalls.iterator();
+                while(iterator.hasNext()){
+                    String id = iterator.next().getId();
+                    if(ignored.containsKey(id)) {
+                        iterator.remove();
+                        ignored.put(id,true);
+                    }
+                }
                 if (missedCalls.size() > 0) {
                     NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(REMINDER_TYPE, MISSED_CALLS);
                     np.setObject(NetworkPackage.N_OBJECT, new MissedCalls(missedCalls));
                     BackgroundService.sendToAllDevices(np.getMessage());
                 }
+              clearIgnoreList();
             };
-            callTaskFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task, callFrequency, callFrequency, TimeUnit.SECONDS);
+            callTaskFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task, 0, callFrequency, TimeUnit.SECONDS);
             callTask = true;
         }finally {
             staticLock.unlock();
+        }
+    }
+
+    private static void clearIgnoreList() {
+        Iterator<Map.Entry<String, Boolean>> iterator1 = ignored.entrySet().iterator();  // clear ignored list from messages which are not actuall now
+        while(iterator1.hasNext()){                                                     // (if you returned not readed messages, and some message in ignore map didn't contain in this list, so this message already readed and you remove it from ignore list
+            Map.Entry<String, Boolean> next = iterator1.next();
+            if(!next.getValue()){
+                iterator1.remove();
+            }
         }
     }
 
@@ -175,6 +211,7 @@ public class Reminder extends Module {
         if(callTaskFuture != null){
             callTaskFuture.cancel(true);
         }
+        callTaskFuture = null;
         callTask = false;
         }finally {
             staticLock.unlock();
@@ -184,13 +221,21 @@ public class Reminder extends Module {
     private static void setSmsReminderTask(){
         staticLock.lock();
         try {
-            if (smsTask || smsTaskFuture == null)
+            if (smsTask || smsTaskFuture != null)
                 return;
             SettingService settingService = BackgroundService.getSettingManager();
             int smsFrequency = Integer.parseInt( settingService.getValue("smsFrequency")); // getting int - frequency of timer from setting's in seconds
             Runnable task = () -> {
                 DBHelper db = DBHelper.getInstance(BackgroundService.getAppContext());
                 List<Sms> unreadMessages = db.getUnreadMessages(); // fetch unread Messages
+                Iterator<Sms> iterator = unreadMessages.iterator();
+                while(iterator.hasNext()){
+                    String id = iterator.next().getId();
+                    if(ignored.containsKey(id)) {
+                        iterator.remove();
+                        ignored.put(id,true);
+                    }
+                }
                 unreadMessages.addAll(db.getUnreadMMs());
                 List<Notification> pendingNotifications = fetchNotification();
                 Notifications notifications = new Notifications(pendingNotifications);
@@ -200,8 +245,9 @@ public class Reminder extends Module {
                     np.setObject(NetworkPackage.N_OBJECT, new MessagesPack(notifications,smsPack));
                     BackgroundService.sendToAllDevices(np.getMessage());
                 }
+                clearIgnoreList();
             };
-            smsTaskFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task, smsFrequency, smsFrequency, TimeUnit.SECONDS);
+            smsTaskFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task, 0, smsFrequency, TimeUnit.SECONDS);
             smsTask = true;
         }finally {
             staticLock.unlock();
@@ -214,6 +260,7 @@ public class Reminder extends Module {
             if(smsTaskFuture != null){
                 smsTaskFuture.cancel(true);
             }
+            smsTaskFuture = null;
             smsTask = false;
         }finally {
             staticLock.unlock();
