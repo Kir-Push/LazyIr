@@ -83,30 +83,13 @@
             android:theme="@style/AppTheme.NoActionBar"
             />
 
-        <!--<service android:name=".service.SheluderService"-->
-            <!--android:permission="android.permission.BIND_JOB_SERVICE"/>-->
-
-
-        <!--<receiver android:name=".servBaseBroadcastReceiveriver">-->
-            <!--&lt;!&ndash;<intent-filter>&ndash;&gt;-->
-                <!--&lt;!&ndash;<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />&ndash;&gt;-->
-            <!--&lt;!&ndash;</intent-filter>&ndash;&gt;-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>-->
-            <!--</intent-filter>-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
-            <!--</intent-filter>-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.PHONE_STATE" />-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
 
         <receiver android:name=".service.BootListener">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.NotifActionReceiver" />
 
 
         <service android:name=".service.BackgroundService"

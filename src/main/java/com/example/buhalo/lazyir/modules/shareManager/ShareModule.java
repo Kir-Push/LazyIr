@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.example.buhalo.lazyir.modules.shareManager.ftpServer.ftpServerOn;
 
@@ -35,9 +36,10 @@ public class ShareModule extends Module {
 
     private static SftpServer sftpServer;
     private static ftpServer ftpServer;
-    private static boolean sftServerOn = false;
+    private static volatile boolean sftServerOn = false;
     private static int port = 0;
     private static int portFtp = 0;
+    private static ReentrantLock staticLock = new ReentrantLock();
 
     private boolean waitResponse;
 
@@ -62,21 +64,28 @@ public class ShareModule extends Module {
     }
 
     private void setupftp(NetworkPackage np, Context context) {
-        if(ftpServer == null) {
-            ftpServer = new ftpServer();
+        staticLock.lock();
+        try {
+            if (ftpServer == null) {
+                ftpServer = new ftpServer();
+            }
+            NetworkPackage pack = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T, CONNECT_TO_ME_AND_RECEIVE_FILES);
+            portFtp = ftpServer.setupFtpServer(context, np);
+            if (portFtp == 0)
+                portFtp = 9000;
+            pack.setValue(PORT, Integer.toString(portFtp));
+            String userName = ftpServer.getUser(np.getId());
+            pack.setValue("userName", userName);
+            pack.setValue("pass", ftpServer.getPass(userName));
+            BackgroundService.sendToDevice(np.getId(), pack.getMessage());
+        }finally {
+            staticLock.unlock();
         }
-        NetworkPackage pack = NetworkPackage.Cacher.getOrCreatePackage(SHARE_T,CONNECT_TO_ME_AND_RECEIVE_FILES);
-        portFtp = ftpServer.setupFtpServer(context,np);
-        if(portFtp == 0)
-            portFtp = 9000;
-        pack.setValue(PORT,Integer.toString(portFtp));
-        String userName = ftpServer.getUser(np.getId());
-        pack.setValue("userName",userName);
-        pack.setValue("pass",ftpServer.getPass(userName));
-        BackgroundService.sendToDevice(np.getId(),pack.getMessage());
     }
 
     private   void setupSftp(NetworkPackage np, Context context) {
+        staticLock.lock();
+        try {
         if (sftpServer == null) {
             sftpServer = new SftpServer();
         }
@@ -94,8 +103,13 @@ public class ShareModule extends Module {
         pack.setValue("mainDir", Environment.getExternalStorageDirectory().getAbsolutePath()); // todo test
         pack.setObject("externalPath",new PathWrapper(Arrays.asList(getExternalStorageDirectories()))); // todo in server
         sendMsg(pack.getMessage());
+        }finally {
+            staticLock.unlock();
+        }
     }
     public static void stopSftpServer() {
+        staticLock.lock();
+        try {
         if(sftpServer!= null) {
             sftpServer.stopSftpServer();
         }
@@ -104,6 +118,9 @@ public class ShareModule extends Module {
             ftpServer.stopFtp();
         }
         ftpServerOn = false;
+        }finally {
+            staticLock.unlock();
+        }
     }
 
     /* returns external storage paths (directory of external memory card) as array of Strings */

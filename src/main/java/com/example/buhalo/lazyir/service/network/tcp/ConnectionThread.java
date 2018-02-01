@@ -1,6 +1,15 @@
 package com.example.buhalo.lazyir.service.network.tcp;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.buhalo.lazyir.DbClasses.DBHelper;
@@ -11,10 +20,12 @@ import com.example.buhalo.lazyir.Devices.ModuleSetting;
 import com.example.buhalo.lazyir.Devices.ModuleSettingList;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
+import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.reminder.Reminder;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.NotifActionReceiver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,15 +43,18 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLSocket;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.example.buhalo.lazyir.Devices.NetworkPackage.N_OBJECT;
 import static com.example.buhalo.lazyir.service.BackgroundServiceCmds.onZeroConnections;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_INTRODUCE;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PING;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_SYNC;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
 
 /**
  * Created by buhalo on 08.11.17.
@@ -204,6 +218,7 @@ public class ConnectionThread implements Runnable {
 
 
 
+
     // closeConnection method.
     // first check future and cansel if not null,
     // after that iterate over all modules and disable them(they itself handle,if they will work after disabling)
@@ -303,11 +318,51 @@ public class ConnectionThread implements Runnable {
             case TCP_SYNC:
                 receiveSync(np);
                 break;
+            case TCP_UNPAIR:
+                unpair(np);
+                break;
+            case TCP_PAIR:
+                receiveRequestPair(np);
+                break;
             default:
                 Device.getConnectedDevices().get(deviceId).setAnswer(true);
                 commandFromClient(np);
                 break;
         }
+    }
+
+    private void unpair(NetworkPackage np) {
+        String id = np.getId();
+        Device device = Device.getConnectedDevices().get(id);
+        DBHelper.getInstance(context).deletePaired(deviceId);
+        if(device != null)
+            device.setPaired(false);
+        MainActivity.updateActivity();
+    }
+
+    private void receiveRequestPair(NetworkPackage np) {
+        String id = "775533";
+        String data = np.getData();
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context,id)
+                        .setSmallIcon(R.mipmap.no_pair)
+                        .setContentTitle(np.getName() + " Request pairing!")
+                        .setContentText("You want to be friend?");
+        Intent yesAction = new Intent(context,NotifActionReceiver.class);
+        yesAction.setAction("Yes");
+        yesAction.putExtra("id",np.getId());
+        yesAction.putExtra("value",data);
+        Intent noReceive = new Intent(context,NotifActionReceiver.class);
+        noReceive.setAction("No");
+        noReceive.putExtra("id",np.getId());
+        PendingIntent pendingIntentYes = PendingIntent.getBroadcast(BackgroundService.getAppContext(), 775533, yesAction, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentNo = PendingIntent.getBroadcast(BackgroundService.getAppContext(), 775533, noReceive, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.addAction(R.mipmap.yes_pair,"Yes",pendingIntentYes);
+        mBuilder.addAction(R.drawable.delete48,"No",pendingIntentNo);
+        NotificationManager mNotifyMgr =
+                (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+// Builds the notification and issues it.
+        mNotifyMgr.notify(775533, mBuilder.build());
     }
 
     public Context getContext() {

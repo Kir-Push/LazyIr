@@ -28,6 +28,7 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
+import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
@@ -52,6 +53,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static android.os.Build.VERSION_CODES.N;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.getInstance;
 
@@ -476,6 +481,19 @@ public class BackgroundService extends Service {
             BackgroundService.sendToDevice(id,networkPackage.getMessage());
             Device.getConnectedDevices().get(id).setPaired(false);
             MainActivity.updateActivity(); // at this moment, server not respond to unpair, so update here
+        });
+    }
+
+    public static void pairDevice(String id, String value){
+        submitNewTask(() -> {
+            Device device = Device.getConnectedDevices().get(id);
+            DBHelper.getInstance(getAppContext()).savePairedDevice(id, value);
+                    if (device != null)
+                        device.setPaired(true);
+            NetworkPackage orCreatePackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_PAIR_RESULT, String.valueOf(NetworkPackage.getMyId().hashCode()));
+            orCreatePackage.setValue("answer","paired");
+            sendToDevice(id,orCreatePackage.getMessage());
+            MainActivity.updateActivity();
         });
     }
 

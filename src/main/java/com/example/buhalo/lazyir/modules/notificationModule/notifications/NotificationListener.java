@@ -66,6 +66,15 @@ public class NotificationListener extends NotificationListenerService {
             if(notif == null)
             notif = this;
 
+            if(sbn.getId() == 999888777) {
+                removeNotification(sbn.getKey());
+                for (StatusBarNotification statusBarNotification : getAll()) {
+                    if(statusBarNotification.getId() == Integer.parseInt(NotificationUtils.extractTitle(sbn)))
+                        removeNotification(statusBarNotification.getKey());
+                }
+                return;
+            }
+
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && sbn.getId() == BackgroundService.NotifId)
             snoozeNotification(sbn.getKey(), 600000);
 
@@ -85,6 +94,10 @@ public class NotificationListener extends NotificationListenerService {
         Log.e("NotificationListener","onNotificationPosted error",e);
         }
 
+    }
+
+    private void removeNotification(String id){
+        cancelNotification(id);
     }
 
 

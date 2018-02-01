@@ -134,7 +134,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
         return result;
     }
 
-    private static String extractTitle(StatusBarNotification sbn) {
+    public static String extractTitle(StatusBarNotification sbn) {
         String result = null;
         Bundle extras = sbn.getNotification().extras;
         if(extras == null)

@@ -46,6 +46,7 @@ public class Reminder extends Module {
     private final static String DISSMIS_ALL_CALLS = "dismissAllCalls";
     private final static String DISSMIS_ALL_MESSAGES = "dismissAllMessages";
     private final static ConcurrentHashMap<String,Boolean> ignored = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String,Boolean> ignoredCalls = new ConcurrentHashMap<>();
     private final static Lock staticLock = new ReentrantLock();
     private static boolean callTask = false;
     private static boolean smsTask = false;
@@ -87,7 +88,7 @@ public class Reminder extends Module {
     }
 
     private void setCallIgnored(String i) {
-        ignored.put(i,false);
+        ignoredCalls.put(i,false);
     }
 
 
@@ -176,9 +177,9 @@ public class Reminder extends Module {
                 Iterator<MissedCall> iterator = missedCalls.iterator();
                 while(iterator.hasNext()){
                     String id = iterator.next().getId();
-                    if(ignored.containsKey(id)) {
+                    if(ignoredCalls.containsKey(id)) {
                         iterator.remove();
-                        ignored.put(id,true);
+                        ignoredCalls.put(id,true);
                     }
                 }
                 if (missedCalls.size() > 0) {
@@ -186,12 +187,22 @@ public class Reminder extends Module {
                     np.setObject(NetworkPackage.N_OBJECT, new MissedCalls(missedCalls));
                     BackgroundService.sendToAllDevices(np.getMessage());
                 }
-              clearIgnoreList();
+              clearIgnoreCallList();
             };
             callTaskFuture = BackgroundService.getTimerService().scheduleWithFixedDelay(task, 0, callFrequency, TimeUnit.SECONDS);
             callTask = true;
         }finally {
             staticLock.unlock();
+        }
+    }
+
+    private static void clearIgnoreCallList() {
+        Iterator<Map.Entry<String, Boolean>> iterator1 = ignoredCalls.entrySet().iterator();  // clear ignored list from messages which are not actuall now
+        while(iterator1.hasNext()){                                                     // (if you returned not readed messages, and some message in ignore map didn't contain in this list, so this message already readed and you remove it from ignore list
+            Map.Entry<String, Boolean> next = iterator1.next();
+            if(!next.getValue()){
+                iterator1.remove();
+            }
         }
     }
 
