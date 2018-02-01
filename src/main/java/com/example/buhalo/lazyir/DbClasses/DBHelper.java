@@ -383,6 +383,20 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         return commands;
     }
 
+    public int updateCommand(Command command){
+        List<Command> commands = new ArrayList<Command>();
+        try(SQLiteDatabase db = getWritableDatabase()){
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
+            values.put(COLUMN_NAME_MODULE_DEVICE,command.getDevice());
+            values.put(COLUMN_NAME_COMMAND,command.getCommand());
+            String selection = COLUMN_NAME_TEXT + " LIKE ? AND " + COLUMN_NAME_COMMAND_TYPE + " LIKE ?";
+            String[] selectionArgs = new String[]{command.getCommand_name(), "pc"};
+            int update = db.update(TABLE_NAME_COMMANDS, values, selection, selectionArgs);
+            return update;
+        }
+    }
+
     public List<Command> getCommandFull() {
         List<Command> commands = new ArrayList<Command>();
         try (SQLiteDatabase db = getReadableDatabase()) {
@@ -576,6 +590,21 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
                 db.delete(TABLE_NAME_COMMANDS_BTN, selelection, selectionArgs);
             }
 
+        }
+    }
+
+    public int updateBtnCommand(String id,Command command){
+        List<Command> commands = new ArrayList<Command>();
+        try(SQLiteDatabase db = getWritableDatabase()){
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
+            values.put(COLUMN_NAME_MODULE_DEVICE,command.getDevice());
+            values.put(COLUMN_NAME_COMMAND,command.getCommand());
+            values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
+            String selection = COLUMN_NAME_ENTRY_ID + " LIKE ? AND " + COLUMN_NAME_TEXT + " LIKE ?";
+            String[] selectionArgs = new String[]{command.getOwner_id(), command.getCommand_name()};
+            int update = db.update(TABLE_NAME_COMMANDS_BTN, values, selection, selectionArgs);
+            return update;
         }
     }
 
