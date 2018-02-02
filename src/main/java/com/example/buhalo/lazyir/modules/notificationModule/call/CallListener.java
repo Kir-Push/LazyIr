@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
@@ -12,6 +13,8 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
+import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
+
 /**
  * Created by buhalo on 03.12.17.
  */
@@ -27,29 +30,34 @@ public class CallListener extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        String action = intent.getAction();
-        if(action == null)
-            return;
+        if(checkWifiOnAndConnected(context)) {
+            try {
+                String action = intent.getAction();
+                if (action == null)
+                    return;
 
-        if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
-            Bundle extras = intent.getExtras();
-            if(extras == null)
-                return;
-            String stateStr = extras.getString(TelephonyManager.EXTRA_STATE);
-            String number = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
-            int state = 0;
-            if(stateStr != null){
-                if (stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-                    state = TelephonyManager.CALL_STATE_IDLE;
-                } else if ( stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                    state = TelephonyManager.CALL_STATE_OFFHOOK;
-                } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
-                    state = TelephonyManager.CALL_STATE_RINGING;
+                if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                    Bundle extras = intent.getExtras();
+                    if (extras == null)
+                        return;
+                    String stateStr = extras.getString(TelephonyManager.EXTRA_STATE);
+                    String number = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+                    int state = 0;
+                    if (stateStr != null) {
+                        if (stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                            state = TelephonyManager.CALL_STATE_IDLE;
+                        } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                            state = TelephonyManager.CALL_STATE_OFFHOOK;
+                        } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                            state = TelephonyManager.CALL_STATE_RINGING;
+                        }
+                    }
+                    onCallStateChanged(context, state, number);
                 }
+            }catch (Throwable e){
+                Log.e("CallListener","OnReceive error ",e);
             }
-            onCallStateChanged(context, state, number);
         }
-
     }
 
 

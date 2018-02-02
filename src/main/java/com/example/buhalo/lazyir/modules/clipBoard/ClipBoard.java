@@ -25,8 +25,6 @@ public class ClipBoard extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-        if(!working)
-            return;
         if(np.getData().equals(RECEIVE)) {
             onReceive(np);
         }
@@ -39,6 +37,7 @@ public class ClipBoard extends Module {
         try {
             inserted = true;
             ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            String text = np.getValue("text");
             ClipData clip = ClipData.newPlainText("label", np.getValue("text"));
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);

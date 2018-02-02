@@ -68,8 +68,8 @@ public class BackgroundService extends Service {
     /**
      * ThreadPool's for basic tasks and short timer tasks.
      */
-    private static final ExecutorService executorService = Executors.newCachedThreadPool();
-    private static final ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
+    private static  ExecutorService executorService = Executors.newCachedThreadPool();
+    private static  ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
     private static ConcurrentLinkedQueue<Runnable> takQueue = new ConcurrentLinkedQueue<>();
 
     private TcpConnectionManager tcp;
@@ -171,6 +171,10 @@ public class BackgroundService extends Service {
         if(appContext == null)
         appContext = context.getApplicationContext();
         // initialize and setting executors
+         if(timerService == null)
+             timerService = new ExtScheduledThreadPoolExecutor(5);
+         if(executorService == null)
+             executorService = Executors.newCachedThreadPool();
         timerService.setRemoveOnCancelPolicy(true);
         timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
         timerService.allowCoreThreadTimeOut(true);
@@ -178,6 +182,19 @@ public class BackgroundService extends Service {
         ((ThreadPoolExecutor)executorService).setKeepAliveTime(600,TimeUnit.SECONDS);
         ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
         inited = true;
+    }
+
+    private void initConfig(){
+         if(timerService == null)
+             timerService = new ExtScheduledThreadPoolExecutor(5);
+        if(executorService == null)
+            executorService = Executors.newCachedThreadPool();
+        timerService.setRemoveOnCancelPolicy(true);
+        timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
+        timerService.allowCoreThreadTimeOut(true);
+
+        ((ThreadPoolExecutor)executorService).setKeepAliveTime(600,TimeUnit.SECONDS);
+        ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
     }
 
     private void startTasks(){
@@ -191,14 +208,12 @@ public class BackgroundService extends Service {
     }
 
     private void destroy(){
-        stopSendingPeriodicallyUdp();
-        closeAllTcpConnections();
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.closeAllTcpConnections);
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopSendingPeriodicallyUdp);
       //  unregisterBatteryRecever();
-        removeClipBoardListener();
-        stopSftpServer();
-        stopUdpListener();
-    //    executorService.shutdownNow();
-    //    timerService.shutdownNow();
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.removeClipBoardListener);
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopSftpServer);
+        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
         started = false;
     }
     /**
@@ -324,8 +339,12 @@ public class BackgroundService extends Service {
     }
 
     private void closeAllTcpConnections(){
-        for(Device dv : Device.getConnectedDevices().values())
-            tcp.stopListening(dv);
+        try {
+            for (Device dv : Device.getConnectedDevices().values())
+                tcp.stopListening(dv);
+        }catch (Throwable e){
+            Log.e("BackgroundService","closeAllTcpConnections ",e);
+        }
     }
 
     private void stopSftpServer(){

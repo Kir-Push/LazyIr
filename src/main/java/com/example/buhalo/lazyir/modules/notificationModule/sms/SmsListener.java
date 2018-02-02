@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.service.BackgroundService;
@@ -12,6 +13,7 @@ import com.example.buhalo.lazyir.service.BackgroundService;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getPhoneNumber;
+import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 30.11.17.
@@ -21,6 +23,8 @@ import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.
 public class SmsListener extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(checkWifiOnAndConnected(context)){
+        try{
         String action = intent.getAction();
         if(action == null)
             return;
@@ -39,6 +43,9 @@ public class SmsListener extends BroadcastReceiver {
             resultMessage.setText(stringBuilder.toString());
             smsReceive(resultMessage, context);
         }
+    }catch (Throwable e){
+        Log.e("SmsListener","OnReceive error ",e);
+    }}
     }
 
     private Sms extractSms(SmsMessage smsMessage,Context context){

@@ -126,13 +126,14 @@ public class UdpBroadcastManager  {
                             Log.e("Udp", "UdpReceive exception",e);
                             break;
                         }
+                        if(isListening())
                         udpReceived(packet,context);
                         data = new byte[bufferSize];
                     }
                     Log.d("Udp", "Stopping UDP listener");
-                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
+//                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
                 });
-            } catch (SocketException e) {
+            } catch (Throwable e) {
                 Log.e("Udp","Error creating server socket",e);
             }finally {
                 lock.unlock();
@@ -145,6 +146,7 @@ public class UdpBroadcastManager  {
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(pck);
+        System.out.println("Received Udp " + pck);
         if(np.getId().equals(NetworkPackage.getMyId()))
         { // my own broadcast, ignore it
         }
@@ -157,9 +159,9 @@ public class UdpBroadcastManager  {
 
     void stopUdpListener()
     {
+        setListening(false);
         lock.lock();
         try{
-            setListening(false);
         if(server != null)
         server.close();
         server = null;}
@@ -173,6 +175,8 @@ public class UdpBroadcastManager  {
         if (!checkWifiOnAndConnected(context)) return;
         lock.lock();
         try {
+            if(sendingFuture != null || isSending())
+                stopSending();
         startSending();
         count = 0;
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(BROADCAST_INTRODUCE,BROADCAST_INTRODUCE_MSG);
@@ -218,12 +222,12 @@ public class UdpBroadcastManager  {
     }
 
     void stopSending() {
+        sending = false;
         lock.lock();
         try {
-            sending = false;
             if (sendingFuture != null)
                 sendingFuture.cancel(true);
-                sendingFuture = null;
+            sendingFuture = null;
         }finally {
             lock.unlock();
         }
