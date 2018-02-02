@@ -223,14 +223,9 @@ public class UdpBroadcastManager  {
 
     void stopSending() {
         sending = false;
-        lock.lock();
-        try {
             if (sendingFuture != null)
                 sendingFuture.cancel(true);
             sendingFuture = null;
-        }finally {
-            lock.unlock();
-        }
     }
 
     int getSend_period() {
