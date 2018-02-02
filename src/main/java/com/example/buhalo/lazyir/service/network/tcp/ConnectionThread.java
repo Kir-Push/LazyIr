@@ -254,7 +254,7 @@ public class ConnectionThread implements Runnable {
     public boolean isConnected() {
         lock.lock();
         try {
-            return connection != null && out != null && in != null && connectionRun;
+            return connection != null && out != null && in != null && connectionRun && connection.isConnected() && !connection.isClosed() && !connection.isInputShutdown() && !connection.isOutputShutdown();
         }finally {
             lock.unlock();
         }

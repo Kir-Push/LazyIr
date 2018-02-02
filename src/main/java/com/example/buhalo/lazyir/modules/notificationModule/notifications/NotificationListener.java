@@ -14,6 +14,7 @@ import android.util.SparseLongArray;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 import com.example.buhalo.lazyir.service.SettingService;
 
 import java.util.AbstractMap;
@@ -87,16 +88,31 @@ public class NotificationListener extends NotificationListenerService {
 
 
             if(!smsMessage(sbn)){                        //first check if notification is not smsMessage, if it is - send as sms
+                BackgroundService.addCommandToQueue(BackgroundServiceCmds.cacheConnect);
                 Notification notification = NotificationUtils.castToMyNotification(sbn);
-                if(messengerMessageCheckAndSend(sbn,notification.getPack(),notification.getTitle(),notification.getText(),notification)) {
-                }
-                else
-                  sendToAll(sbn, RECEIVE_NOTIFICATION);  // if previous two false, this is notif, send to server
+                if(!BackgroundService.hasActualConnection()){
+                    BackgroundService.getExecutorService().submit(()->{
+                        try {
+                            Thread.sleep(700); // wait, you have chance to establish connection
+                            whatToDoIfNotSms(sbn,notification);
+                        }catch (InterruptedException e) {
+                            Log.e("NotificationListener","onNotificationPosted error ",e);
+                        }
+                    });
+                }else
+                whatToDoIfNotSms(sbn,notification);
             }
         } catch (Throwable e) {                          // i don't need crash app if something going wrong
         Log.e("NotificationListener","onNotificationPosted error",e);
         }
 
+    }
+
+    private void whatToDoIfNotSms(StatusBarNotification sbn,Notification notification){
+        if(messengerMessageCheckAndSend(sbn,notification.getPack(),notification.getTitle(),notification.getText(),notification)) {
+        }
+        else
+            sendToAll(sbn, RECEIVE_NOTIFICATION);  // if previous two false, this is notif, send to server
     }
 
     private void removeNotification(String id){

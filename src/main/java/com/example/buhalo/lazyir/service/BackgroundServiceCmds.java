@@ -21,5 +21,6 @@ public enum BackgroundServiceCmds {
     submitTask,
     sendToAll,
     destroy,
-    startTasks
+    startTasks,
+    cacheConnect
 }

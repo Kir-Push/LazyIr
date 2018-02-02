@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
@@ -29,6 +31,7 @@ public class SmsListener extends BroadcastReceiver {
         if(action == null)
             return;
         if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
+            BackgroundService.addCommandToQueue(BackgroundServiceCmds.cacheConnect);
             final Bundle bundle = intent.getExtras();
             if (bundle == null) return;
             StringBuilder stringBuilder = new StringBuilder();
@@ -61,9 +64,19 @@ public class SmsListener extends BroadcastReceiver {
             return;
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
         np.setObject(NetworkPackage.N_OBJECT,sms);
+        String message = np.getMessage();
         System.out.println("sending sms: " + sms);
-
-        BackgroundService.sendToAllDevices(np.getMessage());
+        if(!BackgroundService.hasActualConnection()){
+            BackgroundService.getExecutorService().submit(()->{
+                try {
+                    Thread.sleep(700); // wait, you have chance to establish connection
+                    BackgroundService.sendToAllDevices(message);
+                }catch (InterruptedException e) {
+                    Log.e("SmsListener","smsReceive error ",e);
+                }
+            });
+        }else
+        BackgroundService.sendToAllDevices(message);
     }
 
 }

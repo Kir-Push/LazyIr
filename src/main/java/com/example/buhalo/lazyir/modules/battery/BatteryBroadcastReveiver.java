@@ -25,6 +25,7 @@ public class BatteryBroadcastReveiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (checkWifiOnAndConnected(context)) {
             try {
+                BackgroundService.addCommandToQueue(BackgroundServiceCmds.cacheConnect);
             if (Device.getConnectedDevices().size() < 1) {
                 return;
             }

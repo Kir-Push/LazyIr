@@ -1,7 +1,5 @@
 package com.example.buhalo.lazyir.service;
 
-import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -15,7 +13,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.JobIntentService;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.os.Process;
@@ -28,14 +25,11 @@ import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.MainActivity;
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
-import com.example.buhalo.lazyir.modules.battery.Battery;
 import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
 import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.utils.ExtScheduledThreadPoolExecutor;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -52,13 +46,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static android.os.Build.VERSION_CODES.N;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.OK;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.REFUSE;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
 import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.getInstance;
 
 
 public class BackgroundService extends Service {
@@ -412,6 +401,12 @@ public class BackgroundService extends Service {
         toast.show();
     }
 
+    private void cacheConnect() {
+        executorService.submit(()->{
+            udp.cacheConnection();
+        });
+    }
+
     public static void addCommandToQueue(BackgroundServiceCmds cmd){
         Intent intent = new Intent(appContext, BackgroundService.class);
         intent.putExtra("cmd",cmd.name());
@@ -516,6 +511,7 @@ public class BackgroundService extends Service {
         });
     }
 
+
     public static int getPort() {
         lock.lock();
         try{
@@ -525,6 +521,19 @@ public class BackgroundService extends Service {
             lock.unlock();
         }
         return port;
+    }
+
+    public static boolean  hasActualConnection(){
+        boolean hasConnectedDevice = false;
+        if(Device.getConnectedDevices().size() != 0){
+            for (Device device : Device.getConnectedDevices().values()) {
+                if(device.isConnected()){
+                    hasConnectedDevice = true;
+                    break;
+                }
+            }
+        }
+        return hasConnectedDevice;
     }
 
 }

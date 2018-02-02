@@ -5,6 +5,7 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.example.buhalo.lazyir.service.BackgroundService.hasActualConnection;
 import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
@@ -252,5 +254,18 @@ public class UdpBroadcastManager  {
 
     public static void setListening(boolean listening) {
         UdpBroadcastManager.listening = listening;
+    }
+
+    public void cacheConnection() {
+        try {
+           if(hasActualConnection())
+               return;
+            if (socket == null)
+                socket = configureManager();
+            String message = NetworkPackage.Cacher.getOrCreatePackage(BROADCAST_INTRODUCE, BROADCAST_INTRODUCE_MSG).getMessage();
+            sendBroadcast(message, BackgroundService.getPort());
+        }catch (IOException e) {
+            Log.e("Udp","cacheConnection ",e);
+        }
     }
 }

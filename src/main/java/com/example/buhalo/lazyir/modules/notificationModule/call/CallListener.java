@@ -10,6 +10,7 @@ import android.util.Log;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
 import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getContactImage;
 import static com.example.buhalo.lazyir.modules.notificationModule.CallSmsUtils.getName;
@@ -37,6 +38,7 @@ public class CallListener extends BroadcastReceiver {
                     return;
 
                 if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.cacheConnect);
                     Bundle extras = intent.getExtras();
                     if (extras == null)
                         return;
@@ -52,6 +54,17 @@ public class CallListener extends BroadcastReceiver {
                             state = TelephonyManager.CALL_STATE_RINGING;
                         }
                     }
+                    if(!BackgroundService.hasActualConnection()){
+                        int finalState = state;
+                        BackgroundService.getExecutorService().submit(()->{
+                            try {
+                                Thread.sleep(700); // wait, you have chance to establish connection
+                                onCallStateChanged(context, finalState, number);
+                            }catch (InterruptedException e) {
+                                Log.e("CallListener","OnReceive error ",e);
+                            }
+                        });
+                    }else
                     onCallStateChanged(context, state, number);
                 }
             }catch (Throwable e){
