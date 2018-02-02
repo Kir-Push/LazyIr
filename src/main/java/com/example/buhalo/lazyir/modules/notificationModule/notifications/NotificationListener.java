@@ -26,6 +26,7 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengerMessageCheckAndSend;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.smsMessage;
+import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
  * Created by buhalo on 21.03.17.
@@ -62,7 +63,9 @@ public class NotificationListener extends NotificationListenerService {
         try {
             if(BackgroundService.getAppContext() == null)
                 BackgroundService.setAppContext(getApplicationContext());
-
+            if(!checkWifiOnAndConnected(getApplicationContext())){
+                return;
+            }
             if(notif == null)
             notif = this;
 
@@ -109,6 +112,9 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         try {
+            if(!checkWifiOnAndConnected(getApplicationContext())){
+                return;
+            }
             Notification notification = NotificationUtils.castToMyNotification(sbn);
             if (notification != null && notification.getPack() != null) {
                 Messengers.getPendingNotifsLocal().remove(notification.getPack() + ":" + notification.getTitle());

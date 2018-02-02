@@ -103,11 +103,12 @@ public class UdpBroadcastManager  {
     {
         lock.lock();
         try {
-        if(isListening()) {
+        if(isListening() || server != null) {
+            stopUdpListener();
             Log.d("Udp","listening already working");
-            return;
         }
             if (!checkWifiOnAndConnected(context)) return;
+
 
                 server = new DatagramSocket(port);
                 server.setReuseAddress(true);
