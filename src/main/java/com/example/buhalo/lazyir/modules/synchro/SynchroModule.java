@@ -40,6 +40,7 @@ public class SynchroModule extends Module {
                 break;
             case UPDATE_COMMANDS:
                 updateCommands(np);
+                break;
             case GET_ALL_COMMANDS:
                 sendAllCommands();
                 break;
