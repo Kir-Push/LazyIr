@@ -66,7 +66,7 @@ public class TcpConnectionManager {
             SSLSocketFactory factory = sslContext.getSocketFactory();
             return factory.createSocket(ip, port);
         } catch (GeneralSecurityException e) {
-            Log.e(this.getClass().toString(), "Exception while creating context: ", e);
+            Log.e(this.getClass().toString(), "Exception while creating connection: ", e);
             throw new IOException("Could not connect to SSL Server", e);
         }
     }
@@ -82,8 +82,9 @@ public class TcpConnectionManager {
                 return;
             Socket socket = getConnection(address,port,context);
             // submit connection to executorService - this service is main for app
-            BackgroundService.submitNewTask(new ConnectionThread(socket, context));
+            BackgroundService.submitNewTask(new ConnectionThread(socket, context,np.getId()));
         } catch (IOException e) {
+            BackgroundService.removeFromActiveConnecting(address,BackgroundService.getPort(),np.getId());
             Log.e("Tcp","Exception on accept connection ignoring ",e);
         }
     }

@@ -73,9 +73,10 @@ public class ConnectionThread implements Runnable {
     private ScheduledFuture<?> timerFuture;
     private Lock lock = new ReentrantLock();
 
-    public ConnectionThread(Socket socket,Context context) throws SocketException {
+    public ConnectionThread(Socket socket,Context context,String deviceId) throws SocketException {
         this.connection = socket;
         this.context = context;
+        this.deviceId = deviceId;
         // enabling keepAlive and timeout to close socket,
         // Android has some battery safe methods and act not fully predictable, you don't know,
         // when he run netowork code in background, so you need wait more.
@@ -92,12 +93,12 @@ public class ConnectionThread implements Runnable {
             while (connectionRun)
             {
                 String clientCommand = in.readLine();
-                if(clientCommand == null) {
+                if(clientCommand == null || clientCommand.equals("")) {
                     connectionRun = false;
-                    continue;
+                    break;
                 }
                 NetworkPackage np =  NetworkPackage.Cacher.getOrCreatePackage(clientCommand);
-                determineWhatTodo(np);
+                    determineWhatTodo(np);
             }
         }catch (IOException e){
             connectionRun = false;
@@ -146,6 +147,7 @@ public class ConnectionThread implements Runnable {
             if(out == null) {
                 return;
             }
+            System.out.println("Sending " + message);
             out.println(message);
             out.flush();
         }finally {
@@ -179,7 +181,7 @@ public class ConnectionThread implements Runnable {
 
 
     // send ping to device
-    private void ping() {
+    public void ping() {
         printToOut(NetworkPackage.Cacher.getOrCreatePackage(TCP_PING,TCP_PING).getMessage());
     }
 
@@ -188,24 +190,34 @@ public class ConnectionThread implements Runnable {
     // after that send introduce package
     private void newConnectedDevice(NetworkPackage np)
     {
-        if(deviceId == null) {
-            deviceId = np.getId();
+        lock.lock();
+        try {
+            Device device1 = Device.getConnectedDevices().get(deviceId);
+            if (device1 != null) {
+                if (!device1.isConnected()) {
+                    try {
+                        device1.getSocket().close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             boolean paired = true;
             ModuleSettingList object = np.getObject(N_OBJECT, ModuleSettingList.class);
-            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this,  object.getModuleSettingList(),context);
+            Device device = new Device(connection, deviceId, np.getName(), connection.getInetAddress(), np.getValue(NetworkPackage.DEVICE_TYPE), this, object.getModuleSettingList(), context);
             Device.getConnectedDevices().put(deviceId, device);
             Reminder.startReminderTasks();
-            if(MainActivity.getSelected_id().equals("")) {
+            if (MainActivity.getSelected_id().equals("")) {
                 MainActivity.setSelected_id(deviceId);
             }
-            if(np.getData() != null) {
+            if (np.getData() != null) {
                 String pairedCode = np.getData();
                 List<String> savedPairedCode = DBHelper.getInstance(context).getPairedCode(deviceId);
-                if(savedPairedCode.size() != 0) {
-                    if( savedPairedCode.get(0).equals(pairedCode)) {
+                if (savedPairedCode.size() != 0) {
+                    if (savedPairedCode.get(0).equals(pairedCode)) {
                         device.setPaired(true);
                         paired = true;
-                    }else{
+                    } else {
                         device.setPaired(false);
                         paired = false;
                     }
@@ -213,6 +225,8 @@ public class ConnectionThread implements Runnable {
             }
             sendIntroduce(paired);
             //  startPingPong(deviceId);
+        }finally {
+            lock.unlock();
         }
     }
 
@@ -226,24 +240,33 @@ public class ConnectionThread implements Runnable {
     public void closeConnection() {
         lock.lock();
         try {
+            System.out.println("StartCloseConnection! + " + deviceId);
             if (timerFuture != null && !timerFuture.isDone()) {
                 timerFuture.cancel(true);
             }
             Device device = Device.getConnectedDevices().get(deviceId);
             if(device != null)
             for (Module module : device.getEnabledModules().values()) {
-                if(module != null)
+                if(module != null) {
+                    System.out.println("EndModule " + module.getClass().getSimpleName() + "  " + deviceId);
                     module.endWork();
+                    System.out.println("AfterEndModule " + module.getClass().getSimpleName() + "  " + deviceId);
+                }
             }
+            System.out.println("AfterEndModules! + " + deviceId);
             Device.getConnectedDevices().remove(deviceId);
+            BackgroundService.removeFromActiveConnecting(connection.getInetAddress(),BackgroundService.getPort(),deviceId);
+            System.out.println("AfterRemoveddeviceId! + " + deviceId);
             // calling after because can throw exception and remove from hashmap won't be done
             in.close();
             out.close();
             connection.close();
+            System.out.println("AfterClosedSockets! + " + deviceId);
         }catch (Exception e) {Log.e("ConnectionThread","Error in stopped connection",e);}
         finally {
             // call in finally becaus it may be called in end (after remove device from list)
             // but error can be throwed before it.
+            System.out.println("In final CloseConnection " + deviceId);
             BackgroundService.addCommandToQueue(onZeroConnections);
             Log.d("ConnectionThread", deviceId + " - Stopped connection");
             lock.unlock();

@@ -19,6 +19,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.example.buhalo.lazyir.service.BackgroundService.hasActualConnection;
+import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PING;
 import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
@@ -149,14 +150,19 @@ public class UdpBroadcastManager  {
     {
         String pck = new String(packet.getData(),packet.getOffset(),packet.getLength());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(pck);
-        System.out.println("Received Udp " + pck);
         if(np.getId().equals(NetworkPackage.getMyId()))
         { // my own broadcast, ignore it
         }
-        else if(np.getType().equals(BROADCAST_INTRODUCE))
-            if(!TcpConnectionManager.getInstance().checkExistingConnection(np.getId())) {
-                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.getPort(), np,context);
+        else if(np.getType().equals(BROADCAST_INTRODUCE)) {
+            boolean b = TcpConnectionManager.getInstance().checkExistingConnection(np.getId());
+            if (!b && !BackgroundService.checkInActivelyConnectingAndSetIfNo(packet.getAddress(),BackgroundService.getPort(),np.getId())) {
+                TcpConnectionManager.getInstance().receivedUdpIntroduce(packet.getAddress(), BackgroundService.getPort(), np, context);
             }
+        }else if(np.getType().equals(TCP_PING)){
+//            Device device = Device.getConnectedDevices().get(np.getId());
+//            if(device != null)
+//                device.ping();
+        }
     }
 
 

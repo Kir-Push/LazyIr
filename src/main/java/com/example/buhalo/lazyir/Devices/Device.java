@@ -54,7 +54,6 @@ public class Device {
         if(enabledModules != null)
         for (ModuleSetting registeredModule : enabledModules) {
             if(registeredModule.isEnabled()){
-                System.out.println(registeredModule.getName());
                 enableModule(registeredModule.getName());
             } }
     }
@@ -110,6 +109,11 @@ public class Device {
     public boolean isConnected()
     {
         return thread != null && thread.isConnected();
+    }
+
+    public void ping(){
+        if(thread != null)
+            thread.ping();
     }
 
     public void closeConnection()

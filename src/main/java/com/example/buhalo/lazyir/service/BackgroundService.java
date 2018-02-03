@@ -30,11 +30,15 @@ import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
 import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
 import com.example.buhalo.lazyir.utils.ExtScheduledThreadPoolExecutor;
 
+import org.apache.mina.util.ConcurrentHashSet;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -60,7 +64,7 @@ public class BackgroundService extends Service {
     private static  ExecutorService executorService = Executors.newCachedThreadPool();
     private static  ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
     private static ConcurrentLinkedQueue<Runnable> takQueue = new ConcurrentLinkedQueue<>();
-
+    private static Set<String> activeConnecting = new ConcurrentHashSet<>();
     private TcpConnectionManager tcp;
     private UdpBroadcastManager udp;
     private static SettingService settingService;
@@ -92,6 +96,18 @@ public class BackgroundService extends Service {
         }finally {
             lock.unlock();
         }
+    }
+
+    public static boolean checkInActivelyConnectingAndSetIfNo(InetAddress address, int port, String id) {
+        String adr = address.toString() + String.valueOf(port)+id;
+        boolean contains = activeConnecting.contains(adr);
+        if(!contains)
+            activeConnecting.add(adr);
+        return contains;
+    }
+
+    public static void removeFromActiveConnecting(InetAddress address, int port,String id){
+        activeConnecting.remove(address.toString()+String.valueOf(port)+id);
     }
 
 

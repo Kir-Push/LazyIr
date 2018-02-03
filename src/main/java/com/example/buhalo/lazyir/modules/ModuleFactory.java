@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ModuleFactory {
 
 
-    private static Lock lock = new ReentrantLock();
+    private static Lock lockFactory = new ReentrantLock();
     // container of all refistedModulesclasses
     private static List<Class> registeredModules;
     private static boolean myEnabledModulesUpdate;
@@ -43,36 +43,36 @@ public class ModuleFactory {
 
     private static Module instantiateModule(Device dv, Class registeredModule)
     {
-        lock.lock();
-        try {
-            if (registeredModules == null) {
-                registerModulesInit();
-            }
-            Module module = null;
+        lockFactory.lock();
             try {
-                module = (Module) registeredModule.newInstance();
-                module.setDevice(dv);
-                module.setContext(dv.getContext());
-            } catch (IllegalAccessException | InstantiationException e) {
-                Log.e("ModuleFactory", e.toString());
+                if (registeredModules == null) {
+                    registerModulesInit();
+                }
+                Module module = null;
+                try {
+                    module = (Module) registeredModule.newInstance();
+                    module.setDevice(dv);
+                    module.setContext(dv.getContext());
+                } catch (IllegalAccessException | InstantiationException e) {
+                    Log.e("ModuleFactory", e.toString());
 
+                }
+                return module;
+            } finally {
+                lockFactory.unlock();
             }
-            return module;
-        }finally {
-            lock.unlock();
-        }
     }
 
     //method return fully instanced modules, ready to work.
     public static  HashSet<String> getMyEnabledModules(Context context)
     {
-        lock.lock();
+        lockFactory.lock();
+        try {
         if(!myEnabledModulesUpdate && myEnabledModules != null) {
             return myEnabledModules;
         }
         String myId = NetworkPackage.getMyId();
         HashSet<String> result;
-        try {
             // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
             List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(myId);
 
@@ -82,21 +82,21 @@ public class ModuleFactory {
             result = new HashSet<>(enabledModulesNames);
             myEnabledModulesUpdate = false;
             myEnabledModules = result;
+            return result;
         }finally {
-            lock.unlock();
+            lockFactory.unlock();
         }
-        return result;
     }
     //enable or disable module. Change value on Db and call method
     // if enableOrDisable true, then enable and instanciate module, otherwise disable
     public static void changeModuleStatus(String moduleName,Context context,boolean enableOrDisable)
     {
-        lock.lock();
+        lockFactory.lock();
         try{
             DBHelper.getInstance(context).changeModuleStatus(NetworkPackage.getMyId(),moduleName,enableOrDisable);
             myEnabledModulesUpdate = true;
         }finally {
-            lock.unlock();
+            lockFactory.unlock();
         }
     }
 
