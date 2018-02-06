@@ -444,7 +444,7 @@ public class BackgroundService extends Service {
     public static void sendToAllDevices(String message){
         Intent intent = new Intent(appContext, BackgroundService.class);
         intent.setAction("sendToAll");
-        if(message.length() >= 512000){
+        if(message.length() >= 1200){
             UUID uuid = UUID.randomUUID();
             String s = uuid.toString();
             messagesCache.put(s,message);
@@ -456,10 +456,10 @@ public class BackgroundService extends Service {
     }
 
     public static void sendToDevice(String id,String message){
-        Intent intent = new Intent(appContext, BackgroundService.class);
+        Intent intent = new Intent(getAppContext(), BackgroundService.class);
         intent.setAction("sendToDevice");
         intent.putExtra("dvId",id);
-        if(message.length() >= 512000){
+        if(message.length() >= 1200){
             UUID uuid = UUID.randomUUID();
             String s = uuid.toString();
             messagesCache.put(s,message);

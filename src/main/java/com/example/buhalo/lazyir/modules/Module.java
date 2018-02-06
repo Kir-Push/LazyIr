@@ -46,7 +46,8 @@ public abstract class Module {
     }
 
     public void sendMsg(String msg) {
-        BackgroundService.sendToDevice(device.getId(),msg);
+        String id = device.getId();
+        BackgroundService.sendToDevice(id,msg);
     }
 
 

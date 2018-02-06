@@ -46,13 +46,24 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
     // todo reverse notifs for image and text carefully
     public static Notification castToMyNotification(StatusBarNotification sbn)
     {
-        String pack = sbn.getPackageName();
-        String text = extractText(sbn);
-        String title = extractTitle(sbn);
-        String ticker = extractTicker(sbn);
-        String icon = extractIcon(sbn);
-        String picture = extractImage(sbn);
-        String type = extractType(sbn,pack,title,text);
+        String pack = null;
+        String text = null;
+        String title = null;
+        String ticker = null;
+        String icon = null;
+        String picture = null;
+        String type = null;
+        try {
+             pack = sbn.getPackageName();
+             text = extractText(sbn);
+             title = extractTitle(sbn);
+             ticker = extractTicker(sbn);
+             icon = extractIcon(sbn);
+             picture = extractImage(sbn);
+             type = extractType(sbn, pack, title, text);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
         if(pack.equals("com.whatsapp") && text == null)
             return null;
         // telegram send two notifs, first notif with new message title contain action, second not. Skip if new message non exist

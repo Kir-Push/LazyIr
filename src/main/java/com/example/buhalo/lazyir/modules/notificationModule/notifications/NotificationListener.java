@@ -121,6 +121,8 @@ public class NotificationListener extends NotificationListenerService {
 
 
     public static StatusBarNotification[] getAll() {
+        System.out.println(notif);
+        System.out.println( notif.getActiveNotifications());
       return   notif == null ? null : notif.getActiveNotifications();
     }
 

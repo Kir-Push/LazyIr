@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
 
+import com.example.buhalo.lazyir.Devices.Device;
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.Module;
@@ -32,7 +33,8 @@ public class ShowNotification extends Module {
             if(notifications != null) {
                 NetworkPackage nps = NetworkPackage.Cacher.getOrCreatePackage(SHOW_NOTIFICATION, "ALL NOTIFS");
                 nps.setObject(NetworkPackage.N_OBJECT, notifications);
-                sendMsg(nps.getMessage());
+                String message = nps.getMessage();
+                sendMsg(message);
             }
         }else if(np.getData().equals(REMOVE_NOTIFICATION)){
             String value = np.getValue(NOTIFICATION_ID);
