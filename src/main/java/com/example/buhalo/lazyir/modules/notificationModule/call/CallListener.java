@@ -3,12 +3,15 @@ package com.example.buhalo.lazyir.modules.notificationModule.call;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.example.buhalo.lazyir.Devices.NetworkPackage;
 import com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils;
+import com.example.buhalo.lazyir.old.ShareModule;
 import com.example.buhalo.lazyir.service.BackgroundService;
 import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 
@@ -30,6 +33,7 @@ public class CallListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
 
         if(checkWifiOnAndConnected(context)) {
             try {
@@ -114,6 +118,10 @@ public class CallListener extends BroadcastReceiver {
         lastState = state;
     }
 
+    private void ringerModeReturn() {
+        CallModule.returnRingerMode();
+    }
+
     private void onAnswered(Context context, String number, String type) {
         String name = getName(number,context.getApplicationContext());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(CALL_MODULE,ANSWER);
@@ -126,6 +134,8 @@ public class CallListener extends BroadcastReceiver {
     }
 
     private void onIncomingCallEnded(Context context, String savedNumber,String type) {
+
+        ringerModeReturn();
         String name = getName(savedNumber,context.getApplicationContext());
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(CALL_MODULE,"com.android.endCall");
         np.setValue("number",name);

@@ -147,7 +147,6 @@ public class ConnectionThread implements Runnable {
             if(out == null) {
                 return;
             }
-            System.out.println("Sending " + message);
             out.println(message);
             out.flush();
         }finally {

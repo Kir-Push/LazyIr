@@ -104,22 +104,26 @@ public class UdpBroadcastManager  {
 
     void startUdpListener(final Context context,int port)
     {
-        lock.lock();
-        try {
-        if(isListening() || server != null) {
-            stopUdpListener();
-            Log.d("Udp","listening already working");
-        }
-            if (!checkWifiOnAndConnected(context)) return;
-
-
-                server = new DatagramSocket(port);
-                server.setReuseAddress(true);
-                setListening(true);
                 BackgroundService.submitNewTask(()->{
-                    Log.d("Udp","start listening");
+                    lock.lock();
+                    try {
+                            if (isListening() || server != null) {
+                                stopUdpListener();
+                                Log.d("Udp", "listening already working");
+                            }
+                            if (!checkWifiOnAndConnected(context)) return;
+                            Log.d("Udp", "start listening");
+                            server = new DatagramSocket(port);
+                            server.setReuseAddress(true);
+                            setListening(true);
+                        } catch (Throwable e) {
+                            Log.e("Udp","Error creating server socket",e);
+                        } finally {
+                            lock.unlock();
+                        }
                     final int bufferSize = 1024 * 5;
                     byte[] data = new byte[bufferSize];
+                    try {
                     while (isListening()) {
                         if(server == null)
                             break;
@@ -134,14 +138,12 @@ public class UdpBroadcastManager  {
                         udpReceived(packet,context);
                         data = new byte[bufferSize];
                     }
+                    } catch (Throwable e) {
+                        Log.e("Udp","Error creating server socket",e);
+                    }
                     Log.d("Udp", "Stopping UDP listener");
 //                    BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
                 });
-            } catch (Throwable e) {
-                Log.e("Udp","Error creating server socket",e);
-            }finally {
-                lock.unlock();
-            }
     }
 
 
