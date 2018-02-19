@@ -56,6 +56,14 @@ public class ShowNotification extends Module {
             return null;
         }
         for (StatusBarNotification activeNotification : activeNotifications) {
+            boolean sms = NotificationUtils.smsMessage(activeNotification);
+            try {
+                if (sms) {
+                    Messengers.getPendingNotifsLocal().put(activeNotification.getPackageName() + ":" + NotificationUtils.extractTitle(activeNotification), activeNotification);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             notifications.addNotification(NotificationUtils.castToMyNotification(activeNotification));
         }
         return notifications;

@@ -102,7 +102,7 @@ public class NotificationListener extends NotificationListenerService {
                 }else
                 whatToDoIfNotSms(sbn,notification);
             }
-        } catch (Throwable e) {                          // i don't need crash app if something going wrong
+        } catch (Throwable  e) {                          // i don't need crash app if something going wrong
         Log.e("NotificationListener","onNotificationPosted error",e);
         }
 
