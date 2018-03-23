@@ -11,13 +11,13 @@
                     "endOffset": 117
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-h720dp/values-h720dp.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-h720dp-v13/values-h720dp-v13.xml",
                     "position": {
-                        "startLine": 4,
+                        "startLine": 2,
                         "startColumn": 4,
-                        "startOffset": 279,
+                        "startOffset": 55,
                         "endColumn": 66,
-                        "endOffset": 341
+                        "endOffset": 117
                     }
                 }
             }

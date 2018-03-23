@@ -11,13 +11,13 @@
                     "endOffset": 167
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 4,
+                        "startLine": 2,
                         "startColumn": 4,
-                        "startOffset": 276,
+                        "startOffset": 55,
                         "endColumn": 116,
-                        "endOffset": 388
+                        "endOffset": 167
                     }
                 }
             },
@@ -30,13 +30,13 @@
                     "endOffset": 275
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 5,
+                        "startLine": 3,
                         "startColumn": 4,
-                        "startOffset": 393,
+                        "startOffset": 172,
                         "endColumn": 107,
-                        "endOffset": 496
+                        "endOffset": 275
                     }
                 }
             },
@@ -49,13 +49,13 @@
                     "endOffset": 398
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 6,
+                        "startLine": 4,
                         "startColumn": 4,
-                        "startOffset": 501,
+                        "startOffset": 280,
                         "endColumn": 122,
-                        "endOffset": 619
+                        "endOffset": 398
                     }
                 }
             },
@@ -68,13 +68,13 @@
                     "endOffset": 511
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 7,
+                        "startLine": 5,
                         "startColumn": 4,
-                        "startOffset": 624,
+                        "startOffset": 403,
                         "endColumn": 112,
-                        "endOffset": 732
+                        "endOffset": 511
                     }
                 }
             },
@@ -87,13 +87,13 @@
                     "endOffset": 619
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 8,
+                        "startLine": 6,
                         "startColumn": 4,
-                        "startOffset": 737,
+                        "startOffset": 516,
                         "endColumn": 107,
-                        "endOffset": 840
+                        "endOffset": 619
                     }
                 }
             },
@@ -106,13 +106,13 @@
                     "endOffset": 704
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 9,
+                        "startLine": 7,
                         "startColumn": 4,
-                        "startOffset": 845,
+                        "startOffset": 624,
                         "endColumn": 84,
-                        "endOffset": 925
+                        "endOffset": 704
                     }
                 }
             },
@@ -125,13 +125,13 @@
                     "endOffset": 805
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 10,
+                        "startLine": 8,
                         "startColumn": 4,
-                        "startOffset": 930,
+                        "startOffset": 709,
                         "endColumn": 100,
-                        "endOffset": 1026
+                        "endOffset": 805
                     }
                 }
             },
@@ -144,13 +144,13 @@
                     "endOffset": 933
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 11,
+                        "startLine": 9,
                         "startColumn": 4,
-                        "startOffset": 1031,
+                        "startOffset": 810,
                         "endColumn": 127,
-                        "endOffset": 1154
+                        "endOffset": 933
                     }
                 }
             },
@@ -159,17 +159,17 @@
                     "startLine": 10,
                     "startColumn": 4,
                     "startOffset": 938,
-                    "endColumn": 81,
-                    "endOffset": 1015
+                    "endColumn": 75,
+                    "endOffset": 1009
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 12,
+                        "startLine": 10,
                         "startColumn": 4,
-                        "startOffset": 1159,
-                        "endColumn": 81,
-                        "endOffset": 1236
+                        "startOffset": 938,
+                        "endColumn": 75,
+                        "endOffset": 1009
                     }
                 }
             },
@@ -177,18 +177,18 @@
                 "to": {
                     "startLine": 11,
                     "startColumn": 4,
-                    "startOffset": 1020,
-                    "endColumn": 106,
-                    "endOffset": 1122
+                    "startOffset": 1014,
+                    "endColumn": 75,
+                    "endOffset": 1085
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 13,
+                        "startLine": 11,
                         "startColumn": 4,
-                        "startOffset": 1241,
-                        "endColumn": 106,
-                        "endOffset": 1343
+                        "startOffset": 1014,
+                        "endColumn": 75,
+                        "endOffset": 1085
                     }
                 }
             },
@@ -196,18 +196,18 @@
                 "to": {
                     "startLine": 12,
                     "startColumn": 4,
-                    "startOffset": 1127,
-                    "endColumn": 99,
-                    "endOffset": 1222
+                    "startOffset": 1090,
+                    "endColumn": 81,
+                    "endOffset": 1167
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 14,
+                        "startLine": 12,
                         "startColumn": 4,
-                        "startOffset": 1348,
-                        "endColumn": 99,
-                        "endOffset": 1443
+                        "startOffset": 1090,
+                        "endColumn": 81,
+                        "endOffset": 1167
                     }
                 }
             },
@@ -215,18 +215,18 @@
                 "to": {
                     "startLine": 13,
                     "startColumn": 4,
-                    "startOffset": 1227,
-                    "endColumn": 98,
-                    "endOffset": 1321
+                    "startOffset": 1172,
+                    "endColumn": 106,
+                    "endOffset": 1274
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 15,
+                        "startLine": 13,
                         "startColumn": 4,
-                        "startOffset": 1448,
-                        "endColumn": 98,
-                        "endOffset": 1542
+                        "startOffset": 1172,
+                        "endColumn": 106,
+                        "endOffset": 1274
                     }
                 }
             },
@@ -234,18 +234,18 @@
                 "to": {
                     "startLine": 14,
                     "startColumn": 4,
-                    "startOffset": 1326,
-                    "endColumn": 107,
-                    "endOffset": 1429
+                    "startOffset": 1279,
+                    "endColumn": 99,
+                    "endOffset": 1374
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 16,
+                        "startLine": 14,
                         "startColumn": 4,
-                        "startOffset": 1547,
-                        "endColumn": 107,
-                        "endOffset": 1650
+                        "startOffset": 1279,
+                        "endColumn": 99,
+                        "endOffset": 1374
                     }
                 }
             },
@@ -253,18 +253,18 @@
                 "to": {
                     "startLine": 15,
                     "startColumn": 4,
-                    "startOffset": 1434,
-                    "endColumn": 106,
-                    "endOffset": 1536
+                    "startOffset": 1379,
+                    "endColumn": 98,
+                    "endOffset": 1473
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 17,
+                        "startLine": 15,
                         "startColumn": 4,
-                        "startOffset": 1655,
-                        "endColumn": 106,
-                        "endOffset": 1757
+                        "startOffset": 1379,
+                        "endColumn": 98,
+                        "endOffset": 1473
                     }
                 }
             },
@@ -272,18 +272,18 @@
                 "to": {
                     "startLine": 16,
                     "startColumn": 4,
-                    "startOffset": 1541,
-                    "endColumn": 106,
-                    "endOffset": 1643
+                    "startOffset": 1478,
+                    "endColumn": 107,
+                    "endOffset": 1581
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 18,
+                        "startLine": 16,
                         "startColumn": 4,
-                        "startOffset": 1762,
-                        "endColumn": 106,
-                        "endOffset": 1864
+                        "startOffset": 1478,
+                        "endColumn": 107,
+                        "endOffset": 1581
                     }
                 }
             },
@@ -291,18 +291,18 @@
                 "to": {
                     "startLine": 17,
                     "startColumn": 4,
-                    "startOffset": 1648,
-                    "endColumn": 121,
-                    "endOffset": 1765
+                    "startOffset": 1586,
+                    "endColumn": 106,
+                    "endOffset": 1688
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 19,
+                        "startLine": 17,
                         "startColumn": 4,
-                        "startOffset": 1869,
-                        "endColumn": 121,
-                        "endOffset": 1986
+                        "startOffset": 1586,
+                        "endColumn": 106,
+                        "endOffset": 1688
                     }
                 }
             },
@@ -310,18 +310,18 @@
                 "to": {
                     "startLine": 18,
                     "startColumn": 4,
-                    "startOffset": 1770,
-                    "endColumn": 99,
-                    "endOffset": 1865
+                    "startOffset": 1693,
+                    "endColumn": 106,
+                    "endOffset": 1795
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
-                        "startLine": 20,
+                        "startLine": 18,
                         "startColumn": 4,
-                        "startOffset": 1991,
-                        "endColumn": 99,
-                        "endOffset": 2086
+                        "startOffset": 1693,
+                        "endColumn": 106,
+                        "endOffset": 1795
                     }
                 }
             },
@@ -329,18 +329,75 @@
                 "to": {
                     "startLine": 19,
                     "startColumn": 4,
-                    "startOffset": 1870,
-                    "endColumn": 100,
-                    "endOffset": 1966
+                    "startOffset": 1800,
+                    "endColumn": 121,
+                    "endOffset": 1917
                 },
                 "from": {
-                    "file": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-es/values-es.xml",
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
+                    "position": {
+                        "startLine": 19,
+                        "startColumn": 4,
+                        "startOffset": 1800,
+                        "endColumn": 121,
+                        "endOffset": 1917
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 20,
+                    "startColumn": 4,
+                    "startOffset": 1922,
+                    "endColumn": 99,
+                    "endOffset": 2017
+                },
+                "from": {
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
+                    "position": {
+                        "startLine": 20,
+                        "startColumn": 4,
+                        "startOffset": 1922,
+                        "endColumn": 99,
+                        "endOffset": 2017
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 21,
+                    "startColumn": 4,
+                    "startOffset": 2022,
+                    "endColumn": 81,
+                    "endOffset": 2099
+                },
+                "from": {
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
                     "position": {
                         "startLine": 21,
                         "startColumn": 4,
-                        "startOffset": 2091,
+                        "startOffset": 2022,
+                        "endColumn": 81,
+                        "endOffset": 2099
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 22,
+                    "startColumn": 4,
+                    "startOffset": 2104,
+                    "endColumn": 100,
+                    "endOffset": 2200
+                },
+                "from": {
+                    "file": "/home/buhalo/.android/build-cache/ddfbc1f2a3bcdc24b6db3d493191aaaedfd020af/output/res/values-es/values-es.xml",
+                    "position": {
+                        "startLine": 22,
+                        "startColumn": 4,
+                        "startOffset": 2104,
                         "endColumn": 100,
-                        "endOffset": 2187
+                        "endOffset": 2200
                     }
                 }
             }

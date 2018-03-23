@@ -1,10 +1,66 @@
 [
     {
-        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/ic_launcher.png",
-        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/andrr.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/andrr.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/left_btn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/left_btn.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/volume_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/volume_icon.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/yes_pair.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/yes_pair.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/tv_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/tv_icon.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/pause_btn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/pause_btn.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/no_pair.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/no_pair.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/power_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/power_icon.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/down_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/down_icon.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/play_btn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/play_btn.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/music_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/music_icon.png"
     },
     {
         "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/myapp.png",
         "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/myapp.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/right_btn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/right_btn.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/folder_icn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/folder_icn.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/up_icon.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/up_icon.png"
+    },
+    {
+        "merged": "/home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/res/merged/debug/mipmap-xxxhdpi/file_icn.png",
+        "source": "/home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/res/mipmap-xxxhdpi/file_icn.png"
     }
 ]

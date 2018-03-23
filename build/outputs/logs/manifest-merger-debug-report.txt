@@ -1,145 +1,357 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-70:12
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+MERGED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/kirill/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.0.2.aar/5103b67facfd5be9a18c067ef97c95d0/AndroidManifest.xml:2:1-11:12
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:17:1-31:12
+MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:17:1-30:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
 	package
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:3:5-40
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:3:5-40
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
 	android:versionName
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-	xmlns:android
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:11-69
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
 	android:versionCode
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:1-112:12
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:2:11-69
 uses-permission#android.permission.TRANSMIT_IR
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:5:5-70
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:5:5-70
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:5:22-67
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:5:22-67
 uses-permission#android.permission.INTERNET
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:6:5-67
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:6:5-67
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:6:22-64
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:6:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:7:5-79
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:7:5-79
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:7:22-76
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:7:22-76
 uses-permission#android.permission.ACCESS_WIFI_STATE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:8:5-76
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:8:5-76
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:8:22-73
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:8:22-73
 uses-permission#android.permission.CHANGE_WIFI_MULTICAST_STATE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:9:5-86
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:9:5-86
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:9:22-83
-uses-permission-sdk-23
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:10:5-11:38
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:9:22-83
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:10:5-80
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:10:22-77
+uses-permission#android.permission.WRITE_CALL_LOG
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:11:5-73
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:11:22-70
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:12:5-81
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:12:22-78
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:13:5-75
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:13:22-72
+uses-permission#android.permission.CALL_PHONE
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:14:5-69
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:14:22-66
+uses-permission#android.permission.SEND_SMS
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:15:5-66
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:15:22-64
+uses-permission#android.permission.RECEIVE_SMS
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:16:5-69
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:16:22-67
+uses-permission#android.permission.READ_CONTACTS
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:17:5-71
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:17:22-69
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:18:5-81
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:18:22-78
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:19:5-67
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:19:22-65
+uses-permission#android.permission.READ_SMS
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:20:5-66
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:20:22-64
+uses-permission#android.permission.ANSWER_PHONE_CALLS
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:21:5-76
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:21:22-74
+uses-permission#android.permission.READ_CALL_LOG
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:22:5-71
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:22:22-69
+uses-permission-sdk-23#string
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:23:5-24:38
 	android:maxSdkVersion
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:11:9-35
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:24:9-35
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:10:29-50
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:23:29-50
 uses-feature#android.hardware.ConsumerIrManager
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:12:5-71
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:25:5-71
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:12:19-68
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:25:19-68
 supports-screens
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:15:5-20:40
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:28:5-33:40
 	android:largeScreens
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:17:9-36
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:30:9-36
 	android:smallScreens
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:19:9-36
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:32:9-36
 	android:normalScreens
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:18:9-37
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:31:9-37
 	android:xlargeScreens
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:20:9-37
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:33:9-37
 	android:anyDensity
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:16:9-34
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:29:9-34
 application
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:23:5-68:19
-MERGED from [com.android.support:design:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/design/23.0.0/AndroidManifest.xml:22:5-20
-MERGED from [com.android.support:appcompat-v7:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/AndroidManifest.xml:22:5-20
-MERGED from [com.android.support:support-v4:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/AndroidManifest.xml:22:5-20
-MERGED from [com.android.support.constraint:constraint-layout:1.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support.constraint/constraint-layout/1.0.0/AndroidManifest.xml:9:5-20
-	android:label
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:26:9-41
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:36:5-110:19
+MERGED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/kirill/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.0.2.aar/5103b67facfd5be9a18c067ef97c95d0/AndroidManifest.xml:9:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/kirill/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.0.2.aar/5103b67facfd5be9a18c067ef97c95d0/AndroidManifest.xml:9:5-20
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:22:5-26:19
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:25:5-29:19
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:25:5-29:19
+MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:24:5-28:19
+MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:24:5-28:19
+	android:screenOrientation
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:43:9-45
 	android:supportsRtl
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:27:9-35
-	android:allowBackup
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:24:9-35
-	android:icon
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:25:9-37
-	android:theme
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:28:9-40
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:29:9-32
-activity#com.example.buhalo.lazyir.MainActivity
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:30:9-39:20
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:40:9-35
 	android:label
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:32:13-45
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:39:9-41
+	android:icon
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:38:9-37
+	android:allowBackup
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:37:9-36
 	android:theme
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:33:13-58
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:41:9-36
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:31:13-41
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:42:9-32
+activity#com.example.buhalo.lazyir.MainActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:44:9-53:20
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:46:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:47:13-40
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:45:13-41
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:34:13-38:29
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:48:13-52:29
 action#android.intent.action.MAIN
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:35:17-69
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:49:17-69
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:35:25-66
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:49:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:37:17-77
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:51:17-77
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:37:27-74
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:51:27-74
+activity#com.example.buhalo.lazyir.old.ShareActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:55:9-59:20
+	android:parentActivityName
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:56:13-55
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:57:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:58:13-40
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:55:19-52
+activity#com.example.buhalo.lazyir.modules.sendIr.IrActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:61:9-65:20
+	android:parentActivityName
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:62:13-55
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:63:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:64:13-40
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:61:19-60
+activity#com.example.buhalo.lazyir.modules.sendcommand.CommandActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:67:9-71:20
+	android:parentActivityName
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:68:13-55
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:69:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:70:13-40
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:67:19-70
+activity#com.example.buhalo.lazyir.modules.dbus.MediaRemoteActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:73:9-77:24
+	android:parentActivityName
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:74:13-55
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:75:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:76:13-56
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:73:19-67
+activity#com.example.buhalo.lazyir.modules.ModulesActivity
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:81:9-85:15
+	android:parentActivityName
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:82:13-55
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:83:13-45
+	android:theme
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:84:13-56
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:81:19-58
+receiver#com.example.buhalo.lazyir.service.BootListener
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:88:9-92:20
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:88:19-55
+intent-filter#android.intent.action.BOOT_COMPLETED
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:89:13-91:29
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:90:17-79
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:90:25-76
+receiver#com.example.buhalo.lazyir.service.NotifActionReceiver
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:93:9-65
+	android:name
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:93:19-62
 service#com.example.buhalo.lazyir.service.BackgroundService
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:41:9-61
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:96:9-97:39
+	android:exported
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:97:13-37
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:41:18-59
-receiver#com.example.buhalo.lazyir.service.NetworkChangeReceiver
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:44:9-49:20
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:96:18-59
+service#com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationListener
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:100:9-108:19
+	android:enabled
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:103:13-35
+	android:label
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:101:13-55
+	android:permission
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:102:13-87
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:44:19-64
-intent-filter#android.net.conn.CONNECTIVITY_CHANGE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:45:13-48:29
-action#android.net.conn.CONNECTIVITY_CHANGE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:46:17-79
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:100:18-95
+intent-filter#android.service.notification.NotificationListenerService
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:105:13-107:29
+action#android.service.notification.NotificationListenerService
+ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:106:17-99
 	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:46:25-76
-receiver#layout.IrWidg
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:53:9-61:20
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:53:19-47
-intent-filter#android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:54:13-56:29
-action#android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:55:17-84
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:55:25-81
-meta-data#android.appwidget.provider
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:58:13-60:56
-	android:resource
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:60:17-53
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:59:17-58
-activity#layout.IrWidgConfigureActivity
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:63:9-67:20
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:63:19-64
-intent-filter#android.appwidget.action.APPWIDGET_CONFIGURE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:64:13-66:29
-action#android.appwidget.action.APPWIDGET_CONFIGURE
-ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:65:17-87
-	android:name
-		ADDED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:65:25-84
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml:106:25-96
 uses-sdk
-INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
-MERGED from [com.android.support:design:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/design/23.0.0/AndroidManifest.xml:20:5-43
-MERGED from [com.android.support:appcompat-v7:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/AndroidManifest.xml:20:5-43
-MERGED from [com.android.support:support-v4:23.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/AndroidManifest.xml:20:5-43
-MERGED from [com.android.support.constraint:constraint-layout:1.0.0] /home/buhalo/AndroidStudioProjects/LazyIr/app/build/intermediates/exploded-aar/com.android.support.constraint/constraint-layout/1.0.0/AndroidManifest.xml:5:5-7:41
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+MERGED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:21:5-23:62
+MERGED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:21:5-23:62
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/kirill/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.0.2.aar/5103b67facfd5be9a18c067ef97c95d0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/kirill/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.0.2.aar/5103b67facfd5be9a18c067ef97c95d0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:21:5-23:58
+MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:20:5-22:41
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+	tools:overrideLibrary
+		ADDED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:23:9-59
 	android:targetSdkVersion
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
-		INJECTED from /home/buhalo/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		ADDED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+		INJECTED from /media/kirill/sharedDrive/Programming/Projects/AndroidStudioProjects/LazyIr/app/src/main/AndroidManifest.xml
+meta-data#android.support.VERSION
+ADDED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:appcompat-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/18a0ed808534682e47cb3679b93dcca6/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:animated-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-26.1.0.aar/1165a3c3efc3bc60a0c245ea18c5d25f/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/96168c45274b2ed9f16d3ee98c3c640a/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:recyclerview-v7:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-26.1.0.aar/27dba82b44c46b6551fcae8d93610bfd/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:transition:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/transition-26.1.0.aar/1406a54cdd3e954379e8b66ad3cfd988/AndroidManifest.xml:23:9-25:38
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-v4:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/a1113bfef3d6bd22f7556c71097eeba8/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-media-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.1.0.aar/80d3917dcca89aa8f9d077e888625fbd/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-fragment:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-fragment-26.1.0.aar/261e741eabca4f2fe734245147a609b4/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-core-utils:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-utils-26.1.0.aar/d98f28494d41c4572951050dca94973c/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-core-ui:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-core-ui-26.1.0.aar/08335656893fc89f8915eb0fc135c03a/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:26:9-28:38
+MERGED from [com.android.support:support-compat:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/48603aad82ee96316f798718c8acc900/AndroidManifest.xml:26:9-28:38
+	android:value
+		ADDED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:28:13-35
+	android:name
+		ADDED from [com.android.support:design:26.1.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/design-26.1.0.aar/db8a5151bf2f52ae9d1688b03ff7a10a/AndroidManifest.xml:27:13-51
+meta-data#android.arch.lifecycle.VERSION
+ADDED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:25:9-27:47
+	android:value
+		ADDED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:27:13-44
+	android:name
+		ADDED from [android.arch.lifecycle:runtime:1.0.0] /home/kirill/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/8fe8cf0c767d4a3a9d9c7b95566be93d/AndroidManifest.xml:26:13-58

@@ -36,10 +36,7 @@ public class SmsModule extends Module {
     public void endWork() {
 
     }
- // todo create send_mms for sending pictures
     private void send_sms(Sms sms) {
-        String error = null;
-        System.out.println(sms);
         try {
             String number = getPhoneNumber(sms.getName(),context.getApplicationContext());
             if(number.equals("Unsaved")) {

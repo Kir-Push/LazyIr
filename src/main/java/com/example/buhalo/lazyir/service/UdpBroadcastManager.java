@@ -105,12 +105,12 @@ public class UdpBroadcastManager  {
     void startUdpListener(final Context context,int port)
     {
                 BackgroundService.submitNewTask(()->{
+                    if (isListening() || server != null) {
+                        stopUdpListener();
+                        Log.d("Udp", "listening already working");
+                    }
                     lock.lock();
                     try {
-                            if (isListening() || server != null) {
-                                stopUdpListener();
-                                Log.d("Udp", "listening already working");
-                            }
                             if (!checkWifiOnAndConnected(context)) return;
                             Log.d("Udp", "start listening");
                             server = new DatagramSocket(port);

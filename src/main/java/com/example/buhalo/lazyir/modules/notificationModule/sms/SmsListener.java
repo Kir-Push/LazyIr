@@ -65,7 +65,6 @@ public class SmsListener extends BroadcastReceiver {
         NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(SmsModule.SMS_TYPE,SmsModule.RECEIVE);
         np.setObject(NetworkPackage.N_OBJECT,sms);
         String message = np.getMessage();
-        System.out.println("sending sms: " + sms);
         if(!BackgroundService.hasActualConnection()){
             BackgroundService.getExecutorService().submit(()->{
                 try {
