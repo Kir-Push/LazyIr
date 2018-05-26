@@ -27,6 +27,9 @@ import static com.example.buhalo.lazyir.modules.notificationModule.notifications
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengerMessageCheckAndSend;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.messengersMessage;
 import static com.example.buhalo.lazyir.modules.notificationModule.notifications.NotificationUtils.smsMessage;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNotification.DELETE_NOTOFICATION;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNotification.RECEIVE_NOTIFICATION;
+import static com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNotification.SHOW_NOTIFICATION;
 import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
 
 /**
@@ -35,9 +38,6 @@ import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConne
 
 public class NotificationListener extends NotificationListenerService {
     private static NotificationListener notif;
-    public static final String SHOW_NOTIFICATION = "ShowNotification";
-    public static final String RECEIVE_NOTIFICATION = "receiveNotification";
-    public static final String DELETE_NOTOFICATION = "deleteNotification";
     public static final String SMS_TYPE = "com.android.mms";
 
     //---------------------------------------------

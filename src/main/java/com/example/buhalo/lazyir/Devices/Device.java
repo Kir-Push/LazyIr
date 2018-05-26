@@ -116,6 +116,7 @@ public class Device {
             thread.ping();
     }
 
+
     public void closeConnection()
     {
         thread.closeConnection();
@@ -199,5 +200,13 @@ public class Device {
 
     public void setEnabledModulesConfig(List<ModuleSetting> enabledModulesConfig) {
         this.enabledModulesConfig = enabledModulesConfig;
+    }
+
+    public InetAddress getIp() {
+        return ip;
+    }
+
+    public void setIp(InetAddress ip) {
+        this.ip = ip;
     }
 }

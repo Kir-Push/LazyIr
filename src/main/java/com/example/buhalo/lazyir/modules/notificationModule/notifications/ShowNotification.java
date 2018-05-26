@@ -22,9 +22,10 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 public class ShowNotification extends Module {
     public static final String ALL_NOTIFICATIONS = "ALL NOTIFS";
     public static final String SHOW_NOTIFICATION = "ShowNotification";
-    public static final String RECEIVE_NOTIFICATION = "deleteNotification";
+    public static final String RECEIVE_NOTIFICATION = "receiveNotification";
     public static final String REMOVE_NOTIFICATION = "removeNotification";
     public static final String NOTIFICATION_ID = "NOTIFICATION_ID";
+    public static final String DELETE_NOTOFICATION = "deleteNotification";
 
     @Override
     public void execute(NetworkPackage np) {
