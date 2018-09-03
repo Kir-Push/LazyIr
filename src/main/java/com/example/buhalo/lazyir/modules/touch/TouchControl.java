@@ -1,38 +1,53 @@
 package com.example.buhalo.lazyir.modules.touch;
 
 
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
+
+import android.content.Context;
+
+import com.example.buhalo.lazyir.api.MessageFactory;
+import com.example.buhalo.lazyir.api.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
 
-/**
- * Created by buhalo on 21.08.17.
- */
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import javax.inject.Inject;
+
+
 public class TouchControl extends Module {
-
-    private static final String MOVE = "move";
-    private static final String CLICK = "click";
-    private static final String DCLICK = "dclick";
-    private static final String RCLICK = "rclick";
-    private static final String MOUSEUP = "mup";
-    private static final String MOUSEDOWN = "mdown";
-    private static final String MOUSECLICK = "mclick";
-    private static final String LONGCLICK = "lclick";
-    private static final String LONGRELEASE = "lrelease";
-
-
-    public TouchControl() throws Exception {
-
+    public enum api{
+        MOVE,
+        CLICK,
+        DCLICK,
+        RCLICK,
+        MOUSEUP,
+        MOUSEDOWN,
+        MOUSECLICK,
+        LONGCLICK,
+        LONGRELEASE
     }
 
+    @Inject
+    public TouchControl(MessageFactory messageFactory, Context context) {
+        super(messageFactory, context);
+        EventBus.getDefault().register(this);
+    }
 
     public void execute(NetworkPackage np) {
-
+        //server doesn't send anything
     }
-
-
 
     @Override
     public void endWork() {
+        EventBus.getDefault().unregister(this);
+    }
 
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void sendToServer(TouchControlDto dto){
+        if(dto.getId().equals(device.getId())) {
+            String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, dto);
+            sendMsg(message);
+        }
     }
 }

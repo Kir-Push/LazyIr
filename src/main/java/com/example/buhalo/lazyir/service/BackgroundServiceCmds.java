@@ -1,26 +1,19 @@
 package com.example.buhalo.lazyir.service;
 
-/**
- * Created by buhalo on 15.11.17.
- */
 
 public enum BackgroundServiceCmds {
-    startUdpListener,
-    stopUdpListener,
-    stopTcpListener,
-    startListeningTcp,
-    startSendPeriodicallyUdp,
-    stopSendingPeriodicallyUdp,
-    closeAllTcpConnections,
-    stopSftpServer,
-    removeClipBoardListener,
-    startClipboardListener,
-    unregisterBatteryRecever,
-    registerBatteryReceiver,
-    onZeroConnections,
-    submitTask,
-    sendToAll,
-    destroy,
-    startTasks,
-    cacheConnect
+    START_UDP_LISTENER,
+    STOP_UDP_LISTENER,
+    START_SEND_PERIODICALLY_UDP,
+    STOP_SENDING_PERIODICALLY_UDP,
+    CLOSE_ALL_TCP_CONNECTIONS,
+    SUBMIT_TASK,
+    SEND_TO_ALL,
+    DESTROY,
+    START_TASKS,
+    CACHE_CONNECT,
+    REGISTER_BROADCASTS,
+    ON_DEVICE_DISCONNECTED,
+    REMOVE_CLIP_BOARD_LISTENER,
+    START_CLIPBOARD_LISTENER
 }

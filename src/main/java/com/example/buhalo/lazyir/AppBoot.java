@@ -1,41 +1,82 @@
 package com.example.buhalo.lazyir;
 
+import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
+import android.app.Fragment;
+import android.app.Service;
+import android.content.BroadcastReceiver;
 
-
-import com.example.buhalo.lazyir.service.BackgroundService;
+import com.example.buhalo.lazyir.di.ActivityComponent;
+import com.example.buhalo.lazyir.di.AppComponent;
+import com.example.buhalo.lazyir.di.DaggerAppComponent;
+import com.example.buhalo.lazyir.di.ServiceComponent;
 import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
-import com.example.buhalo.lazyir.service.BootListener;
+import com.example.buhalo.lazyir.service.BackgroundUtil;
 
-import static com.example.buhalo.lazyir.service.WifiListener.checkWifiOnAndConnected;
+import javax.inject.Inject;
 
-/**
- * Created by buhalo on 21.02.17.
- */
+import dagger.android.AndroidInjector;;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
+import dagger.android.HasBroadcastReceiverInjector;
+import dagger.android.HasFragmentInjector;
+import dagger.android.HasServiceInjector;
+import lombok.Getter;
 
-public class AppBoot extends Application {
+import static com.example.buhalo.lazyir.service.BackgroundUtil.checkWifiOnAndConnected;
 
-    final String LOG_TAG = "AppBoot";
+public class AppBoot extends Application implements HasActivityInjector, HasServiceInjector,HasBroadcastReceiverInjector,HasFragmentInjector{
 
+    @Inject
+    public DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
+    @Inject
+    public DispatchingAndroidInjector<Service> dispatchingServiceInjector;
+    @Inject
+    public DispatchingAndroidInjector<BroadcastReceiver> dispatchingBroadcastInector;
+    @Inject
+    public DispatchingAndroidInjector<Fragment> dispatchingFragmentInjector;
 
-    boolean bound = false;
+    @Getter
+    private ActivityComponent activityComponent;
+    @Getter
+    private ServiceComponent serviceComponent;
+    @Getter
+    private AppComponent appComponent;
+
 
     @Override
     public void onCreate() {
-
         super.onCreate();
-        Context applicationContext = getApplicationContext();
-        BootListener.registerBroadcasts(applicationContext);
-
-        if(BackgroundService.getAppContext() == null)
-            BackgroundService.setAppContext(applicationContext);
-       if(checkWifiOnAndConnected(this))
-           BackgroundService.addCommandToQueue(BackgroundServiceCmds.startTasks);
-
-    }
-
-    private void testClass() {
+        appComponent = DaggerAppComponent.builder().application(this).build();
+        serviceComponent = appComponent.getServiceComponent();
+        activityComponent = serviceComponent.getActivityComponent();
+        activityComponent.inject(this);
+        BackgroundUtil.setAppComponent(appComponent);
+       if(checkWifiOnAndConnected(this)) {
+           BackgroundUtil.addCommand(BackgroundServiceCmds.START_TASKS,this);
+           BackgroundUtil.addCommand(BackgroundServiceCmds.REGISTER_BROADCASTS,this);
+       }
 
     }
+
+    @Override
+    public DispatchingAndroidInjector<Activity> activityInjector() {
+        return dispatchingActivityInjector;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Service> serviceInjector() {
+        return dispatchingServiceInjector;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<BroadcastReceiver> broadcastReceiverInjector(){
+        return dispatchingBroadcastInector;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> fragmentInjector(){
+        return dispatchingFragmentInjector;
+    }
+
 }

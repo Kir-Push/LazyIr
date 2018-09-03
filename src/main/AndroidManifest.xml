@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.buhalo.lazyir">
 
-    <uses-permission android:name="android.permission.TRANSMIT_IR" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -22,7 +21,6 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     <uses-permission-sdk-23 android:name="string"
         android:maxSdkVersion="23" />
-    <uses-feature android:name="android.hardware.ConsumerIrManager" />
 
 
     <supports-screens
@@ -42,7 +40,7 @@
         android:name=".AppBoot"
         android:screenOrientation="portrait">
         <activity
-            android:name=".MainActivity"
+            android:name=".view.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/baba">
             <intent-filter>
@@ -52,55 +50,56 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".old.ShareActivity"
-            android:parentActivityName=".MainActivity"
+
+        <activity android:name=".modules.shareScreen.ScreenShareActivity"
+            android:parentActivityName=".view.activity.MainActivity"
+            android:label="ScreenShare"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+        <activity android:name=".view.activity.TouchActivity"
+            android:parentActivityName=".view.activity.MainActivity"
+            android:label="TouchControl"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+        <activity android:name=".view.activity.CommandActivity"
+            android:parentActivityName=".view.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/baba">
         </activity>
 
-        <activity android:name=".modules.sendIr.IrActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/baba">
-        </activity>
-
-        <activity android:name=".modules.sendcommand.CommandActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/baba">
-        </activity>
-
-        <activity android:name=".modules.dbus.MediaRemoteActivity"
-            android:parentActivityName=".MainActivity"
+        <activity android:name=".view.activity.MediaRemoteActivity"
+            android:parentActivityName=".view.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             </activity>
 
 
          <!--attention on theme,if some error, see there-->
-        <activity android:name=".modules.ModulesActivity"
-            android:parentActivityName=".MainActivity"
+        <activity android:name=".view.activity.ModulesActivity"
+            android:parentActivityName=".view.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             />
 
 
-        <receiver android:name=".service.BootListener">
+        <receiver android:name=".service.receivers.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".service.NotifActionReceiver" />
 
 
         <service android:name=".service.BackgroundService"
             android:exported="false"/>
         <!--android:enabled="true"-->
 
-        <service android:name=".modules.notificationModule.notifications.NotificationListener"
+        <service android:name=".service.listeners.NotificationListener"
             android:label="@string/NotificationListen"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="false"> <!--//todo think about it,maybe need to be false-->
 
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />

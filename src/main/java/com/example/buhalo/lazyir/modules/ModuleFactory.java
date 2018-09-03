@@ -1,173 +1,132 @@
 package com.example.buhalo.lazyir.modules;
 
-import android.content.Context;
 import android.util.Log;
 
-import com.example.buhalo.lazyir.DbClasses.DBHelper;
-import com.example.buhalo.lazyir.Devices.Device;
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.device.Device;
+import com.example.buhalo.lazyir.di.ModuleComponent;
 import com.example.buhalo.lazyir.modules.battery.Battery;
+import com.example.buhalo.lazyir.modules.battery.BatteryDto;
+import com.example.buhalo.lazyir.modules.clipboard.ClipBoardDto;
+import com.example.buhalo.lazyir.modules.dbus.MprisDto;
 import com.example.buhalo.lazyir.modules.memory.Memory;
-import com.example.buhalo.lazyir.modules.notificationModule.call.CallModule;
+import com.example.buhalo.lazyir.modules.memory.MemoryDto;
+import com.example.buhalo.lazyir.modules.notification.call.CallModule;
+import com.example.buhalo.lazyir.modules.notification.call.CallModuleDto;
+import com.example.buhalo.lazyir.modules.notification.messengers.MessengersDto;
+import com.example.buhalo.lazyir.modules.notification.notifications.ShowNotificationDto;
+import com.example.buhalo.lazyir.modules.notification.reminder.ReminderDto;
+import com.example.buhalo.lazyir.modules.notification.sms.SmsModuleDto;
 import com.example.buhalo.lazyir.modules.ping.Ping;
-import com.example.buhalo.lazyir.modules.reminder.Reminder;
+import com.example.buhalo.lazyir.modules.notification.reminder.Reminder;
+import com.example.buhalo.lazyir.modules.ping.PingDto;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
-import com.example.buhalo.lazyir.modules.sendIr.IrModule;
-import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
+import com.example.buhalo.lazyir.modules.clipboard.ClipBoard;
 import com.example.buhalo.lazyir.modules.dbus.Mpris;
-import com.example.buhalo.lazyir.modules.notificationModule.messengers.Messengers;
-import com.example.buhalo.lazyir.modules.notificationModule.notifications.ShowNotification;
-import com.example.buhalo.lazyir.modules.notificationModule.sms.SmsModule;
-import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
-import com.example.buhalo.lazyir.modules.synchro.SynchroModule;
+import com.example.buhalo.lazyir.modules.notification.messengers.Messengers;
+import com.example.buhalo.lazyir.modules.notification.notifications.ShowNotification;
+import com.example.buhalo.lazyir.modules.notification.sms.SmsModule;
+import com.example.buhalo.lazyir.modules.sendcommand.SendCommandDto;
+import com.example.buhalo.lazyir.modules.share.ShareModule;
+import com.example.buhalo.lazyir.modules.share.ShareModuleDto;
 import com.example.buhalo.lazyir.modules.touch.TouchControl;
+import com.example.buhalo.lazyir.modules.touch.TouchControlDto;
+import com.example.buhalo.lazyir.service.BackgroundUtil;
+import com.example.buhalo.lazyir.utils.entity.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
-/**
- * Created by buhalo on 05.03.17.
- */
-// util class for instantiating and controlling of modules. Enabling,Disabling,Getting list of enabled.
+
+import lombok.Getter;
+import lombok.Synchronized;
+
+
 public class ModuleFactory {
+    private static final String TAG = "ModuleFactory";
 
+    @Getter
+    private static HashMap<String, Pair<Class,Class>> registeredModules = new HashMap<>();
+    private ModuleComponent moduleComponent;
+    private Method[] methods;
 
-    private static Lock lockFactory = new ReentrantLock();
-    // container of all refistedModulesclasses
-    private static List<Class> registeredModules;
-    private static boolean myEnabledModulesUpdate;
-    private static HashSet<String> myEnabledModules;
-
-    private static Module instantiateModule(Device dv, Class registeredModule)
-    {
-        lockFactory.lock();
-            try {
-                if (registeredModules == null) {
-                    registerModulesInit();
-                }
-                Module module = null;
-                try {
-                    module = (Module) registeredModule.newInstance();
-                    module.setDevice(dv);
-                    module.setContext(dv.getContext());
-                } catch (IllegalAccessException | InstantiationException e) {
-                    Log.e("ModuleFactory", e.toString());
-
-                }
-                return module;
-            } finally {
-                lockFactory.unlock();
-            }
+    public ModuleFactory() {
+        registerModulesInit();
     }
 
-    //method return fully instanced modules, ready to work.
-    public static  HashSet<String> getMyEnabledModules(Context context)
-    {
-        lockFactory.lock();
+    @Synchronized
+    private Module instantiateModule(Device dv, Class registeredModule) {
         try {
-        if(!myEnabledModulesUpdate && myEnabledModules != null) {
-            return myEnabledModules;
-        }
-        String myId = NetworkPackage.getMyId();
-        HashSet<String> result;
-            // check if Db contain some info about device modules, if no instanciate by default value's(all modules). It all in DBhelper class.
-            List<String>  enabledModulesNames = DBHelper.getInstance(context).checkAndSetDefaultIfNoInfo(myId);
-
-            // getting list of enabledModules names from Database;
-            if(enabledModulesNames == null || enabledModulesNames.size() == 0)
-            enabledModulesNames = DBHelper.getInstance(context).getEnabledModules(myId);
-            result = new HashSet<>(enabledModulesNames);
-            myEnabledModulesUpdate = false;
-            myEnabledModules = result;
-            return result;
-        }finally {
-            lockFactory.unlock();
-        }
-    }
-    //enable or disable module. Change value on Db and call method
-    // if enableOrDisable true, then enable and instanciate module, otherwise disable
-    public static void changeModuleStatus(String moduleName,Context context,boolean enableOrDisable)
-    {
-        lockFactory.lock();
-        try{
-            DBHelper.getInstance(context).changeModuleStatus(NetworkPackage.getMyId(),moduleName,enableOrDisable);
-            myEnabledModulesUpdate = true;
-        }finally {
-            lockFactory.unlock();
-        }
-    }
-
-
-    private static void registerModulesInit() {
-        registeredModules = new ArrayList<>();
-        registeredModules.add(SendCommand.class);
-        registeredModules.add(IrModule.class);
-        registeredModules.add(ShareModule.class);
-        registeredModules.add(SmsModule.class);
-        registeredModules.add(Mpris.class);
-        registeredModules.add(ClipBoard.class);
-        registeredModules.add(Messengers.class);
-        registeredModules.add(ShowNotification.class);
-        registeredModules.add(SynchroModule.class);
-        registeredModules.add(CallModule.class);
-        registeredModules.add(Battery.class);
-        registeredModules.add(TouchControl.class);
-        registeredModules.add(Reminder.class);
-        registeredModules.add(Memory.class);
-        registeredModules.add(Ping.class);
-    }
-
-    public static Module instantiateModuleByName(Device dv,String name)
-    {
-        if(registeredModules == null)
-        {
-            registerModulesInit();
-        }
-        for (Class registeredModule : registeredModules) {
-            if(registeredModule.getSimpleName().equals(name))
-            {
-                return instantiateModule(dv,registeredModule);
+            if(moduleComponent == null){
+                moduleComponent = BackgroundUtil.getAppComponent().getModuleComponent();
             }
+            if(registeredModules.isEmpty()){
+                registerModulesInit();
+            }
+            Method method = getMethod(registeredModule);
+            if(method == null) {
+                Log.e(TAG,"NullPointerException Such method doesn't exist  " + registeredModule.getSimpleName());
+                throw new NullPointerException("Such method doesn't exist  " + registeredModule.getSimpleName());
+            }
+            method.setAccessible(true);
+            Module module =(Module) method.invoke(moduleComponent);
+            module.setDevice(dv);
+            return module;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            Log.e(TAG,"error in instantiateModule - " + dv.getId() + " " + registeredModule,e);
         }
         return null;
-
     }
 
-    public static List<Class> getRegisteredModules() {
-        if(registeredModules == null)
-        {
-            registerModulesInit();
+
+    private Method getMethod(Class registeredModule) {
+        if (methods == null) {
+            methods = moduleComponent.getClass().getDeclaredMethods();
         }
-        return registeredModules;
+        Method method = null;
+        for (Method mt : methods) {
+            if(mt.getName().equals("provide"+registeredModule.getSimpleName())){
+                method = mt;
+                break;
+            }
+        }
+        return method;
     }
 
-    public static void setRegisteredModules(List<Class> registeredModules) {
-        ModuleFactory.registeredModules = registeredModules;
+    private void registerModulesInit() {
+        if(registeredModules.isEmpty()) {
+            registeredModules.put("SendCommand",new Pair<>(SendCommand.class, SendCommandDto.class));
+            registeredModules.put("ShareModule",new Pair<>(ShareModule.class, ShareModuleDto.class));
+            registeredModules.put("ShowNotification",new Pair<>(ShowNotification.class, ShowNotificationDto.class));
+            registeredModules.put("SmsModule",new Pair<>(SmsModule.class, SmsModuleDto.class));
+            registeredModules.put("Battery",new Pair<>(Battery.class, BatteryDto.class));
+            registeredModules.put("Mpris",new Pair<>(Mpris.class, MprisDto.class));
+            registeredModules.put("ClipBoard",new Pair<>(ClipBoard.class, ClipBoardDto.class));
+            registeredModules.put("Messengers",new Pair<>(Messengers.class, MessengersDto.class));
+            registeredModules.put("TouchControl",new Pair<>(TouchControl.class, TouchControlDto.class));
+            registeredModules.put("CallModule",new Pair<>(CallModule.class, CallModuleDto.class));
+            registeredModules.put("Reminder",new Pair<>(Reminder.class, ReminderDto.class));
+            registeredModules.put("Memory",new Pair<>(Memory.class, MemoryDto.class));
+            registeredModules.put("Ping",new Pair<>(Ping.class, PingDto.class));
+        }
     }
 
-    // method getting all registered modules, get all enabled modules for device, after that iterate over all modules and check if enabledhashMap contain it,
-    // if no - add to resultList with false status. After that iterate over enabledModules and add all to resultList.
-    // use Module wrapper which is simple class with string name,dv id - (needed in internal logic) and bool status (enabled:disabled);
-    // alghorithm not efficient, but number of modules very small - around 10, maximum 15 items,
-    // it's not very bad for that. alghorithm has O(2n) difficulty.
-    public static List<ModulesWrap> getModulesNamesWithStatus(Context context)
-    {
-        //to
-        List<ModulesWrap> result = new ArrayList<>();
-        HashSet<String> enabledModules = getMyEnabledModules(context);
-        List<Class> registeredModules = getRegisteredModules();
-        for (Class registeredModule : registeredModules) {
-            if(!enabledModules.contains(registeredModule.getSimpleName()))
-            result.add(new ModulesWrap(registeredModule.getSimpleName(),false, NetworkPackage.getMyId()));
-        }
-        for (String s : enabledModules) {
-            result.add(new ModulesWrap(s,true,NetworkPackage.getMyId()));
-        }
 
-        return result;
+    public Module instantiateModuleByName(Device dv,String name) {
+        Pair<Class, Class> entry = registeredModules.get(name);
+        if(entry == null){
+            return null;
+        }
+        Class moduleClass = entry.getLeft();
+        return instantiateModule(dv, moduleClass);
+    }
+
+    public Class getModuleDto(String type){
+        Pair<Class, Class> pair = registeredModules.get(type);
+        if(pair == null){
+            return null;
+        }
+        return pair.getRight();
     }
 
 }

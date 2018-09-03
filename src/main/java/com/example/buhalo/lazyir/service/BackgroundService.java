@@ -1,5 +1,6 @@
 package com.example.buhalo.lazyir.service;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -14,31 +15,32 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.os.Process;
-import android.widget.Toast;
 
-import com.example.buhalo.lazyir.DbClasses.DBHelper;
-import com.example.buhalo.lazyir.Devices.Device;
-import com.example.buhalo.lazyir.Devices.ModuleSetting;
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.MainActivity;
+import com.annimon.stream.Stream;
+import com.example.buhalo.lazyir.api.MessageFactory;
+import com.example.buhalo.lazyir.bus.events.MainActivityCommand;
+import com.example.buhalo.lazyir.db.DBHelper;
+import com.example.buhalo.lazyir.device.Device;
+import com.example.buhalo.lazyir.device.ModuleSetting;
+import com.example.buhalo.lazyir.modules.clipboard.ClipBoard;
+import com.example.buhalo.lazyir.service.receivers.CallReceiver;
+import com.example.buhalo.lazyir.service.receivers.NotifActionReceiver;
+import com.example.buhalo.lazyir.service.receivers.SmsListener;
+import com.example.buhalo.lazyir.service.network.tcp.TcpConnectionManager;
+import com.example.buhalo.lazyir.service.network.udp.UdpBroadcastManager;
+import com.example.buhalo.lazyir.service.receivers.WifiReceiver;
+import com.example.buhalo.lazyir.service.settings.SettingService;
+import com.example.buhalo.lazyir.view.UiCmds;
 import com.example.buhalo.lazyir.R;
-import com.example.buhalo.lazyir.modules.ModuleFactory;
-import com.example.buhalo.lazyir.modules.battery.BatteryBroadcastReveiver;
-import com.example.buhalo.lazyir.modules.clipBoard.ClipBoard;
-import com.example.buhalo.lazyir.modules.shareManager.ShareModule;
+import com.example.buhalo.lazyir.service.receivers.BatteryBroadcastReceiver;
 import com.example.buhalo.lazyir.utils.ExtScheduledThreadPoolExecutor;
 
-import org.apache.mina.util.ConcurrentHashSet;
+import org.greenrobot.eventbus.EventBus;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -47,120 +49,100 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_PAIR_RESULT;
-import static com.example.buhalo.lazyir.service.TcpConnectionManager.TCP_UNPAIR;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 
 public class BackgroundService extends Service {
-
-    private Looper mServiceLooper;
-    private ServiceHandler mServiceHandler;
-    /**
-     * ThreadPool's for basic tasks and short timer tasks.
-     */
-    private static  ExecutorService executorService = Executors.newCachedThreadPool();
-    private static  ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
-    private static ConcurrentLinkedQueue<Runnable> takQueue = new ConcurrentLinkedQueue<>();
-    private static Set<String> activeConnecting = new ConcurrentHashSet<>();
-    private TcpConnectionManager tcp;
-    private UdpBroadcastManager udp;
-    private static SettingService settingService;
-
-    private static int port = 0;
+    public enum api{
+        CMD,
+        TASK,
+        SEND_TO_ALL,
+        SEND_TO_DEVICE,
+        ARGS,
+        MESSAGE,
+        CACHE_ID,
+        DEVICE_ID
+    }
 
     // for android 8 notification
-    public static final int NotifId = 454352354;
+    public static final int NOTIF_ID = 454352354;
+    private static final String NOTIFICATION_CHANNEL_ID_SERVICE = "com.lazyIr.service";
 
-    private static BatteryBroadcastReveiver mReceiver;
-    private boolean batteryRegistered;
+    @Inject @Setter TcpConnectionManager tcp;
+    @Inject @Setter UdpBroadcastManager udp;
+    @Inject @Setter SettingService settingService;
+    @Inject @Setter DBHelper dbHelper;
+    @Inject @Setter MessageFactory messageFactory;
 
-    // If a Context object is needed, call getApplicationContext() here.
-    private static Lock lock = new ReentrantLock();
-
-
-    private static Context appContext = getAppContext();
-    private static volatile boolean started;
-    private static volatile boolean inited;
-
+    private ServiceHandler mServiceHandler;
+    private ExecutorService executorService = Executors.newCachedThreadPool();
+    @Getter(value = AccessLevel.PACKAGE)
+    private static ScheduledThreadPoolExecutor timerService = new ExtScheduledThreadPoolExecutor(5);
+    private static ConcurrentLinkedQueue<Runnable> taskQueue = new ConcurrentLinkedQueue<>();
     private static ConcurrentHashMap<String,String> messagesCache = new ConcurrentHashMap<>(); // to avoid (android.os.TransactionTooLargeException: data parcel size 3563360 bytes)
+    @Getter(value = AccessLevel.PACKAGE)
+    private static final ConcurrentHashMap<String, Device> connectedDevices = new ConcurrentHashMap<>();
+    @Getter(value = AccessLevel.PACKAGE)
+    private static ConcurrentHashMap<String, ModuleSetting> myEnabledModules = new ConcurrentHashMap<>();
 
-    public static SettingService getSettingManager() {
-        lock.lock();
-        try {
-            if (settingService == null)
-                settingService = new SettingService();
-            return settingService;
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    public static boolean checkInActivelyConnectingAndSetIfNo(InetAddress address, int port, String id) {
-        String adr = address.toString() + String.valueOf(port)+id;
-        boolean contains = activeConnecting.contains(adr);
-        if(!contains)
-            activeConnecting.add(adr);
-        return contains;
-    }
-
-    public static void removeFromActiveConnecting(InetAddress address, int port,String id){
-        activeConnecting.remove(address.toString()+String.valueOf(port)+id);
-    }
-
-
-    private final class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
-            super(looper);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            // Normally we would do some work here, like download a file.
-            // For our sample, we just sleep for 5 seconds.
-            if(!inited)
-                initConfig(getApplicationContext());
-            if(msg != null && msg.obj != null)
-                onHandleWork((Intent) msg.obj);
-            // Stop the service using the startId, so that we don't stop
-            // the service in the middle of handling another job
-         //   stopSelf(msg.arg1);
-        }
-    }
-
-
-
-    public BackgroundService() {
-        super();
-        tcp = TcpConnectionManager.getInstance();
-        udp = UdpBroadcastManager.getInstance();
-    }
+    @Getter(value = AccessLevel.PRIVATE) @Setter(value = AccessLevel.PRIVATE)private boolean registered;
+    @Getter(value = AccessLevel.PRIVATE) @Setter(value = AccessLevel.PRIVATE) private boolean started;
+    @Getter(value = AccessLevel.PRIVATE) @Setter(value = AccessLevel.PRIVATE) private boolean inited;
 
     @Override
     public void onCreate() {
+        AndroidInjection.inject(this);
         super.onCreate();
+
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-          //  startForeground(int, android.app.Notification)
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            android.support.v4.app.NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+            initChannel();
+            android.support.v4.app.NotificationCompat.Builder builder = new NotificationCompat.Builder(this,NOTIFICATION_CHANNEL_ID_SERVICE)
                     .setSmallIcon(R.mipmap.power_icon)
                     .setContentTitle("Background LazyIr")
                     .setContentText("Sorry android 8 require it");
-            if(nm != null)
-            nm.notify(NotifId,builder.build());
+            startForeground(NOTIF_ID,builder.build());
         }
-
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
         // main thread, which we don't want to block.  We also make it
         // background priority so CPU-intensive work will not disrupt our UI.
-        HandlerThread thread = new HandlerThread("ServiceStartArguments",
+        HandlerThread thread = new HandlerThread("BackgroundHandlerThread",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         // Get the HandlerThread's Looper and use it for our Handler
-        mServiceLooper = thread.getLooper();
+        Looper mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
+    }
+
+    /**
+     * When service destroyed, stop all network operation's
+     * and all running threads.
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        setInited(false);
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    public void initChannel(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if(nm != null) {
+                nm.createNotificationChannel(new NotificationChannel(NOTIFICATION_CHANNEL_ID_SERVICE, "LazyIr service", NotificationManager.IMPORTANCE_LOW));
+            }
+        }
     }
 
     @Override
@@ -172,81 +154,56 @@ public class BackgroundService extends Service {
         return START_STICKY;
     }
 
-     private void initConfig(Context context){
-        if(appContext == null)
-        appContext = context.getApplicationContext();
-        // initialize and setting executors
-         if(timerService == null)
-             timerService = new ExtScheduledThreadPoolExecutor(5);
-         if(executorService == null)
-             executorService = Executors.newCachedThreadPool();
-        timerService.setRemoveOnCancelPolicy(true);
-        timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
-        timerService.allowCoreThreadTimeOut(true);
+    private final class ServiceHandler extends Handler {
+        ServiceHandler(Looper looper) {
+            super(looper);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            if(!isInited()) {
+                initConfig();
+            }
+            if(msg != null && msg.obj != null) {
+                onHandleWork((Intent) msg.obj);
+            }
+        }
 
-        ((ThreadPoolExecutor)executorService).setKeepAliveTime(600,TimeUnit.SECONDS);
-        ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
-        inited = true;
+        private void initConfig(){
+            // initialize and setting executors
+            timerService.setRemoveOnCancelPolicy(true);
+            timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
+            timerService.allowCoreThreadTimeOut(true);
+            ((ThreadPoolExecutor)executorService).setKeepAliveTime(10,TimeUnit.SECONDS);
+            ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
+            initEnabedModules();
+            setInited(true);
+        }
+
+        private void initEnabedModules(){
+            List<String>  enabledModules = dbHelper.checkAndSetDefaultIfNoInfo(BackgroundUtil.getMyId());
+            Stream.of(enabledModules).forEach(s -> myEnabledModules.put(s,new ModuleSetting(s,true, Collections.emptyList(),true)));
+        }
     }
 
-    private void initConfig(){
-         if(timerService == null)
-             timerService = new ExtScheduledThreadPoolExecutor(5);
-        if(executorService == null)
-            executorService = Executors.newCachedThreadPool();
-        timerService.setRemoveOnCancelPolicy(true);
-        timerService.setKeepAliveTime(10, TimeUnit.SECONDS);
-        timerService.allowCoreThreadTimeOut(true);
 
-        ((ThreadPoolExecutor)executorService).setKeepAliveTime(600,TimeUnit.SECONDS);
-        ((ThreadPoolExecutor)executorService).allowCoreThreadTimeOut(true);
-    }
 
-    private void startTasks(){
-        if(started)
-            return;
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startUdpListener);
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startSendPeriodicallyUdp);
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.startClipboardListener);
-       // registerBatteryReceiver();
-        started = true;
-    }
-
-    private void destroy(){
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.closeAllTcpConnections);
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopSendingPeriodicallyUdp);
-      //  unregisterBatteryRecever();
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.removeClipBoardListener);
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopSftpServer);
-        BackgroundService.addCommandToQueue(BackgroundServiceCmds.stopUdpListener);
-        started = false;
-    }
-    /**
-     * When service destroyed, stop all network operation's
-     * and all running threads.
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        inited = false;
-      //  destroy(); // not now
-    }
-
-    protected void onHandleWork(@NonNull Intent intent) {
+    private void onHandleWork(@NonNull Intent intent) {
         String action = intent.getAction();
-        if(action == null)
+        if(action == null) {
             return;
-        switch (action){
-            case "cmd":
-                if (cmdAction(intent)) return;
+        }
+        api command = BackgroundService.api.valueOf(action);
+        switch (command){
+            case CMD:
+                cmdAction(intent);
                 break;
-            case "task":
+            case TASK:
                 taskAction();
                 break;
-            case "sendToAll":
+            case SEND_TO_ALL:
                 sendToAllAction(intent);
                 break;
-            case "sendToDevice":
+            case SEND_TO_DEVICE:
                 sendToDeviceAction(intent);
                 break;
             default:
@@ -254,302 +211,227 @@ public class BackgroundService extends Service {
         }
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-
-
-
-    private void sendToDeviceAction(Intent intent){
-        String msg = intent.getStringExtra("message");
-        if(msg == null){
-            String cacheId = intent.getStringExtra("cacheId");
-            msg = messagesCache.get(cacheId);
-            messagesCache.remove(cacheId);
+    private void cmdAction(Intent intent) {
+        String cmd = intent.getStringExtra(api.CMD.name());
+        BackgroundServiceCmds method = BackgroundServiceCmds.valueOf(cmd);
+        switch (method){
+            case START_UDP_LISTENER:
+                startUdpListener();
+                break;
+            case STOP_UDP_LISTENER:
+                stopUdpListener();
+                break;
+            case START_SEND_PERIODICALLY_UDP:
+                startSendPeriodicallyUdp();
+                break;
+            case STOP_SENDING_PERIODICALLY_UDP:
+                stopSendPeriodicallyUdp();
+                break;
+            case CLOSE_ALL_TCP_CONNECTIONS:
+                closeAllTcpConnections();
+                break;
+            case DESTROY:
+                destroy();
+                break;
+            case START_TASKS:
+                startTasks();
+                break;
+            case CACHE_CONNECT:
+                cacheConnect();
+                break;
+            case REGISTER_BROADCASTS:
+                registerBroadcasts();
+                break;
+            case ON_DEVICE_DISCONNECTED:
+                onDeviceDisconnected();
+                break;
+            case START_CLIPBOARD_LISTENER:
+                startClipboardListener();
+                break;
+            case REMOVE_CLIP_BOARD_LISTENER:
+                removeClipBoardListener();
+                break;
+            default:
+                break;
         }
-        String id = intent.getStringExtra("dvId");
-        sendToOneDevice(id,msg);
     }
 
+    private void taskAction() {
+        Runnable task;
+        while ((task = taskQueue.poll()) != null)
+            executorService.submit(task);
+    }
 
     private void sendToAllAction(Intent intent) {
-        String msg = intent.getStringExtra("message");
+        String msg = intent.getStringExtra(api.MESSAGE.name());
         if(msg == null){
-            String cacheId = intent.getStringExtra("cacheId");
+            String cacheId = intent.getStringExtra(api.CACHE_ID.name());
             msg = messagesCache.get(cacheId);
             messagesCache.remove(cacheId);
         }
         sendToAll(msg);
     }
 
-    private void taskAction() {
-        Runnable task;
-        while ((task = takQueue.poll()) != null)
-            executorService.submit(task);
+    private void sendToAll(String message){
+        executorService.submit(()->{
+            for (Device device : connectedDevices.values()) {
+                if(device != null && device.isConnected() && device.isPaired())
+                    device.sendMessage(message);
+            }});
     }
 
-    private boolean cmdAction(Intent intent) {
-        String cmd = intent.getStringExtra("cmd");
-        int args = intent.getIntExtra("args", -1);
-        try {
-            Method method = tryToextractMethod(cmd);
-            if(method == null)
-                return true;
-            if(args == -1)
-                method.invoke(this);
-            else
-                method.invoke(this,args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            Log.e("BackgroundService","OnHandleIntentError",e);
+    private void sendToDeviceAction(Intent intent){
+        String msg = intent.getStringExtra(api.MESSAGE.name());
+        if(msg == null){
+            String cacheId = intent.getStringExtra(api.CACHE_ID.name());
+            msg = messagesCache.get(cacheId);
+            messagesCache.remove(cacheId);
         }
-        return false;
+        String id = intent.getStringExtra(api.DEVICE_ID.name());
+        sendToOneDevice(id,msg);
     }
 
-    private Method tryToextractMethod(String methodName){
-        Method method = null;
-        try {
-            method = this.getClass().getDeclaredMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            try {
-                method = this.getClass().getDeclaredMethod(methodName,Integer.class);
-            } catch (NoSuchMethodException e1) {
-                Log.e("BackgroundServce","Can't find method with such name " + methodName,e);
-            }
+    private void sendToOneDevice(String id, String msg) {
+        Device device = connectedDevices.get(id);
+        if(device != null && device.isConnected()) {
+            device.sendMessage(msg);
         }
-        if(method != null)
-            method.setAccessible(true);
-        return method;
+    }
+
+    private void startTasks(){
+        if(isStarted()) {
+            return;
+        }
+        addCommandToQueue(BackgroundServiceCmds.START_UDP_LISTENER);
+        addCommandToQueue(BackgroundServiceCmds.START_SEND_PERIODICALLY_UDP);
+        setStarted(true);
+    }
+
+    private void destroy(){
+        addCommandToQueue(BackgroundServiceCmds.CLOSE_ALL_TCP_CONNECTIONS);
+        addCommandToQueue(BackgroundServiceCmds.STOP_SENDING_PERIODICALLY_UDP);
+        addCommandToQueue(BackgroundServiceCmds.STOP_UDP_LISTENER);
+        setStarted(false);
+    }
+
+    void addCommandToQueue(BackgroundServiceCmds cmd){
+        addCommandToQueue(cmd,getApplicationContext());
+    }
+
+    static void addCommandToQueue(BackgroundServiceCmds cmd,Context context){
+        Intent intent = new Intent(context, BackgroundService.class);
+        String command = api.CMD.name();
+        intent.putExtra(command,cmd.name());
+        intent.setAction(command);
+        startServiceOrForeground(intent,context);
+    }
+
+    static void submitNewTask(Runnable task,Context context){
+        Intent intent = new Intent(context, BackgroundService.class);
+        taskQueue.add(task);
+        intent.setAction(api.TASK.name());
+        startServiceOrForeground(intent,context);
+    }
+
+    static void sendToAllDevices(String message,Context context){
+        Intent intent = new Intent(context, BackgroundService.class);
+        intent.setAction(api.SEND_TO_ALL.name());
+        if(message.length() >= 1200){
+            UUID uuid = UUID.randomUUID();
+            String s = uuid.toString();
+            messagesCache.put(s,message);
+            intent.putExtra(api.CACHE_ID.name(),s);
+        }
+        else {
+            intent.putExtra(api.MESSAGE.name(), message);
+        }
+        startServiceOrForeground(intent,context);
+    }
+
+
+    static void sendToDevice(String id,String message,Context context){
+        Intent intent = new Intent(context, BackgroundService.class);
+        intent.setAction(api.SEND_TO_DEVICE.name());
+        intent.putExtra(api.DEVICE_ID.name(),id);
+        if(message.length() >= 1200){
+            UUID uuid = UUID.randomUUID();
+            String s = uuid.toString();
+            messagesCache.put(s,message);
+            intent.putExtra(api.CACHE_ID.name(),s);
+        }
+        else {
+            intent.putExtra(api.MESSAGE.name(), message);
+        }
+        startServiceOrForeground(intent,context);
+    }
+
+    private static void startServiceOrForeground(Intent intent,Context context){
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            // Do something for oreo and above versions
+            context.startForegroundService(intent);
+        } else{
+            context.startService(intent);
+            // do something for phones running an SDK before oreo
+        }
+    }
+
+    private int getPort() {
+        return Integer.parseInt(settingService.getValue("TCP-port"));
     }
 
 
     private void startUdpListener() {
-        executorService.submit(()->udp.startUdpListener(appContext,getPort()));
+        executorService.submit(()->udp.startUdpListener(getApplicationContext(),getPort()));
     }
-
     private void stopUdpListener() {
         executorService.submit(()->udp.stopUdpListener());
     }
 
-
-
     private void startSendPeriodicallyUdp() {
-        executorService.submit(()->udp.startSendingTask(appContext,getPort()));
+        executorService.submit(()->udp.startSendingTask(getApplicationContext(),getPort()));
     }
-
-    private void stopSendingPeriodicallyUdp() {
-        executorService.submit(()->udp.stopSending());
+    private void stopSendPeriodicallyUdp(){
+        executorService.submit(()->udp.stopUdpListener());
     }
-
     private void closeAllTcpConnections(){
-        try {
-            for (Device dv : Device.getConnectedDevices().values())
-                tcp.stopListening(dv);
-        }catch (Throwable e){
-            Log.e("BackgroundService","closeAllTcpConnections ",e);
-        }
+        Stream.of(connectedDevices.values()).forEach(tcp::stopListening);
     }
 
-    private void stopSftpServer(){
-        ShareModule.stopSftpServer(); // maybe you need do this something different
+    private void onDeviceDisconnected(){
+        Collection<Device> values = getConnectedDevices().values();
+        Device next = null;
+        if(!values.isEmpty()) {
+            next = values.iterator().next();
+        }
+        BackgroundUtil.setSelectedId(next == null ? "" : next.getId());
+        EventBus.getDefault().post(new MainActivityCommand(UiCmds.UPDATE_ACTIVITY,null));
+
     }
 
 
     private void removeClipBoardListener() {
-        ClipBoard.removeListener(appContext);
+        ClipBoard.removeListener(getApplicationContext());
     }
 
     private void startClipboardListener() {
-        ClipBoard.setListener(appContext);
-    }
-
-    private void unregisterBatteryRecever() {
-        unregisterReceiver(mReceiver);
-        mReceiver = null;
-        batteryRegistered = false;
-    }
-
-    private void registerBatteryReceiver() {
-        if(mReceiver == null)
-            mReceiver = new BatteryBroadcastReveiver();
-        if(!batteryRegistered)
-        registerReceiver(mReceiver,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        batteryRegistered = true;
-    }
-
-    private void onZeroConnections(){
-        if(Device.getConnectedDevices().size() == 0) { //return to normal frequency
-            udp.onZeroConnections();
-            MainActivity.setSelected_id("");
-            stopSftpServer();
-//            unregisterBatteryRecever();
-   //         removeClipBoardListener();
-        } else {
-            MainActivity.setSelected_id(Device.getConnectedDevices().values().iterator().next().getId());
-        }
-    }
-
-    private void sendToAll(String message){
-        executorService.submit(()->{
-        if(Device.getConnectedDevices().size() == 0) {
-            return;
-        }
-        for (Device device : Device.getConnectedDevices().values()) {
-            if(device != null && device.isConnected())
-            device.sendMessage(message);
-        }});
-    }
-
-
-    // todo think need to be in separate thread, or no
-    private void sendToOneDevice(String id, String msg) {
-        Device device = Device.getConnectedDevices().get(id);
-        if(device != null && device.isConnected())
-        device.sendMessage(msg);
-        else
-            showNoConnection();
-    }
-
-    private void showNoConnection() {
-        Toast toast = Toast.makeText(getApplicationContext(), "Sorry no connection",Toast.LENGTH_SHORT );
-        toast.show();
+        ClipBoard.setListener(getApplicationContext(),messageFactory);
     }
 
     private void cacheConnect() {
-        executorService.submit(()->{
-            udp.cacheConnection();
-        });
+        executorService.submit(()-> udp.cacheConnection());
     }
 
-    public static void addCommandToQueue(BackgroundServiceCmds cmd){
-        Intent intent = new Intent(appContext, BackgroundService.class);
-        intent.putExtra("cmd",cmd.name());
-        intent.setAction("cmd");
-        startServiceOrForeground(intent);
-    }
-
-    private static void startServiceOrForeground(Intent intent){
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            // Do something for lollipop and above versions
-            appContext.startForegroundService(intent);
-        } else{
-            appContext.startService(intent);
-            // do something for phones running an SDK before lollipop
+    private void registerBroadcasts(){
+        if(isRegistered()) {
+            return;
         }
+        setRegistered(true);
+        getApplicationContext().registerReceiver(new WifiReceiver(),new IntentFilter("android.net.wifi.supplicant.STATE_CHANGE"));
+        getApplicationContext().registerReceiver(new BatteryBroadcastReceiver(),new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        getApplicationContext().registerReceiver(new SmsListener(),new IntentFilter( "android.provider.Telephony.SMS_RECEIVED"));
+        getApplicationContext().registerReceiver(new CallReceiver(),new IntentFilter("android.intent.action.PHONE_STATE"));
+        getApplicationContext().registerReceiver(new NotifActionReceiver(),new IntentFilter("lazyIr-cmd"));
     }
 
-
-    public static void sendToAllDevices(String message){
-        Intent intent = new Intent(appContext, BackgroundService.class);
-        intent.setAction("sendToAll");
-        if(message.length() >= 1200){
-            UUID uuid = UUID.randomUUID();
-            String s = uuid.toString();
-            messagesCache.put(s,message);
-            intent.putExtra("cacheId",s);
-        }
-        else
-        intent.putExtra("message",message);
-        startServiceOrForeground(intent);
-    }
-
-    public static void sendToDevice(String id,String message){
-        Intent intent = new Intent(getAppContext(), BackgroundService.class);
-        intent.setAction("sendToDevice");
-        intent.putExtra("dvId",id);
-        if(message.length() >= 1200){
-            UUID uuid = UUID.randomUUID();
-            String s = uuid.toString();
-            messagesCache.put(s,message);
-            intent.putExtra("cacheId",s);
-        }
-        else
-        intent.putExtra("message",message);
-        startServiceOrForeground(intent);
-    }
-
-    public static void submitNewTask(Runnable task){ // todo this for timer
-        Intent intent = new Intent(appContext, BackgroundService.class);
-        takQueue.add(task);
-        intent.setAction("task");
-        startServiceOrForeground(intent);
-    }
-
-    public static HashSet<String> getMyEnabledModules(){
-        return ModuleFactory.getMyEnabledModules(getAppContext());
-    }
-
-    public static List<ModuleSetting> getMyEnabledModulesToModuleSetting(){
-        HashSet<String> myEnabledModules = ModuleFactory.getMyEnabledModules(getAppContext());
-        List<ModuleSetting> list = new ArrayList<>();
-        for (String myEnabledModule : myEnabledModules) {
-            list.add(new ModuleSetting(myEnabledModule,true,"*",true));
-        }
-        return list;
-    }
-
-
-    public static ScheduledThreadPoolExecutor getTimerService() {
-        return timerService;
-    }
-
-    public static ExecutorService getExecutorService() {return executorService;}
-
-    public static Context getAppContext() {
-        return appContext;
-    }
-
-    public static void setAppContext(Context cntx) {appContext = cntx;
-    }
-
-    public static void unpairDevice(String id) {
-        submitNewTask(() -> {
-            DBHelper.getInstance(appContext).deletePaired(id);
-            NetworkPackage networkPackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_UNPAIR, TCP_UNPAIR);
-            BackgroundService.sendToDevice(id,networkPackage.getMessage());
-            Device.getConnectedDevices().get(id).setPaired(false);
-            MainActivity.updateActivity(); // at this moment, server not respond to unpair, so update here
-        });
-    }
-
-    public static void pairDevice(String id, String value){
-        submitNewTask(() -> {
-            Device device = Device.getConnectedDevices().get(id);
-            DBHelper.getInstance(getAppContext()).savePairedDevice(id, value);
-                    if (device != null)
-                        device.setPaired(true);
-            NetworkPackage orCreatePackage = NetworkPackage.Cacher.getOrCreatePackage(TCP_PAIR_RESULT, String.valueOf(NetworkPackage.getMyId().hashCode()));
-            orCreatePackage.setValue("answer","paired");
-            sendToDevice(id,orCreatePackage.getMessage());
-            MainActivity.updateActivity();
-        });
-    }
-
-
-    public static int getPort() {
-        lock.lock();
-        try{
-            if(port == 0)
-                port = Integer.parseInt(getSettingManager().getValue("TCP-port"));
-        }finally {
-            lock.unlock();
-        }
-        return port;
-    }
-
-    public static boolean  hasActualConnection(){
-        boolean hasConnectedDevice = false;
-        if(Device.getConnectedDevices().size() != 0){
-            for (Device device : Device.getConnectedDevices().values()) {
-                if(device.isConnected()){
-                    hasConnectedDevice = true;
-                    break;
-                }
-            }
-        }
-        return hasConnectedDevice;
-    }
 
 }

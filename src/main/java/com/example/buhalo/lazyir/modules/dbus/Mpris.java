@@ -1,126 +1,140 @@
 package com.example.buhalo.lazyir.modules.dbus;
 
-import android.util.Log;
-import android.widget.Toast;
+import android.content.Context;
 
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
+import com.example.buhalo.lazyir.api.MessageFactory;
+import com.example.buhalo.lazyir.api.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-/**
- * Created by buhalo on 15.04.17.
- */
-// ServerAnswer LinkedList are queque for received players from server,
-// with size only 1
+import javax.inject.Inject;
+
+
 public class Mpris extends Module {
+    public enum api{
+        SEEK,
+        NEXT,
+        PREVIOUS,
+        STOP,
+        PLAYPAUSE,
+        OPENURI,
+        SETPOSITION,
+        VOLUME,
+        ALLPLAYERS
+    }
 
-    public final static String SEEK = "seek";
-    public final static String NEXT = "next";
-    public final static String PREVIOUS = "previous";
-    public final static String PLAYPAUSE = "playPause";
-    public final static String STOP = "stop";
-    public final static String OPENURI = "openUri";
-    public final static String SETPOSITION = "setPosition";
-    public final static String VOLUME = "volume";
-    public final static String PLAYER = "player";
-    public final static String GET_ALL_INFO = "allInfo";
-    public final static String ALL_PLAYERS = "allPlayers";
-    public final static String REPEAT = "repeat";
-
-    private final static int TIMEOUT = 1000;
-    private LinkedBlockingQueue<List<Player>> serverAnswer = new LinkedBlockingQueue<>(1);
-
+    @Inject
+    public Mpris(MessageFactory messageFactory, Context context) {
+        super(messageFactory, context);
+        EventBus.getDefault().register(this);
+    }
 
     @Override
     public void execute(NetworkPackage np) {
-        try {
-            if(!working)
-                return;
-        switch (np.getData())
-        {
-            case ALL_PLAYERS:
-                    fillPlayers(np);
-                break;
-            case "UnsupportedOS":
-                Toast.makeText(device.getContext(),"Sorry " + np.getValue("OS") + " not support this function",Toast.LENGTH_LONG).show();
-                break;
-            default:
-                break;
-        }
-        } catch (InterruptedException e) {
-            Log.e("Mpris","Error in Mpris execute",e);
+        MprisDto dto = (MprisDto) np.getData();
+        if (dto.getCommand().equals(api.ALLPLAYERS.name())) {
+            fillPlayers(dto);
         }
     }
 
-    // use offer insteab pull, because i don't want to wait while list was empty,
-    // and after some time, these data may be outdate, so if list full, just wait
-    // #TIMEOUT second's and put or ignore
-    private void fillPlayers(NetworkPackage np) throws InterruptedException {
-        serverAnswer.offer(np.getObject(ALL_PLAYERS,Players.class).getPlayerList(),TIMEOUT,TimeUnit.MILLISECONDS);
+    private void fillPlayers(MprisDto dto) {
+        EventBus.getDefault().post(dto);
     }
 
-    // wait and return null if time exceeds
-    List<Player> getPlayers(int timeout) throws InterruptedException {
-        return serverAnswer.poll(timeout, TimeUnit.MILLISECONDS);
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void receiveCommandFromActivity(MprisCommand cmd){
+        if(!cmd.getId().equals(device.getId())){
+            return;
+        }
+        api command =  api.valueOf(cmd.getCommand());
+       switch (command){
+           case ALLPLAYERS:
+               sendGetAllPlayers();
+               break;
+           case NEXT:
+               sendNext(cmd.getPlayer());
+               break;
+           case SEEK:
+               sendSeek(cmd.getPlayer(),cmd.getData());
+               break;
+           case STOP:
+               sendPlayPause(cmd.getPlayer());
+               break;
+           case VOLUME:
+               sendVolume(cmd.getPlayer(),cmd.getData());
+               break;
+           case PREVIOUS:
+               sendPrev(cmd.getPlayer());
+               break;
+           case PLAYPAUSE:
+               sendPlayPause(cmd.getPlayer());
+               break;
+           case SETPOSITION:
+               sendSeek(cmd.getPlayer(),cmd.getData());
+               break;
+           default:
+               break;
+       }
     }
 
-    void sendMetadata(String player) {
-        send(player,GET_ALL_INFO);
-    }
-
-    void sendPlayPause(String player) {
-        send(player,PLAYPAUSE);
-    }
-
-    void sendNext(String player) {
-        send(player,NEXT);
-    }
-
-    void sendVolume(String player,int volume) {
-        double vol = ((double)volume)/100;
-        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),VOLUME).setValue(PLAYER,player).setValue(VOLUME,Double.toString(vol)).getMessage());
-    }
-
-    // hard to read, but one string ;)
-    // in send methods, it get get networkPackage from cache, set Player, set method's now return this networkPackage, so
-    // after set other value if need and finally call getMessage.
-    void sendSeek(String player, int seek) {
-        sendMsg( NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),SEEK).setValue(SEEK,Integer.toString(seek)).setValue(PLAYER,player).getMessage());
-    }
-
-    void sendPrev(String player) {
-        send(player,PREVIOUS);
-    }
-
-    private void send(String player,String cmd){
-        sendMsg(NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),cmd).setValue(PLAYER,player).getMessage());
-    }
-
-    void sendRepeat(String player){
-        send(player,REPEAT);
-    }
-
-    // Mpris actually doesn't have any state
     @Override
     public void endWork() {
-        working = false;
-        serverAnswer = null;
+        EventBus.getDefault().unregister(this);
+        context = null;
+        device = null;
     }
 
-    void sendGetAllPlayers() {
-        NetworkPackage np = NetworkPackage.Cacher.getOrCreatePackage(Mpris.class.getSimpleName(),ALL_PLAYERS);
-        sendMsg(np.getMessage());
+    private void sendGetAllPlayers() {
+        String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, new MprisDto(api.ALLPLAYERS.name()));
+        sendMsg(message);
     }
 
-    public LinkedBlockingQueue<List<Player>> getServerAnswer() {
-        return serverAnswer;
+    private void sendPlayPause(Player player) {
+        send(player,api.PLAYPAUSE.name());
     }
 
-    public void clearPlayers() {
-        serverAnswer.clear();
+    private void sendNext(Player player) {
+        send(player,api.NEXT.name());
+    }
+
+    private void sendVolume(Player player,int volume) {
+        double vol = ((double)volume)/100;
+        send(player,api.VOLUME.name(),vol);
+    }
+
+    private void sendSeek(Player player, int seek) {
+        send(player,api.SEEK.name(),seek);
+    }
+
+    private void send(Player player,String cmd){
+        send(player,cmd,0);
+    }
+
+    private void sendPrev(Player player) {
+        send(player,api.PREVIOUS.name());
+    }
+
+    private void send(Player player,String cmd,double data){
+        MprisDto mprisDto = new MprisDto(cmd);
+        String name = player.getName();
+        if(!player.getId().equals("-1")){
+            mprisDto.setPlayerType("browser");
+            mprisDto.setJsIp(player.getIp());
+            mprisDto.setJsId(player.getId());
+        }else{
+            mprisDto.setPlayerType("desktop");
+        }
+        String[] split = name.split("-!!-");
+        if(split.length == 0){
+            mprisDto.setPlayer(name);
+        }else{
+            mprisDto.setPlayer(split[0]);
+        }
+        mprisDto.setDValue(data);
+        String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, mprisDto);
+        sendMsg(message);
     }
 }

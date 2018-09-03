@@ -2,54 +2,34 @@ package com.example.buhalo.lazyir.modules;
 
 import android.content.Context;
 
-import com.example.buhalo.lazyir.Devices.Device;
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.service.BackgroundService;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
+import com.example.buhalo.lazyir.api.MessageFactory;
+import com.example.buhalo.lazyir.api.NetworkPackage;
+import com.example.buhalo.lazyir.device.Device;
+import com.example.buhalo.lazyir.service.BackgroundUtil;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-/**
- * Created by buhalo on 05.03.17.
- */
+import org.greenrobot.eventbus.EventBus;
 
 public abstract class Module {
 
     protected Device device;
-
+    protected MessageFactory messageFactory;
     protected  Context context;
 
-    protected Lock lock = new ReentrantLock();
-    protected volatile boolean working = true;
-
-    public   void setDevice(Device dv)
-    {
-        this.device = dv;
-    }
-
-    public  void setContext(Context context)
-    {
+    public Module(MessageFactory messageFactory, Context context) {
+        this.messageFactory = messageFactory;
         this.context = context;
     }
 
+    public void setDevice(Device dv)
+    {
+        this.device = dv;
+    }
     public abstract void execute(NetworkPackage np);
+    public abstract void endWork();
+    protected void sendMsg(String msg) {
+        if(device.isPaired()) {
+            BackgroundUtil.sendToDevice(device.getId(), msg, context);
+        }}
+    protected void sendToAll(String msg) { BackgroundUtil.sendToAll(msg,context);}
 
-
-    public void endWork() {
-        lock.lock();
-        try {
-            working = false;
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    public void sendMsg(String msg) {
-        String id = device.getId();
-        BackgroundService.sendToDevice(id,msg);
-    }
-
-
-    public void sendToAll(String msg) {BackgroundService.sendToAllDevices(msg);}
 }
