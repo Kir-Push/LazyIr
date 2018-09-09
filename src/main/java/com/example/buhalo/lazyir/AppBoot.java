@@ -52,9 +52,9 @@ public class AppBoot extends Application implements HasActivityInjector, HasServ
         activityComponent = serviceComponent.getActivityComponent();
         activityComponent.inject(this);
         BackgroundUtil.setAppComponent(appComponent);
+        BackgroundUtil.addCommand(BackgroundServiceCmds.REGISTER_BROADCASTS,this);
        if(checkWifiOnAndConnected(this)) {
            BackgroundUtil.addCommand(BackgroundServiceCmds.START_TASKS,this);
-           BackgroundUtil.addCommand(BackgroundServiceCmds.REGISTER_BROADCASTS,this);
        }
 
     }

@@ -96,6 +96,7 @@ public class UdpBroadcastManager  {
             byte[] sendData = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(sendPacket);
+            System.out.println("send broadcast: " + sendPacket);
         } catch (IOException e) {
             Log.e(TAG, "error in sendBroadcast message: " + message + " port: " + port, e);
         }
@@ -218,9 +219,6 @@ public class UdpBroadcastManager  {
     }
 
     public void cacheConnection() {
-        if (hasActualConnection()) {
-            return;
-        }
         String message = messageFactory.createMessage(BROADCAST_INTRODUCE.name(), false, null);
         sendBroadcast(message, Integer.parseInt(settingService.getValue("TCP-port")));
     }

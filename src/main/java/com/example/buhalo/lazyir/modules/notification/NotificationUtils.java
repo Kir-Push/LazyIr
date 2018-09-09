@@ -161,7 +161,10 @@ import static com.example.buhalo.lazyir.service.listeners.NotificationListener.S
         }
         // if fail's extract simple text
         if(result == null || result.length() <= 0){
-            result = extras.getString(android.app.Notification.EXTRA_TEXT);
+            Object obj = extras.get(android.app.Notification.EXTRA_TEXT);
+            if(obj != null) {
+                result = obj.toString();
+            }
         }
         return result;
     }
