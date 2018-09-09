@@ -1,7 +1,9 @@
 package com.example.buhalo.lazyir.service.listeners;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
@@ -36,6 +38,8 @@ import dagger.android.AndroidInjection;
 import lombok.Getter;
 import lombok.Setter;
 
+import static android.app.Notification.EXTRA_TEXT;
+import static android.app.Notification.EXTRA_TITLE;
 import static com.example.buhalo.lazyir.service.BackgroundUtil.checkWifiOnAndConnected;
 
 
@@ -73,11 +77,16 @@ public class NotificationListener extends NotificationListenerService {
    }
 
     private void createRemoveNotification(String notificationId) {
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(),"someLittleHack")
+        NotificationManager mNotifyMgr = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel("someLittleHack", "someLittleHack",NotificationManager.IMPORTANCE_LOW);
+            mNotifyMgr.createNotificationChannel(mChannel);
+        }
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(),"someLittleHack")
                             .setSmallIcon(R.mipmap.up_icon)
                             .setContentTitle(notificationId)
                             .setContentText("I should disappear fast, if no something went wrong");
-            NotificationManager mNotifyMgr = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+
             if(mNotifyMgr != null) {
                 mNotifyMgr.notify(999888777, mBuilder.build());
             }
@@ -89,8 +98,12 @@ public class NotificationListener extends NotificationListenerService {
             StatusBarNotification[] activeNotifications = getActiveNotifications();
             if(activeNotifications != null) {
                 for (StatusBarNotification statusBarNotification : activeNotifications) {
-                    if (statusBarNotification.getId() == Integer.parseInt(utils.extractTitle(sbn))) {
-                        removeNotification(statusBarNotification.getKey());
+                    Bundle extras = sbn.getNotification().extras;
+                    Object o = extras.get(EXTRA_TITLE);
+                    if(o != null) {
+                        if (statusBarNotification.getId() == Integer.parseInt(o.toString())) {
+                            removeNotification(statusBarNotification.getKey());
+                        }
                     }
                 }
             }

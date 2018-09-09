@@ -24,6 +24,7 @@ import com.example.buhalo.lazyir.db.DBHelper;
 import com.example.buhalo.lazyir.device.Device;
 import com.example.buhalo.lazyir.device.ModuleSetting;
 import com.example.buhalo.lazyir.modules.clipboard.ClipBoard;
+import com.example.buhalo.lazyir.modules.notification.notifications.NotificationListenerCmd;
 import com.example.buhalo.lazyir.service.receivers.CallReceiver;
 import com.example.buhalo.lazyir.service.receivers.NotifActionReceiver;
 import com.example.buhalo.lazyir.service.receivers.SmsListener;
@@ -56,6 +57,8 @@ import dagger.android.AndroidInjection;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+
+import static com.example.buhalo.lazyir.modules.notification.notifications.ShowNotification.api.REMOVE_NOTIFICATION;
 
 
 public class BackgroundService extends Service {
@@ -107,6 +110,7 @@ public class BackgroundService extends Service {
                     .setContentTitle("Background LazyIr")
                     .setContentText("Sorry android 8 require it");
             startForeground(NOTIF_ID,builder.build());
+            startSnoozeTask(NOTIF_ID);
         }
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
@@ -118,6 +122,12 @@ public class BackgroundService extends Service {
         // Get the HandlerThread's Looper and use it for our Handler
         Looper mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
+    }
+
+    private void startSnoozeTask(int notifId) {
+        timerService.scheduleAtFixedRate(() ->
+                EventBus.getDefault().post(new NotificationListenerCmd(REMOVE_NOTIFICATION, Integer.toString(notifId), null)),
+                0,5,TimeUnit.MINUTES);
     }
 
     /**
