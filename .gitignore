@@ -3,8 +3,10 @@
 *.apk
 *.ap_
 
+.directory
 # Files for the ART/Dalvik VM
 *.dex
+app.iml
 
 # Java class files
 *.class
@@ -27,7 +29,6 @@ proguard/
 
 # Log Files
 *.log
-
 # Android Studio Navigation editor temp files
 .navigation/
 

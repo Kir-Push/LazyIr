@@ -25,6 +25,7 @@ import lombok.Setter;
 import lombok.Synchronized;
 
 import static com.example.buhalo.lazyir.modules.notification.call.CallModule.api.ANSWER;
+import static com.example.buhalo.lazyir.modules.notification.call.CallModule.api.CALL;
 import static com.example.buhalo.lazyir.modules.notification.call.CallModule.api.ENDCALL;
 import static com.example.buhalo.lazyir.service.BackgroundUtil.checkWifiOnAndConnected;
 
@@ -145,7 +146,7 @@ public class CallReceiver extends BroadcastReceiver {
     }
 
     private void onIncomingCallReceived(Context context, String number,String type) {
-        CallModuleDto dto = new CallModuleDto(ENDCALL.name(), type,  utils.getName(number,context.getApplicationContext()));
+        CallModuleDto dto = new CallModuleDto(CALL.name(), type,  utils.getName(number,context.getApplicationContext()));
         if(type.equals(NotificationTypes.OUTGOING.name())) {
             dto.setText("Outgoing CALL");
         } else {
