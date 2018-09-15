@@ -1,37 +1,42 @@
 package com.example.buhalo.lazyir.modules.battery;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
 
-import com.example.buhalo.lazyir.Devices.NetworkPackage;
-import com.example.buhalo.lazyir.service.TcpConnectionManager;
+import com.example.buhalo.lazyir.api.MessageFactory;
+import com.example.buhalo.lazyir.api.NetworkPackage;
+import com.example.buhalo.lazyir.modules.Module;
 
-/**
- * Created by buhalo on 17.04.17.
- */
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-public class Battery { // it not implement module because it one for all, send message when connected device , and after send to all when broadcast received
-    public static final String STATUS = "status";
-    public static final String PERCENTAGE = "percentage";
+import javax.inject.Inject;
 
-    public static void sendBatteryLevel(String id, Context context)
-    {
-        NetworkPackage np = new NetworkPackage(Battery.class.getSimpleName(),STATUS);
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = context.getApplicationContext().registerReceiver(null, ifilter);
-        if(batteryStatus == null)
-            return;
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                status == BatteryManager.BATTERY_STATUS_FULL;
+public class Battery extends Module {
 
-        String percentage = Integer.toString(level);
-        np.setValue(PERCENTAGE,percentage);
-        np.setValue(STATUS,Boolean.toString(isCharging)); // true charging, false not
-        TcpConnectionManager.getInstance().sendCommandToServer(id,np.getMessage());
+    @Inject
+    public Battery(MessageFactory messageFactory, Context context) {
+        super(messageFactory, context);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void execute(NetworkPackage np) {
+        // you don't have any commands from pc
+    }
+
+    @Override
+    public void endWork() {
+        context = null;
+        device = null;
+        EventBus.getDefault().unregister(this);
+    }
+
+
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onBatteryBroadcastReceived(BatteryDto event) {
+        sendMsg(messageFactory.createMessage(this.getClass().getSimpleName(),true,event));
     }
 
 }

@@ -42,58 +42,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/command_set_layout"
-            android:layout_marginBottom="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginBottom="28dp"
+            android:layout_marginRight="16dp"
             android:text="@string/commands"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/const_bt_rmv"
-            app:layout_constraintRight_toLeftOf="@+id/button_command_list"
-            app:layout_constraintTop_toBottomOf="@+id/const_bt_add"
-            app:layout_constraintVertical_bias="0.0"
-            tools:layout_editor_absoluteX="22dp"
-            tools:layout_editor_absoluteY="95dp" />
+            app:layout_constraintRight_toLeftOf="@+id/button_command_list" />
 
         <Button
-            android:text="@string/cntxMenuOk"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/cnts_btn_ok"
-            app:layout_constraintBottom_toTopOf="@+id/const_bt_add"
-            android:layout_marginBottom="0dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/button_command_list"
-            android:layout_marginEnd="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginRight="18dp"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <Button
-            android:text="@string/cntxMenuAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/const_bt_add"
-            android:layout_alignTop="@+id/command_set_layout"
-            android:layout_alignParentEnd="true"
+            android:text="@string/cntxMenuOk"
             app:layout_constraintRight_toLeftOf="@+id/button_command_list"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/const_bt_rmv"
-            app:layout_constraintVertical_bias="0.461"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="0dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:text="@string/cntxMenuDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/const_bt_rmv"
-            android:layout_alignTop="@+id/command_set_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            app:layout_constraintRight_toLeftOf="@+id/button_command_list"
-            android:layout_marginEnd="8dp"
+            android:layout_alignTop="@+id/command_set_layout"
+            android:layout_marginRight="16dp"
+            android:text="@string/cntxMenuDelete"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginRight="6dp"
-            android:layout_marginBottom="0dp" />
+            app:layout_constraintRight_toLeftOf="@+id/button_command_list" />
 
         <ListView
             android:id="@+id/button_command_list"

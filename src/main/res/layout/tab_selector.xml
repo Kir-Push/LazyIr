@@ -7,6 +7,16 @@
 
 
     <Button
+        android:id="@+id/music_icn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="24dp"
+        android:layout_toEndOf="@+id/down_icn"
+        android:background="@mipmap/music_icon"
+        android:tag="@mipmap/music_icon" />
+
+    <Button
         android:id="@+id/volume_icn"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -56,14 +66,13 @@
         android:layout_alignStart="@+id/volume_icn" />
 
     <Button
-        android:id="@+id/music_icn"
+        android:id="@+id/mute_icn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:tag="@mipmap/music_icon"
-        android:background="@mipmap/music_icon"
-        android:layout_marginStart="24dp"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/down_icn" />
+        android:layout_alignStart="@+id/down_icn"
+        android:layout_alignTop="@+id/dv_icn"
+        android:background="@mipmap/yes_pair"
+        android:tag="@mipmap/yes_pair" />
 
 
 </RelativeLayout>
