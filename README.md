@@ -1,4 +1,4 @@
-# LazyIr
+# LazyIr (android)
 Connect your Android to PC  
 Share Files, Show notifications,  
 Answer messages, Control media playback  
