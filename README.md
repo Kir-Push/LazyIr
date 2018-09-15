@@ -1,6 +1,6 @@
 # LazyIr
-Connect your Android to PC\n
-Share Files, Show notifications, \n
+Connect your Android to PC  
+Share Files, Show notifications,  
 Answer messages, Control media playback \n
 and more \n
 App allow:
