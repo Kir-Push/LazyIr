@@ -3,8 +3,10 @@ package com.example.buhalo.lazyir.modules.memory;
 import com.example.buhalo.lazyir.api.Dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

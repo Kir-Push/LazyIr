@@ -3,9 +3,11 @@ package com.example.buhalo.lazyir.modules.sendcommand;
 import com.example.buhalo.lazyir.api.Dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 public class SendCommandDto extends Dto {

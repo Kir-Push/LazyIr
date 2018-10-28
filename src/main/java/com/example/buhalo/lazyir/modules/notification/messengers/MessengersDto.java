@@ -4,7 +4,9 @@ import com.example.buhalo.lazyir.api.Dto;
 import com.example.buhalo.lazyir.modules.notification.notifications.Notification;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 public class MessengersDto extends Dto {

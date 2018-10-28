@@ -167,7 +167,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         volumeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                EventBus.getDefault().post(new MprisCommand(Mpris.api.VOLUME.name(),selectedId,getPlayer(),seekBar.getProgress()));
+                //nothing to do here
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -175,12 +175,21 @@ public class MediaRemoteActivity extends AppCompatActivity {
                  }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                EventBus.getDefault().post(new MprisCommand(Mpris.api.VOLUME.name(),selectedId,getPlayer(),seekBar.getProgress()));
                 setVolumeLine(seekBar.getProgress());
             }});
 
         timeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //nothing to do here
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //nothing to do here
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
                 Player player = getPlayer();
                 int arg;
                 if(!player.getId().equals("-1")) {
@@ -190,14 +199,6 @@ public class MediaRemoteActivity extends AppCompatActivity {
                     arg = (int) (seekBar.getProgress() - player.getCurrTime());
                 }
                 EventBus.getDefault().post(new MprisCommand(Mpris.api.SEEK.name(),selectedId,player,arg));
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //nothing to do here
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //nothing to here, need test
             }
         });
 

@@ -5,9 +5,11 @@ import com.example.buhalo.lazyir.modules.notification.notifications.Notification
 import com.example.buhalo.lazyir.modules.notification.sms.Sms;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 public class ReminderDto extends Dto {
