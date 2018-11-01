@@ -22,7 +22,8 @@ public class TouchActivity extends AppCompatActivity {
     private View touchView;
     private int startx;
     private int starty;
-    private double sensitibly = 0.4;
+    private double sensitibly = 1;
+    private String id = BackgroundUtil.getSelectedId();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,15 +67,15 @@ public class TouchActivity extends AppCompatActivity {
             }
             return true;
         });
-        leftbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.CLICK.name())));
-        rightbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.RCLICK.name())));
+        leftbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.CLICK.name(),id)));
+        rightbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.RCLICK.name(),id)));
     }
 
     private void move(int x, int y, double sensitibly) {
        int accumX =  (int) (x * sensitibly);
         int accumY = (int) (y * sensitibly);
         if(accumX != 0 && accumY != 0) {
-            EventBus.getDefault().post(new TouchControlDto(TouchControl.api.MOVE.name(),accumX,accumY));
+            EventBus.getDefault().post(new TouchControlDto(TouchControl.api.MOVE.name(),id,accumY,accumX));
         }
     }
 }

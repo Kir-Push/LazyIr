@@ -20,7 +20,8 @@ public class TouchControlDto extends Dto {
         this.moveX = moveX;
     }
 
-    public TouchControlDto(String command) {
+    public TouchControlDto(String command,String id) {
         this.command = command;
+        this.id = id;
     }
 }

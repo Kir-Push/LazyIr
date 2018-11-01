@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -62,11 +63,11 @@ import static com.example.buhalo.lazyir.service.listeners.NotificationListener.S
 
      public boolean isSms(Notification notification) {
         String pack = notification.getPack();
-        return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2);
+        return pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2) || pack.equals(Telephony.Sms.getDefaultSmsPackage(context));
     }
 
     private String extractType(StatusBarNotification sbn,String pack,String title,String text){
-        if(pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2)) {
+        if(pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2) || pack.equals(Telephony.Sms.getDefaultSmsPackage(context))) { //todo проверь, если скажем fb messenger стоит стандартным sms, не считает ли он все его сообщение смс, если да то свенряйся с smsbroadcast, если туда приходило значит sms, если нет, то нет
             return NotificationTypes.SMS.name();
         }
         else if(messengersMessage(sbn,pack,title,text)) {
