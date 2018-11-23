@@ -107,15 +107,29 @@ public class MediaRemoteActivity extends AppCompatActivity {
 
     private String createTimeStatusString(double currTime, double length) {
         String result = "";
-        if(currTime < 10 && currTime >= 0){
+        double secs = currTime % 60;
+        double min = currTime / 60;
+        if(min < 10 && min >= 0){
             result += "0";
         }
-        result += Double.toString(currTime);
+        result += Double.toString(min);
         result += ":";
-        if(length < 10 && length >= 0){
+        if(secs < 10 && secs >= 0){
             result += "0";
         }
-        result += Double.toString(length);
+        result += Double.toString(secs);
+        result += " / ";
+        double lengSecs = length % 60;
+        double lengMin = length / 60;
+        if(lengMin < 10 && lengMin >= 0){
+            result += "0";
+        }
+        result += Double.toString(lengMin);
+        result += ":";
+        if(lengSecs < 10 && lengSecs >= 0){
+            result += "0";
+        }
+        result += Double.toString(lengSecs);
         return result;
     }
 
