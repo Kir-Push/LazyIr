@@ -97,9 +97,9 @@ public class MediaRemoteActivity extends AppCompatActivity {
             title.refreshDrawableState();
             String status = player.getStatus();
             if (status.equalsIgnoreCase("Playing") || status.equalsIgnoreCase("\"Playing\"")) {
-                play.setBackgroundResource(R.mipmap.pause_btn);
+                play.setBackgroundResource(R.drawable.pause);
             } else {
-                play.setBackgroundResource(R.mipmap.play_btn);
+                play.setBackgroundResource(R.drawable.play);
             }
             play.refreshDrawableState();
         }
@@ -168,7 +168,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         title =  findViewById(R.id.trackName);
         lenghtTxt = findViewById(R.id.lenght_text);
         play = findViewById(R.id.playButton);
-        volumeLine = findViewById(R.id.volume_lin).findViewById(R.id.volume_bar);
+        volumeLine = findViewById(R.id.volume_bar);
         next =  findViewById(R.id.nextBtn);
         prev = findViewById(R.id.prewBtn);
         setListeners();

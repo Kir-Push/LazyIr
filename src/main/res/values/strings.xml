@@ -15,4 +15,9 @@
     <string name="notPaired">notPaired</string>
     <string name="paired">paired</string>
     <string name="folderImg">folderImg</string>
+    <string name="media_control">Media Control</string>
+    <string name="clipboard_history">Clipboard History</string>
+    <string name="share">Share</string>
+    <string name="command">Command</string>
+    <string name="touch_control">Touch Control</string>
 </resources>

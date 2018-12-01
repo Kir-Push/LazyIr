@@ -56,8 +56,8 @@ dependencies {
     implementation 'com.google.dagger:dagger-android-support:2.18'
     // if you use the support libraries
     implementation 'com.annimon:stream:1.2.1'
-    compileOnly 'org.projectlombok:lombok:1.16.18'
-    annotationProcessor 'org.projectlombok:lombok:1.16.18' // after update gradle or lombok change to latest, in current(18.2) version error https://github.com/rzwitserloot/lombok/issues/1882
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.4' // after update gradle or lombok change to latest, in current(18.2) version error https://github.com/rzwitserloot/lombok/issues/1882
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.18'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.18'
 }

@@ -5,7 +5,6 @@ import com.example.buhalo.lazyir.di.scope.ActivityScope;
 import com.example.buhalo.lazyir.view.activity.CommandActivity;
 import com.example.buhalo.lazyir.view.activity.MainActivity;
 import com.example.buhalo.lazyir.view.activity.ModulesActivity;
-import com.example.buhalo.lazyir.view.fragment.PageFragment;
 
 
 import dagger.Module;
@@ -27,7 +26,4 @@ public interface MainActivityModule {
     @ContributesAndroidInjector()
     ModulesActivity modulesActivityInjector();
 
-    @ActivityScope
-    @ContributesAndroidInjector()
-    PageFragment modulesPageFragmentInjector();
 }

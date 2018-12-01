@@ -83,7 +83,7 @@ public class NotificationListener extends NotificationListenerService {
             mNotifyMgr.createNotificationChannel(mChannel);
         }
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(),"someLittleHack")
-                            .setSmallIcon(R.mipmap.up_icon)
+                            .setSmallIcon(R.drawable.notification)
                             .setContentTitle(notificationId)
                             .setContentText("I should disappear fast, if no something went wrong");
 

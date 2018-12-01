@@ -106,7 +106,7 @@ public class BackgroundService extends Service {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             initChannel();
             android.support.v4.app.NotificationCompat.Builder builder = new NotificationCompat.Builder(this,NOTIFICATION_CHANNEL_ID_SERVICE)
-                    .setSmallIcon(R.mipmap.power_icon)
+                    .setSmallIcon(R.drawable.notification)
                     .setContentTitle("Background LazyIr")
                     .setContentText("Sorry android 8 require it");
             startForeground(NOTIF_ID,builder.build());

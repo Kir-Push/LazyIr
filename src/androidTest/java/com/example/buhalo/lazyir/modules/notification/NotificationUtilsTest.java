@@ -59,36 +59,6 @@ public class NotificationUtilsTest {
     @Test
     public void castToMyNotification() throws Exception {
 
-        notificationManager.cancelAll();
-        Thread.sleep(10);
-        notificationManager.notify(1,notification);
-        Icon smallIcon = notification.getSmallIcon();
-        Drawable drawable = smallIcon.loadDrawable(appContext);
-        Bitmap bitmap = drawableToBitmap(drawable);
-        String base64 = bitmapToBase64(bitmap);
-        String base642 = bitmapToBase64(drawableToBitmap(notification2.getSmallIcon().loadDrawable(appContext)));
-        StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
-        com.example.buhalo.lazyir.modules.notification.notifications.Notification notification1 = NotificationUtils.castToMyNotification(activeNotifications[0]);
-        assertEquals(activeNotifications.length,1);
-        System.out.println(notification1.getIcon());
-        assertEquals(notification1.getText(),"Hello World!");
-        assertEquals(notification1.getTitle(),"My notification");
-        assertNotEquals(notification1.getIcon(),base642);
-
-
-
-        notificationManager.notify(2,notification2);
-        Thread.sleep(10);
-        activeNotifications = notificationManager.getActiveNotifications();
-        com.example.buhalo.lazyir.modules.notification.notifications.Notification notification3 = NotificationUtils.castToMyNotification(activeNotifications[1].getId() != 2 ? activeNotifications[0] : activeNotifications[1]);
-        System.out.println(notification3.getIcon());
-        assertNotEquals(notification3.getIcon(),base64);
-        assertEquals(notification3.getIcon(),base642);
-        assertEquals(notification3.getTitle(),"My notification-2");
-        assertEquals(notification3.getText(),"Hello World-2!");
-        assertNotEquals(notification3.getText(),"Hello World");
-        assertNotEquals(activeNotifications[0].getId(),activeNotifications[1].getId());
-        // todo rewrite, невозможно читать
     }
 
     private static String bitmapToBase64(Bitmap bitmap){

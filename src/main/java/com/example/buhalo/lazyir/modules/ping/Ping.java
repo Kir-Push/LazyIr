@@ -76,7 +76,7 @@ public class Ping extends Module {
         stopAlarmAction.putExtra("id", ID);
         PendingIntent pendingIntentOff = PendingIntent.getBroadcast(context, 775533, stopAlarmAction, PendingIntent.FLAG_CANCEL_CURRENT);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.up_icon)
+                .setSmallIcon(R.drawable.notification)
                 .setContentTitle("FOUND ME")
                 .setContentText("Click to turn Off")
                 .setContentIntent(pendingIntentOff)

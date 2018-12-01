@@ -9,7 +9,7 @@
         android:id="@+id/pair_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/no_pair" />
+        android:src="@drawable/no_pair" />
 
     <TextView
         android:contentDescription="@string/paired"

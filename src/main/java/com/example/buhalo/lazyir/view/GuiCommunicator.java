@@ -36,10 +36,10 @@ public class GuiCommunicator {
         PendingIntent pendingIntentYes = PendingIntent.getBroadcast(context, 775533, yesAction, PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent pendingIntentNo = PendingIntent.getBroadcast(context, 775534, noReceive, PendingIntent.FLAG_CANCEL_CURRENT);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context,CHANEL_PAIR_ID)
-                        .setSmallIcon(R.mipmap.no_pair)
+                        .setSmallIcon(R.drawable.no_pair)
                         .setContentTitle(np.getName() + " Request pairing!")
                         .setContentText("You want to be friend?");
-        mBuilder.addAction(R.mipmap.yes_pair,"Yes",pendingIntentYes);
+        mBuilder.addAction(R.drawable.yes_pair,"Yes",pendingIntentYes);
         mBuilder.addAction(R.drawable.delete48,"No",pendingIntentNo);
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if(mNotifyMgr != null) {

@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -30,7 +29,6 @@ import com.example.buhalo.lazyir.device.Device;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
 import com.example.buhalo.lazyir.service.network.tcp.PairService;
 import com.example.buhalo.lazyir.view.UiCmds;
-import com.example.buhalo.lazyir.view.adapters.SampleFragmentPagerAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,12 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     private DevicesAdapter adapter;
-    private SampleFragmentPagerAdapter sampleFragmentPagerAdapter;
     @Inject @Getter @Setter
     PairService pairService;
-
-    @Setter @Getter
-    private static boolean editMode;
 
     private static final int PERMISSION_ALL = 566;
     private static final String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_CALL_LOG,Manifest.permission.WRITE_CALL_LOG, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.RECEIVE_SMS,Manifest.permission.SEND_SMS,Manifest.permission.READ_SMS,Manifest.permission.READ_CONTACTS,Manifest.permission.READ_PHONE_STATE,Manifest.permission_group.PHONE};
@@ -92,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.mipmap.andrr);
+            actionBar.setHomeAsUpIndicator(R.drawable.android_app);
             actionBar.setTitle(BackgroundUtil.getSelectedId());
         }
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -109,11 +103,29 @@ public class MainActivity extends AppCompatActivity {
                 R.string.close_drawer  /* "close drawer" description */
         );
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        sampleFragmentPagerAdapter = new SampleFragmentPagerAdapter(getFragmentManager(), getApplicationContext());
-        ViewPager viewPager = findViewById(R.id.viewpager);
-        viewPager.setAdapter(sampleFragmentPagerAdapter);
-        TabLayout tabLayout = findViewById(R.id.sliding_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        createMainPage();
+    }
+
+    private void createMainPage() {
+        LinearLayout contentFrame = findViewById(R.id.content_frame);
+        contentFrame.findViewById(R.id.media_start_btn).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MediaRemoteActivity.class);
+            startActivity(intent);
+        });
+        contentFrame.findViewById(R.id.touch_control).setOnClickListener(v -> {
+            Intent intent = new Intent(this, TouchActivity.class);
+            startActivity(intent);
+        });
+        contentFrame.findViewById(R.id.command_start_btn).setOnClickListener(v -> {
+            Intent intent = new Intent(this, CommandActivity.class);
+            startActivity(intent);
+        });
+        contentFrame.findViewById(R.id.share_start_btn).setOnClickListener(v -> {
+
+        });
+        contentFrame.findViewById(R.id.clipboard_start_btn).setOnClickListener(v -> {
+
+        });
     }
 
     private void requestPermissions() {
@@ -157,18 +169,10 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         Device device = BackgroundUtil.getDevice(BackgroundUtil.getSelectedId());
-        if(item.toString().equals("Edit")) {
-            boolean checked = item.isChecked();
-            item.setChecked(!checked);
-            setEditMode(!checked);
-            // when selected option edit, buttons need to change listeners, therefore need recreate fragment's.
-            // crutch is re-set fragment adapter to layout, which cause recreating fragments
-            ViewPager viewPager = findViewById(R.id.viewpager);
-           viewPager.setAdapter(sampleFragmentPagerAdapter);
-        }else if(item.toString().equals("Options")) {
+      if(item.toString().equals("Options")) {
             Intent intent = new Intent(this, ModulesActivity.class);
             startActivity(intent);
-        }else if(device != null && device.isPaired() && item.toString().equals("Unpair")) {
+        }else if(device != null && device.isPaired() && item.toString().equals("UnPair")) {
             pairService.sendUnpairRequest(device.getId(),getApplicationContext());
        } else if (device != null && !device.isPaired() && item.toString().equals("Pair")) {
             pairService.sendPairRequest(device.getId(),getApplicationContext());
@@ -182,18 +186,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Device device = BackgroundUtil.getDevice(BackgroundUtil.getSelectedId());
         if(device != null && device.isPaired()) {
-            menu.add("Unpair");
+            menu.add("UnPair");
         } else {
             menu.add("Pair");
         }
         menu.add("Options");
-        MenuItem edit = menu.add("Edit");
-        edit.setCheckable(true);
-        if(isEditMode()) {
-            edit.setChecked(true);
-        } else {
-            edit.setChecked(false);
-        }
         return true;
     }
 
@@ -229,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
             if(values.size() <= position){
                 return values.iterator().next();
             }
-           return values.toArray(new Device[values.size()])[position];
+           return values.toArray(new Device[0])[position];
         }
 
         @Override
@@ -248,10 +245,10 @@ public class MainActivity extends AppCompatActivity {
                 String id = d.getId();
                 ((TextView) view.findViewById(R.id.connected_device)).setText(id);
                 if (d.isPaired()) {
-                    ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.mipmap.yes_pair);
+                    ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.drawable.yes_pair);
                 }
                 else {
-                    ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.mipmap.no_pair);
+                    ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.drawable.no_pair);
                 }
                 if (BackgroundUtil.getSelectedId().equals(id)) {
                     ((TextView) view.findViewById(R.id.connected_device)).setTextColor(Color.GRAY);

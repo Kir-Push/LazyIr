@@ -2,34 +2,71 @@
 
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/sliding_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
     <android.support.v4.widget.DrawerLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <!-- The main content view -->
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@android:color/white" >
 
-            <android.support.v4.view.ViewPager
-                android:id="@+id/viewpager"
+            <Button
+                android:id="@+id/media_start_btn"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white" />
-        </FrameLayout>
+                android:layout_height="68dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/media_control"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/touch_control"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/touch_control"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/command_start_btn"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/command"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/share_start_btn"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/share"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/clipboard_start_btn"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/clipboard_history"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
         <!-- The navigation drawer -->
         <ListView android:id="@+id/left_drawer"
             android:layout_width="240dp"

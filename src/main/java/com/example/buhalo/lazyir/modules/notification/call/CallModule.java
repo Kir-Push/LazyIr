@@ -14,6 +14,8 @@ import android.view.KeyEvent;
 import com.example.buhalo.lazyir.api.MessageFactory;
 import com.example.buhalo.lazyir.api.NetworkPackage;
 import com.example.buhalo.lazyir.modules.Module;
+import com.example.buhalo.lazyir.modules.notification.NotificationTypes;
+import com.example.buhalo.lazyir.service.BackgroundUtil;
 import com.example.buhalo.lazyir.service.listeners.NotificationListener;
 
 import org.greenrobot.eventbus.EventBus;
@@ -23,15 +25,30 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Synchronized;
+
+import static com.example.buhalo.lazyir.modules.notification.call.CallModule.api.ANSWER;
 import static com.example.buhalo.lazyir.service.receivers.CallReceiver.setRingerMode;
 
 
 public class CallModule extends Module {
     private static final String TAG = "CallModule";
+    @Setter @Getter
+    private static boolean isPlainCall = false;
+    @Setter @Getter
+    private static int lastState;
+    @Setter @Getter
+    private static boolean taskCreated;
+    @Setter @Getter
+    private static  ScheduledFuture<?> scheduledFuture;
     public enum api{
         CALL,
         ENDCALL,
@@ -46,6 +63,10 @@ public class CallModule extends Module {
     public CallModule(MessageFactory messageFactory, Context context) {
         super(messageFactory, context);
         EventBus.getDefault().register(this);
+        if(!isTaskCreated()){
+            setMessengerCallDetectionTask(context,messageFactory,this.getClass().getSimpleName());
+            setTaskCreated(true);
+        }
     }
 
     @Override
@@ -73,6 +94,11 @@ public class CallModule extends Module {
     @Override
     public void endWork() {
         EventBus.getDefault().unregister(this);
+        if(BackgroundUtil.ifLastConnectedDeviceAreYou(device.getId()) && getScheduledFuture() != null){
+            getScheduledFuture().cancel(true);
+            setScheduledFuture(null);
+            setTaskCreated(false);
+        }
     }
 
     private void answerCall(CallModuleDto dto) {
@@ -173,8 +199,42 @@ public class CallModule extends Module {
         //can't do that
     }
 
+    @Synchronized
+    private static void setMessengerCallDetectionTask(Context context,MessageFactory messageFactory,String className){
+        if(getScheduledFuture() != null){
+           getScheduledFuture().cancel(true);
+        }
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        setScheduledFuture(BackgroundUtil.getTimerExecutor().scheduleAtFixedRate(() -> {
+            final int mode = am.getMode();
+            if (!isPlainCall() && getLastState() != mode) {
+                CallModuleDto dto = null;
+                if (AudioManager.MODE_IN_CALL == mode) {
+                  //  dto = new CallModuleDto(ANSWER.name(), NotificationTypes.ANSWER.name(), "messenger answer call");
+                } else if (AudioManager.MODE_IN_COMMUNICATION == mode) {
+                    dto = new CallModuleDto(ANSWER.name(), NotificationTypes.ANSWER.name(), "messenger answer call");
+                    // device is in communiation mode, i.e. in a VoIP or video call
+                } else if (AudioManager.MODE_RINGTONE == mode) {
+                    // device is in ringing mode, some incoming is being signalled
+                    dto = new CallModuleDto(api.CALL.name(), NotificationTypes.INCOMING.name(), "messenger call");
+                } else {
+                    // device is in normal mode, no incoming and no audio being played
+                }
+                if (dto != null) {
+                    BackgroundUtil.sendToAll(messageFactory.createMessage(className, true, dto), context);
+                }
+            }
+            setLastState(mode);
+        }, 0, 1000, TimeUnit.MILLISECONDS));
+    }
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receiveCallSignal(CallModuleDto dto){
+        if(dto.getCommand().equals(api.CALL.name())){
+            setPlainCall(true);
+        }else if(dto.getCommand().equals(api.ENDCALL.name())){
+            setPlainCall(false);
+        }
         sendMsg(messageFactory.createMessage(this.getClass().getSimpleName(),true,dto));
     }
 
