@@ -77,13 +77,7 @@ public class SendCommand extends Module {
         if(commands == null || commands.isEmpty()) {
             return;
         }
-        List<Button> buttons = dbHelper.getButtons("1", context); // from first tab
-        List<Command> commandList = new ArrayList<>();
-        Stream.of(buttons).forEach(btn -> commandList.addAll(dbHelper.getBtnCommands(String.valueOf(btn.getId()))));
-        Stream.of(commands).forEach(command -> {
-            dbHelper.updateCommand(command);
-        Stream.of(commandList).filter(cmd -> cmd.getCommandName().equals(command.getCommandName())).forEach(cmd -> dbHelper.updateBtnCommand(command));
-        });
+        Stream.of(commands).forEach(dbHelper::updateCommand);
     }
 
     private void addCommand(SendCommandDto dto) {
@@ -99,14 +93,7 @@ public class SendCommand extends Module {
         if(commands == null || commands.isEmpty()) {
             return;
         }
-        List<Button> buttons = dbHelper.getButtons("1", context); // from first tab
-        List<Command> commandList = new ArrayList<>();
-        Stream.of(buttons).forEach(btn -> commandList.addAll(dbHelper.getBtnCommands(String.valueOf(btn.getId()))));
-
-        Stream.of(commands).forEach(command -> {
-            dbHelper.deleteCommand(command);
-            Stream.of(commandList).filter(cmd -> cmd.getCommandName().equals(command.getCommandName())).forEach(cmd -> dbHelper.removeCommandBtn(cmd.getOwnerId(),cmd.getCommandName()));
-        });
+        Stream.of(commands).forEach(dbHelper::deleteCommand);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

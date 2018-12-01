@@ -2,9 +2,6 @@ package com.example.buhalo.lazyir.db;
 
 import android.provider.BaseColumns;
 
-/**
- * Created by buhalo on 28.02.17.
- */
 
 public interface DbCommands extends BaseColumns {
      String TABLE_NAME_BUTTON = "button";
