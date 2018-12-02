@@ -237,7 +237,8 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
         List<String> enabledModules = getEnabledModules(dv);
         if (enabledModules.isEmpty() && checkIfFirstTimeDevice(dv)) {
-            enabledModules = fillStandart(dv);
+             fillStandart(dv);
+            return getEnabledModules(dv);
         }
         return enabledModules;
     }
@@ -246,8 +247,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
     // return list of enabled modules names by this method - actually all modules
     // lock for write and read
     @Synchronized
-    private List<String> fillStandart(String dv) {
-        List<String> result = new ArrayList<>();
+    private void fillStandart(String dv) {
         try (SQLiteDatabase db = getWritableDatabase()) {
             for (com.example.buhalo.lazyir.utils.entity.Pair<Class, Class> pair : ModuleFactory.getRegisteredModules().values()) {
                 Class moduleClass = pair.getLeft();
@@ -258,7 +258,6 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
                 db.insert(TABLE_NAME_MODULE, null, values);
             }
         }
-        return result;
     }
     // checking if device modules info exist in db.
     // simply checking module table for device id.

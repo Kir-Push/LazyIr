@@ -1,43 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout_editor_absoluteX="0dp"
-    tools:layout_editor_absoluteY="81dp">
+    tools:layout_editor_absoluteY="81dp"
+    tools:layout_editor_absoluteX="0dp">
 
     <TextView
         android:id="@+id/trackName"
-        android:layout_width="0dp"
-        android:layout_height="89dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
+        android:layout_width="536dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:ems="10"
         android:text="@string/name"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/spinner"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.404"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/spinner"
         app:layout_constraintTop_toBottomOf="@+id/spinner"
         app:layout_constraintVertical_bias="0.0" />
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="375dp"
-        android:layout_height="89dp"
+        android:layout_width="537dp"
+        android:layout_height="90dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="24dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintHorizontal_bias="0.402"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.085" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <SeekBar
         android:id="@+id/timeLine"
@@ -45,28 +46,31 @@
         android:layout_width="324dp"
         android:layout_height="32dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:splitTrack="false"
         android:theme="@android:style/Widget.Material.SeekBar"
         android:thumb="@drawable/square"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.535"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.784" />
+        app:layout_constraintVertical_bias="0.933" />
 
     <Button
         android:id="@+id/playButton"
         android:layout_width="93dp"
         android:layout_height="86dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/play"
-        app:layout_constraintBottom_toTopOf="@+id/volume_bar"
+        app:layout_constraintBottom_toTopOf="@+id/timeLine"
+        app:layout_constraintEnd_toStartOf="@+id/nextBtn"
+        app:layout_constraintHorizontal_bias="0.937"
         app:layout_constraintStart_toEndOf="@+id/prewBtn"
         app:layout_constraintTop_toBottomOf="@+id/trackName" />
 
@@ -74,6 +78,7 @@
         android:id="@+id/prewBtn"
         android:layout_width="93dp"
         android:layout_height="86dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/previous"
         app:layout_constraintStart_toStartOf="@+id/timeLine"
         app:layout_constraintTop_toTopOf="@+id/playButton" />
@@ -82,9 +87,9 @@
         android:id="@+id/nextBtn"
         android:layout_width="93dp"
         android:layout_height="86dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/next"
-        app:layout_constraintStart_toEndOf="@+id/playButton"
+        app:layout_constraintEnd_toEndOf="@+id/timeLine"
         app:layout_constraintTop_toTopOf="@+id/playButton" />
 
     <SeekBar
@@ -95,42 +100,44 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
         android:max="100"
         android:splitTrack="false"
         android:thumb="@drawable/volume_box"
         app:layout_constraintBottom_toTopOf="@+id/timeLine"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintHorizontal_bias="0.963"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/playButton"
-        app:layout_constraintVertical_bias="0.864" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/lenght_text"
-        android:layout_width="154dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="64dp"
+        android:layout_width="177dp"
+        android:layout_height="17dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.331"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timeLine"
-        app:layout_constraintVertical_bias="0.024" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/loop_btn"
-        android:layout_width="51dp"
-        android:layout_height="35dp"
+        android:layout_width="47dp"
+        android:layout_height="32dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/repeat"
         android:text=""
+        app:layout_constraintBottom_toTopOf="@+id/timeLine"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.126"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/volume_bar" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.966" />
 
 </android.support.constraint.ConstraintLayout>

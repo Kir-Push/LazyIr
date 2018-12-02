@@ -11,6 +11,7 @@ import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -69,7 +70,7 @@ public class TcpConnectionManager {
             sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
             SSLSocketFactory factory = sslContext.getSocketFactory();
             return factory.createSocket(ip, port);
-        } catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException | EOFException e) {
             Log.e(TAG, "Exception while creating connection: ", e);
             throw new IOException("Could not connect to SSL Server", e);
         }

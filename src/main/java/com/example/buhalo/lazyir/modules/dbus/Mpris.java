@@ -23,7 +23,8 @@ public class Mpris extends Module {
         OPENURI,
         SETPOSITION,
         VOLUME,
-        ALLPLAYERS
+        ALLPLAYERS,
+        REPEAT
     }
 
     @Inject
@@ -75,9 +76,16 @@ public class Mpris extends Module {
            case SETPOSITION:
                sendSeek(cmd.getPlayer(),cmd.getData());
                break;
+           case REPEAT:
+               sendRepeat(cmd.getPlayer());
+               break;
            default:
                break;
        }
+    }
+
+    private void sendRepeat(Player player) {
+        send(player,api.REPEAT.name());
     }
 
     @Override

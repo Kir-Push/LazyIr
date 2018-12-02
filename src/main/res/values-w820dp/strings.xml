@@ -5,4 +5,5 @@
     <string name="share">Share</string>
     <string name="command">Command</string>
     <string name="touch_control">Touch Control</string>
+    <string name="name">Name</string>
 </resources>

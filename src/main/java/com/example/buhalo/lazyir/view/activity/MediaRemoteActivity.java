@@ -27,6 +27,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -46,30 +47,24 @@ public class MediaRemoteActivity extends AppCompatActivity {
     private SeekBar volumeLine;
     private Button next;
     private Button prev;
+    private Button repeat;
+    private boolean timeTouched;
+    private boolean volumeTouched;
 
     private ScheduledFuture<?> scheduledFuture;
 
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receivePlayers(MprisDto mprisDto){
-        List<Player> players = mprisDto.getPlayers();
-        if(players == null || players.isEmpty()){
+        TreeSet<Player> players = new TreeSet<>(mprisDto.getPlayers());
+        if(players.isEmpty()){
             return;
         }
         playerNameToAdapter.clear();
         for (Player player : players) {
-            int counter = 0;
-            StringBuilder name = new StringBuilder(player.getName());
-            while(playerNameToAdapter.contains(name.toString())) {
-                name.append("-!!-").append(String.valueOf(++counter));
-            }
-
-            if(player.getId().equals("-1")){
-                int length = player.getName().length();
-                name = new StringBuilder(player.getName().substring(23, length));
-            }
-            playerNameToAdapter.add(name.toString());
-            playerHashMap.put(name.toString(),player);
+            String name = setPlayerName(player);
+            playerNameToAdapter.add(name);
+            playerHashMap.put(name,player);
         }
 
         if(playerNameToAdapter.isEmpty()) {
@@ -84,14 +79,13 @@ public class MediaRemoteActivity extends AppCompatActivity {
         if(player != null) {
             double length = player.getLength();
             double currTime = player.getCurrTime();
-            timeLine.setMax((int) length);
-            timeLine.setProgress((int) currTime);
+            setTimeLine(length,currTime);
             timeLine.refreshDrawableState();
 
-            lenghtTxt.setText(createTimeStatusString(currTime, length));
+            lenghtTxt.setText(createTimeStatusString((int)currTime, (int)length));
             lenghtTxt.refreshDrawableState();
 
-            setVolumeLine((int) player.getVolume());
+            setVolumeLine(player.getVolume());
 
             title.setText(player.getTitle());
             title.refreshDrawableState();
@@ -105,38 +99,79 @@ public class MediaRemoteActivity extends AppCompatActivity {
         }
     }
 
-    private String createTimeStatusString(double currTime, double length) {
+    private void setTimeLine(double length, double currTime) {
+        if(!timeTouched) {
+            if (length != currTime && length > 0 && currTime >= 0) {
+                timeLine.setMax((int) length);
+                timeLine.setProgress((int) currTime);
+            } else {
+                timeLine.setMax(0);
+                timeLine.setProgress(0);
+            }
+        }else{
+            timeTouched = false;
+        }
+
+    }
+
+    private String setPlayerName(Player player) {
+        int counter = 0;
+        StringBuilder name = new StringBuilder(player.getName());
+        while(playerNameToAdapter.contains(name.toString())) {
+            name.append("-!!-").append(++counter);
+        }
+
+        if(player.getId().equals("-1")){
+            int length = player.getName().length();
+            name = new StringBuilder(player.getName().substring(23, length));
+        }
+        return name.toString();
+    }
+
+    private String createTimeStatusString(int currTime, int length) {
         String result = "";
-        double secs = currTime % 60;
-        double min = currTime / 60;
+        if(currTime < 0 && length == currTime){
+            result += currTime;
+            return result;
+        }
+        int secs = currTime % 60;
+        int min = currTime / 60;
         if(min < 10 && min >= 0){
             result += "0";
         }
-        result += Double.toString(min);
+        result += Integer.toString(min);
         result += ":";
         if(secs < 10 && secs >= 0){
             result += "0";
         }
-        result += Double.toString(secs);
+        result += Integer.toString(secs);
         result += " / ";
-        double lengSecs = length % 60;
-        double lengMin = length / 60;
+        int lengSecs = length % 60;
+        int lengMin = length / 60;
         if(lengMin < 10 && lengMin >= 0){
             result += "0";
         }
-        result += Double.toString(lengMin);
+        result += Integer.toString(lengMin);
         result += ":";
         if(lengSecs < 10 && lengSecs >= 0){
             result += "0";
         }
-        result += Double.toString(lengSecs);
+        result += Integer.toString(lengSecs);
         return result;
     }
 
-    private void setVolumeLine(int volume) {
-        volumeLine.setMax(100);
-        volumeLine.setProgress(volume);
-        volumeLine.refreshDrawableState();
+    private void setVolumeLine(double volume) {
+        int actualVolume = (int)volume;
+        if(actualVolume <= 0){
+            actualVolume = (int) (volume * 100);
+        }
+        if(!volumeTouched) {
+            volumeLine.setMax(100);
+            volumeLine.setProgress(actualVolume);
+            volumeLine.refreshDrawableState();
+        }else{
+            volumeTouched = false;
+        }
     }
 
     @Override
@@ -171,6 +206,8 @@ public class MediaRemoteActivity extends AppCompatActivity {
         volumeLine = findViewById(R.id.volume_bar);
         next =  findViewById(R.id.nextBtn);
         prev = findViewById(R.id.prewBtn);
+        repeat = findViewById(R.id.loop_btn);
+
         setListeners();
     }
 
@@ -178,6 +215,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
         play.setOnClickListener(v -> EventBus.getDefault().post(new MprisCommand(Mpris.api.PLAYPAUSE.name(),selectedId,getPlayer())));
         next.setOnClickListener(v -> EventBus.getDefault().post(new MprisCommand(Mpris.api.NEXT.name(),selectedId,getPlayer())));
         prev.setOnClickListener(v -> EventBus.getDefault().post(new MprisCommand(Mpris.api.PREVIOUS.name(),selectedId,getPlayer())));
+        repeat.setOnClickListener(v -> EventBus.getDefault().post(new MprisCommand(Mpris.api.REPEAT.name(),selectedId,getPlayer())));
         volumeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -189,8 +227,8 @@ public class MediaRemoteActivity extends AppCompatActivity {
                  }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                volumeTouched = true;
                 EventBus.getDefault().post(new MprisCommand(Mpris.api.VOLUME.name(),selectedId,getPlayer(),seekBar.getProgress()));
-                setVolumeLine(seekBar.getProgress());
             }});
 
         timeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -212,6 +250,7 @@ public class MediaRemoteActivity extends AppCompatActivity {
                 else {
                     arg = (int) (seekBar.getProgress() - player.getCurrTime());
                 }
+                timeTouched = true;
                 EventBus.getDefault().post(new MprisCommand(Mpris.api.SEEK.name(),selectedId,player,arg));
             }
         });
