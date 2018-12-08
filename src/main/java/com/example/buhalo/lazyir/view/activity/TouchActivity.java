@@ -1,10 +1,13 @@
 package com.example.buhalo.lazyir.view.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -19,6 +22,7 @@ public class TouchActivity extends AppCompatActivity {
 
     private Button leftbtn;
     private Button rightbtn;
+    private Button showKeyboard;
     private View touchView;
     private int startx;
     private int starty;
@@ -34,6 +38,7 @@ public class TouchActivity extends AppCompatActivity {
             return;
         }
         setContentView(R.layout.touch_layout);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 
     @Override
@@ -42,6 +47,7 @@ public class TouchActivity extends AppCompatActivity {
         touchView = findViewById(R.id.touchView);
         leftbtn = findViewById(R.id.leftBtn);
         rightbtn = findViewById(R.id.rightBtn);
+        showKeyboard = findViewById(R.id.show_keyboard);
         setListeners();
     }
 
@@ -69,6 +75,10 @@ public class TouchActivity extends AppCompatActivity {
         });
         leftbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.CLICK.name(),id)));
         rightbtn.setOnClickListener(v -> EventBus.getDefault().post(new TouchControlDto(TouchControl.api.RCLICK.name(),id)));
+        showKeyboard.setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        });
     }
 
     private void move(int x, int y, double sensitibly) {

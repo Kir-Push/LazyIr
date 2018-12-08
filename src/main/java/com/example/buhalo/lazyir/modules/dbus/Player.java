@@ -54,7 +54,7 @@ public class Player implements Comparable<Player> {
     @Override
     public int compareTo(Player o) {
         if(getTitle().equals(o.getTitle())){
-            return o.getId().compareTo(getId());
+            return Double.compare(o.getLength(),getLength());
         }
         else {
             return o.getTitle().compareTo(getTitle());

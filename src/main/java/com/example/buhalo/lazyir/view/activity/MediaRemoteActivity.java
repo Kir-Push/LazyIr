@@ -115,10 +115,12 @@ public class MediaRemoteActivity extends AppCompatActivity {
     }
 
     private String setPlayerName(Player player) {
-        int counter = 0;
+        int counter = 1;
         StringBuilder name = new StringBuilder(player.getName());
-        while(playerNameToAdapter.contains(name.toString())) {
-            name.append("-!!-").append(++counter);
+        StringBuilder temp = new StringBuilder(name);
+        while(playerNameToAdapter.contains(temp.toString())) {
+            temp = new StringBuilder(name);
+           temp.append(" ").append(counter++);
         }
 
         if(player.getId().equals("-1")){

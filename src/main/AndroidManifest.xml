@@ -52,15 +52,12 @@
         </activity>
 
 
-        <activity android:name=".modules.shareScreen.ScreenShareActivity"
-            android:parentActivityName=".view.activity.MainActivity"
-            android:label="ScreenShare"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
 
         <activity android:name=".view.activity.TouchActivity"
             android:parentActivityName=".view.activity.MainActivity"
             android:label="TouchControl"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize|screenLayout|uiMode"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
