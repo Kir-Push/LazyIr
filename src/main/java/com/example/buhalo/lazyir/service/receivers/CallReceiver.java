@@ -76,6 +76,8 @@ public class CallReceiver extends BroadcastReceiver {
             String number = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
             int state = 0;
             if (stateStr != null) {
+
+                System.out.println("received call!!");
                 if (stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
                     state = TelephonyManager.CALL_STATE_IDLE;
                 } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {

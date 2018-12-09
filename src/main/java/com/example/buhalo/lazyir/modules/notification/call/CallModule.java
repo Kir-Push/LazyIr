@@ -207,10 +207,9 @@ public class CallModule extends Module {
         AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setScheduledFuture(BackgroundUtil.getTimerExecutor().scheduleAtFixedRate(() -> {
             final int mode = am.getMode();
+            CallModuleDto dto = null;
             if (!isPlainCall() && getLastState() != mode) {
-                CallModuleDto dto = null;
                 if (AudioManager.MODE_IN_CALL == mode) {
-                  //  dto = new CallModuleDto(ANSWER.name(), NotificationTypes.ANSWER.name(), "messenger answer call");
                 } else if (AudioManager.MODE_IN_COMMUNICATION == mode) {
                     dto = new CallModuleDto(ANSWER.name(), NotificationTypes.ANSWER.name(), "messenger answer call");
                     // device is in communiation mode, i.e. in a VoIP or video call
@@ -218,9 +217,12 @@ public class CallModule extends Module {
                     // device is in ringing mode, some incoming is being signalled
                     dto = new CallModuleDto(api.CALL.name(), NotificationTypes.INCOMING.name(), "messenger call");
                 } else {
+                    if(getLastState() == AudioManager.MODE_IN_COMMUNICATION || getLastState() == AudioManager.MODE_RINGTONE){
+                        dto = new CallModuleDto(api.ENDCALL.name(),NotificationTypes.INCOMING.name(),"messenger end call");
+                    }
                     // device is in normal mode, no incoming and no audio being played
                 }
-                if (dto != null) {
+                if (dto != null && !isPlainCall()) {
                     BackgroundUtil.sendToAll(messageFactory.createMessage(className, true, dto), context);
                 }
             }
