@@ -198,7 +198,7 @@ public class NotificationListener extends NotificationListenerService {
     // charging notification show each time when percent update, we don't want to see it
     // so filter it
     private boolean checkChargingNotification(Notification notification) {
-        if(notification.getPack().equals("com.android.systemui")){ // charging notifs have this packageName
+        if(notification.getPack() != null && notification.getPack().equals("com.android.systemui")){ // charging notifs have this packageName
             NotificationManager notificationManager = (NotificationManager)  getSystemService(NOTIFICATION_SERVICE);
             if(notificationManager == null) {
                 return false;

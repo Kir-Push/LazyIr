@@ -98,7 +98,7 @@ public class Messengers extends Module {
          MessengersDto dto = new MessengersDto(api.ANSWER.name());
          dto.setTypeName(typeName);
          dto.setNotification(notification);
-         notification.setPack(tryExtractPack(notification.getPack()));
+         notification.setPack(notification.getPack());
          String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, dto);
          sendMsg(message);
     }
