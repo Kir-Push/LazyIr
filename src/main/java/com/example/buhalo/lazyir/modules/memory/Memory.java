@@ -74,7 +74,7 @@ public class Memory extends Module {
         long allMemory = getAllMemory();
         List<MemPair> extMemory = getExtMemory();
         MemoryEntity memoryEntity = new MemoryEntity(allMemory,freeMem,extMemory);
-        String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, new MemoryDto(api.GET_CRT.name(), memoryEntity));
+        String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, new MemoryDto(api.GET_FREE_MEM.name(), memoryEntity));
         sendMsg(message);
     }
 

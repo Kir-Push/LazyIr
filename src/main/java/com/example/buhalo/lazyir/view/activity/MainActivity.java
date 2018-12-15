@@ -35,12 +35,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collection;
-
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import lombok.Getter;
 import lombok.Setter;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         createMainPage();
     }
+
 
     private void createMainPage() {
         LinearLayout contentFrame = findViewById(R.id.content_frame);
