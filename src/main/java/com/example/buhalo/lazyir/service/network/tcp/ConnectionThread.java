@@ -163,6 +163,7 @@ public class ConnectionThread implements Runnable {
             dv.closeConnection();
         }
 
+        System.out.println(dto.getModuleSettings());
         Device device = new Device(deviceId, np.getName(), connection.getInetAddress(), this, dto.getModuleSettings(), moduleFactory);
         device.enableModules();
         BackgroundUtil.addDeviceToConnected(deviceId, device);

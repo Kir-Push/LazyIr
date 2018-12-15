@@ -28,6 +28,8 @@ import com.example.buhalo.lazyir.modules.notification.sms.SmsModule;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommandDto;
 import com.example.buhalo.lazyir.modules.share.ShareModule;
 import com.example.buhalo.lazyir.modules.share.ShareModuleDto;
+import com.example.buhalo.lazyir.modules.touch.KeyboardControl;
+import com.example.buhalo.lazyir.modules.touch.KeyboardDto;
 import com.example.buhalo.lazyir.modules.touch.TouchControl;
 import com.example.buhalo.lazyir.modules.touch.TouchControlDto;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
@@ -108,6 +110,7 @@ public class ModuleFactory {
             registeredModules.put("Reminder",new Pair<>(Reminder.class, ReminderDto.class));
             registeredModules.put("Memory",new Pair<>(Memory.class, MemoryDto.class));
             registeredModules.put("Ping",new Pair<>(Ping.class, PingDto.class));
+            registeredModules.put("KeyboardControl",new Pair<>(KeyboardControl.class, KeyboardDto.class));
         }
     }
 

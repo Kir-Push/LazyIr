@@ -302,10 +302,12 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
             values.put(COLUMN_NAME_MODULE_NAME, moduleName);
             values.put(COLUMN_NAME_MODULE_DEVICE, dv);
             values.put(COLUMN_NAME_MODULE_STATUS, status ? statusOn : statusOff);
-            String selection = COLUMN_NAME_MODULE_DEVICE + LIKE_AND + COLUMN_NAME_MODULE_NAME + LIKE;
-            String[] args = new String[]{dv, moduleName};
-            db.update(TABLE_NAME_MODULE, values, selection, args);
+       //     String selection = COLUMN_NAME_MODULE_DEVICE + LIKE_AND + COLUMN_NAME_MODULE_NAME + LIKE;
+       //     String[] args = new String[]{dv, moduleName};
+            db.insert(TABLE_NAME_MODULE, null, values);
         }
+
+
     }
     //*************************************************************************************************************************
     // getMissed calls from CallLog

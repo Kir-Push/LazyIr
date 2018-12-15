@@ -13,6 +13,7 @@ import com.example.buhalo.lazyir.modules.ping.Ping;
 import com.example.buhalo.lazyir.modules.notification.reminder.Reminder;
 import com.example.buhalo.lazyir.modules.sendcommand.SendCommand;
 import com.example.buhalo.lazyir.modules.share.ShareModule;
+import com.example.buhalo.lazyir.modules.touch.KeyboardControl;
 import com.example.buhalo.lazyir.modules.touch.TouchControl;
 
 import dagger.Subcomponent;
@@ -34,4 +35,5 @@ public interface ModuleComponent {
     Reminder provideReminder();
     ShareModule provideShareModule();
     TouchControl provideTouchControl();
+    KeyboardControl provideKeyboardControl();
 }
