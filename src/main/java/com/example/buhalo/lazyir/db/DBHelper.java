@@ -38,7 +38,7 @@ import lombok.Synchronized;
 public class DBHelper extends SQLiteOpenHelper implements DbCommands {
 
     private static final String TAG = "DBHelper";
-    private static final int DATABASE_VERSION = 34;
+    private static final int DATABASE_VERSION = 35;
     private static final String LIKE_AND = " LIKE ? AND ";
     private static final String LIKE = " LIKE ?";
     private String dbpath;
@@ -141,9 +141,6 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         try (SQLiteDatabase db = getWritableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_TEXT, command.getCommandName());
-            values.put(COLUMN_NAME_COMAMND_VENDOR, command.getProducer());
-            values.put(COLUMT_NAME_COMMAND_DEVICE, command.getDevice());
-            values.put(COLUMN_NAME_COMMAND_TYPE, command.getType());
             values.put(COLUMN_NAME_COMMAND, command.getCmd());
             db.insert(TABLE_NAME_COMMANDS, null, values);
         }
@@ -153,22 +150,19 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         List<Command> commands = new ArrayList<>();
         try (SQLiteDatabase db = getReadableDatabase()) {
             String[] projection = {
+                    _ID,
                     COLUMN_NAME_TEXT,
-                    COLUMN_NAME_COMAMND_VENDOR,
-                    COLUMT_NAME_COMMAND_DEVICE,
-                    COLUMN_NAME_COMMAND_TYPE,
                     COLUMN_NAME_COMMAND
-
             };
             String selection = null;
             String[] selectionArgs = null;
             if (commandName != null) {
-                selection = COLUMN_NAME_TEXT + LIKE_AND + COLUMN_NAME_COMMAND_TYPE + LIKE;
-                selectionArgs = new String[]{commandName, "pc"};
+                selection = COLUMN_NAME_TEXT + LIKE;
+                selectionArgs = new String[]{commandName};
             }
             try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
                 while (c.moveToNext()) {
-                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR)), c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE)), c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), c.getInt(c.getColumnIndex(_ID)));
                     commands.add(command);
                 }
             }
@@ -179,12 +173,13 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
     public int updateCommand(Command command){
         try(SQLiteDatabase db = getWritableDatabase()){
             ContentValues values = new ContentValues();
-            values.put(COLUMN_NAME_COMAMND_VENDOR,command.getProducer());
-            values.put(COLUMN_NAME_MODULE_DEVICE,command.getDevice());
+            String selection = _ID + LIKE;
+            String[] selectionArgs = {String.valueOf(command.getId())};
+            System.out.println("update cmd: " + command);
+            values.put(_ID,command.getId());
             values.put(COLUMN_NAME_COMMAND,command.getCmd());
-            String selection = COLUMN_NAME_TEXT + LIKE_AND + COLUMN_NAME_COMMAND_TYPE + LIKE;
-            String[] selectionArgs = new String[]{command.getCommandName(), "pc"};
-            return db.update(TABLE_NAME_COMMANDS, values, selection, selectionArgs);
+            values.put(COLUMN_NAME_TEXT,command.getCommandName());
+            return db.update(TABLE_NAME_COMMANDS, values, selection,selectionArgs);
         }
     }
 
@@ -192,20 +187,13 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         List<Command> commands = new ArrayList<>();
         try (SQLiteDatabase db = getReadableDatabase()) {
             String[] projection = {
+                    _ID,
                     COLUMN_NAME_TEXT,
-                    COLUMN_NAME_COMAMND_VENDOR,
-                    COLUMT_NAME_COMMAND_DEVICE,
-                    COLUMN_NAME_COMMAND_TYPE,
                     COLUMN_NAME_COMMAND
-
             };
-            String selection;
-            String[] selectionArgs;
-            selection = COLUMN_NAME_COMMAND_TYPE + LIKE;
-            selectionArgs = new String[]{"pc"};
-            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, selection, selectionArgs, null, null, null)) {
+            try (Cursor c = db.query(TABLE_NAME_COMMANDS, projection, null, null, null, null, null)) {
                 while (c.moveToNext()) {
-                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_COMAMND_VENDOR)), c.getString(c.getColumnIndex(COLUMT_NAME_COMMAND_DEVICE)), c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), null, c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND_TYPE)));
+                    Command command = new Command(c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_COMMAND)), c.getInt(c.getColumnIndex(_ID)));
                     commands.add(command);
                 }
             }
@@ -215,8 +203,8 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
     // delete command from DB
     public void deleteCommand(Command command) {
         try (SQLiteDatabase db = getWritableDatabase()) {
-            String selection = COLUMN_NAME_COMMAND_TYPE + LIKE_AND + COLUMN_NAME_TEXT + LIKE;
-            String[] selectionArgs = {"pc", command.getCmd()};
+            String selection = _ID + LIKE;
+            String[] selectionArgs = {String.valueOf(command.getId())};
             db.delete(TABLE_NAME_COMMANDS, selection, selectionArgs);
         }
     }
