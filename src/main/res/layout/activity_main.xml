@@ -4,6 +4,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <android.support.v4.widget.DrawerLayout
@@ -77,8 +78,8 @@
             android:layout_gravity="start"
             android:background="#3D3D3D"
             android:choiceMode="singleChoice"
-            android:divider="#888787"
-            android:dividerHeight="0dp" />
+            android:divider="#35888787"
+            android:dividerHeight="1dp" />
 
     </android.support.v4.widget.DrawerLayout>
 

@@ -11,4 +11,8 @@
     <string name="unpair">unPair</string>
     <string name="pair">Pair</string>
     <string name="options">Options</string>
+    <string name="add_new_command">add new command</string>
+    <string name="delete">delete</string>
+    <string name="edit" />
+    <string name="run">run</string>
 </resources>

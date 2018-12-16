@@ -156,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
             BackgroundUtil.setSelectedId(item.getId());
             mDrawerList.setItemChecked(position, true);
         }
+        updateActivity();
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -256,9 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     ((ImageView) view.findViewById(R.id.pair_status)).setImageResource(R.drawable.no_pair);
-                }
-                if (BackgroundUtil.getSelectedId().equals(id)) {
-                    ((TextView) view.findViewById(R.id.connected_device)).setTextColor(Color.GRAY);
                 }
             }
             return view;
