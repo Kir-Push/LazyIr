@@ -149,7 +149,7 @@ public class ConnectionThread implements Runnable {
         }
     }
 
-    // instantiate new device, put it in map and check in db if it paired.
+    // instantiate new device, put it in map and check in db if it yes_pair.
     // after that send introduce package
     private void newConnectedDevice(NetworkPackage np) {
             // if device not null - you already know about device, so no introduction

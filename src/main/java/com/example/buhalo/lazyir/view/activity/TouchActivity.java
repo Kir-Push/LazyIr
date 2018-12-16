@@ -45,11 +45,11 @@ public class TouchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if(!BackgroundUtil.hasActualConnection()) {
-//            Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
-//            finish();
-//            return;
-//        }
+        if(!BackgroundUtil.hasActualConnection()) {
+            Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         setContentView(R.layout.touch_layout);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }

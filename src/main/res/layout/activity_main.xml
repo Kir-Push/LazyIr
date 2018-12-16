@@ -21,61 +21,64 @@
 
             <Button
                 android:id="@+id/media_start_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="68dp"
+                android:layout_marginLeft="20dp"
                 android:layout_marginTop="32dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginBottom="32dp"
+                android:background="@drawable/round_shape_main"
                 android:text="@string/media_control"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/touch_control"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="68dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginBottom="32dp"
+                android:background="@drawable/round_shape_main"
+                android:backgroundTint="#FF6D00"
                 android:text="@string/touch_control"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/command_start_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="68dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginBottom="32dp"
+                android:background="@drawable/round_shape_main"
+                android:backgroundTint="#FFAB00"
                 android:text="@string/command"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/share_start_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="68dp"
-                android:layout_marginBottom="32dp"
-                android:text="@string/share"
-                android:textStyle="bold" />
-
-            <Button
                 android:id="@+id/clipboard_start_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="68dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginBottom="32dp"
+                android:background="@drawable/round_shape_main"
+                android:backgroundTint="#AA00FF"
                 android:text="@string/clipboard_history"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
         <!-- The navigation drawer -->
-        <ListView android:id="@+id/left_drawer"
-            android:layout_width="240dp"
+        <ListView
+            android:id="@+id/left_drawer"
+            android:layout_width="280dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:background="#3D3D3D"
             android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp"
-            android:background="#111"/>
+            android:divider="#888787"
+            android:dividerHeight="0dp" />
 
     </android.support.v4.widget.DrawerLayout>
 

@@ -6,12 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -121,9 +124,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CommandActivity.class);
             startActivity(intent);
         });
-        contentFrame.findViewById(R.id.share_start_btn).setOnClickListener(v -> {
-
-        });
         contentFrame.findViewById(R.id.clipboard_start_btn).setOnClickListener(v -> {
 
         });
@@ -185,13 +185,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         Device device = BackgroundUtil.getDevice(BackgroundUtil.getSelectedId());
         if(device != null && device.isPaired()) {
-            menu.add("UnPair");
+            menu.getItem(0).setVisible(true);
+            menu.getItem(1).setVisible(false);
         } else {
-            menu.add("Pair");
+            menu.getItem(0).setVisible(false);
+            menu.getItem(1).setVisible(true);
         }
-        menu.add("Options");
         return true;
     }
 
@@ -202,6 +204,10 @@ public class MainActivity extends AppCompatActivity {
     private void updateActivity(){
         invalidateOptionsMenu();
         getAdapter().notifyDataSetChanged();
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null) {
+            supportActionBar.setTitle(BackgroundUtil.getSelectedId());
+        }
     }
 
 
