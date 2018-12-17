@@ -64,7 +64,7 @@
         <activity android:name=".view.activity.CommandActivity"
             android:parentActivityName=".view.activity.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/baba">
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
         <activity android:name=".view.activity.MediaRemoteActivity"
