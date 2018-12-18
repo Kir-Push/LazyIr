@@ -98,8 +98,14 @@ public class SendCommand extends Module {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void commandFromActivity(SendCommandDto dto){
-        if(dto.getId().equals(device.getId()) && dto.getCommand().equals(api.EXECUTE.name())){
-            sendMsg(messageFactory.createMessage(this.getClass().getSimpleName(),true,dto));
+        if(dto.getId().equals(device.getId())) {
+            if (dto.getCommand().equals(api.EXECUTE.name())) {
+                sendMsg(messageFactory.createMessage(this.getClass().getSimpleName(), true, dto));
+            } else if (dto.getCommand().equals(api.DELETE_COMMANDS.name())) {
+                deleteCommands(dto);
+            } else if (dto.getCommand().equals(api.UPDATE_COMMANDS.name())) {
+                updateCommands(dto);
+            }
         }
     }
 }

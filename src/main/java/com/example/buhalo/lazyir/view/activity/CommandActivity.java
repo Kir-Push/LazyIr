@@ -4,9 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.db.DBHelper;
+import com.example.buhalo.lazyir.device.Device;
+import com.example.buhalo.lazyir.service.BackgroundUtil;
 import com.example.buhalo.lazyir.view.adapters.CommandsAdapter;
 
 import javax.inject.Inject;
@@ -20,15 +23,22 @@ public class CommandActivity extends AppCompatActivity{
 
     @Inject @Setter @Getter
     DBHelper dbHelper;
+    private String selectedId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
+        selectedId = BackgroundUtil.getSelectedId();
+        Device device = BackgroundUtil.getDevice(selectedId);
+        if(device == null || !BackgroundUtil.hasActualConnection()) {
+            Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         setContentView(R.layout.commands_layout);
         ListView commandListView = findViewById(R.id.command_list_view);
-        CommandsAdapter moduleSettingAdapter = new CommandsAdapter(this,dbHelper,dbHelper.getCommandFull());
+        CommandsAdapter moduleSettingAdapter = new CommandsAdapter(this,dbHelper,dbHelper.getCommandFull(),selectedId);
         commandListView.setAdapter(moduleSettingAdapter);
     }
 
