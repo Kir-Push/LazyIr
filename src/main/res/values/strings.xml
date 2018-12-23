@@ -30,4 +30,5 @@
     <string name="delete">delete</string>
     <string name="edit">edit</string>
     <string name="run">run</string>
+    <string name="save">Save</string>
 </resources>

@@ -3,6 +3,7 @@ package com.example.buhalo.lazyir.di;
 
 import com.example.buhalo.lazyir.di.scope.ActivityScope;
 import com.example.buhalo.lazyir.view.activity.CommandActivity;
+import com.example.buhalo.lazyir.view.activity.CommandEditActivity;
 import com.example.buhalo.lazyir.view.activity.MainActivity;
 import com.example.buhalo.lazyir.view.activity.ModulesActivity;
 
@@ -21,6 +22,10 @@ public interface MainActivityModule {
     @ActivityScope
     @ContributesAndroidInjector()
     CommandActivity commandActivityInjector();
+
+    @ActivityScope
+    @ContributesAndroidInjector()
+    CommandEditActivity commandEditActivityInjector();
 
     @ActivityScope
     @ContributesAndroidInjector()
