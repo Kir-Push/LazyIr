@@ -25,14 +25,13 @@ public class CommandActivity extends AppCompatActivity{
 
     @Inject @Setter @Getter
     DBHelper dbHelper;
-    private String selectedId;
     CommandsAdapter moduleSettingAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        selectedId = BackgroundUtil.getSelectedId();
+        String selectedId = BackgroundUtil.getSelectedId();
         Device device = BackgroundUtil.getDevice(selectedId);
         if(device == null || !BackgroundUtil.hasActualConnection()) {
             Toast.makeText(this,"No connection",Toast.LENGTH_SHORT).show();
@@ -41,7 +40,7 @@ public class CommandActivity extends AppCompatActivity{
         }
         setContentView(R.layout.commands_layout);
         ListView commandListView = findViewById(R.id.command_list_view);
-        moduleSettingAdapter = new CommandsAdapter(this,dbHelper,dbHelper.getCommandFull(),selectedId);
+        moduleSettingAdapter = new CommandsAdapter(this,dbHelper,dbHelper.getCommandFull(), selectedId);
         commandListView.setAdapter(moduleSettingAdapter);
         Button addCmdButton = findViewById(R.id.addNewCommandBtn);
         addCmdButton.setOnClickListener(v ->{

@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.Telephony;
 import android.util.Log;
-import android.widget.RelativeLayout;
 
 import com.example.buhalo.lazyir.modules.notification.CallSmsUtils;
 import com.example.buhalo.lazyir.modules.sendcommand.Command;
@@ -175,7 +174,6 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
             ContentValues values = new ContentValues();
             String selection = _ID + LIKE;
             String[] selectionArgs = {String.valueOf(command.getId())};
-            System.out.println("update cmd: " + command);
             values.put(_ID,command.getId());
             values.put(COLUMN_NAME_COMMAND,command.getCmd());
             values.put(COLUMN_NAME_TEXT,command.getCommandName());
@@ -290,8 +288,6 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
             values.put(COLUMN_NAME_MODULE_NAME, moduleName);
             values.put(COLUMN_NAME_MODULE_DEVICE, dv);
             values.put(COLUMN_NAME_MODULE_STATUS, status ? statusOn : statusOff);
-       //     String selection = COLUMN_NAME_MODULE_DEVICE + LIKE_AND + COLUMN_NAME_MODULE_NAME + LIKE;
-       //     String[] args = new String[]{dv, moduleName};
             db.insert(TABLE_NAME_MODULE, null, values);
         }
 

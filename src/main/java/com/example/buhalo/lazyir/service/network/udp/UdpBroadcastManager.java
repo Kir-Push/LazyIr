@@ -16,7 +16,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +27,6 @@ import lombok.Setter;
 import lombok.Synchronized;
 
 import static com.example.buhalo.lazyir.service.BackgroundUtil.checkWifiOnAndConnected;
-import static com.example.buhalo.lazyir.service.BackgroundUtil.hasActualConnection;
 import static com.example.buhalo.lazyir.service.network.udp.UdpBroadcastManager.api.BROADCAST_INTRODUCE;
 
 public class UdpBroadcastManager  {

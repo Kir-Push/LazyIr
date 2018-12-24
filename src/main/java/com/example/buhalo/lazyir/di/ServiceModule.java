@@ -1,6 +1,5 @@
 package com.example.buhalo.lazyir.di;
 
-import android.app.Application;
 import android.content.Context;
 
 import com.example.buhalo.lazyir.AppBoot;

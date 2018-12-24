@@ -7,7 +7,6 @@ import com.example.buhalo.lazyir.api.NetworkPackage;
 import com.example.buhalo.lazyir.device.Device;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
 
-import org.greenrobot.eventbus.EventBus;
 
 public abstract class Module {
 

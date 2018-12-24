@@ -99,7 +99,8 @@ public class Reminder extends Module {
 
     private void setMessageRead(Notification notification, NotificationManager notificationManager){
         utls.getPendingNotifs().remove(notification.getPack() + ":" + notification.getTitle());
-        notificationManager.cancel(Integer.parseInt(notification.getId())); // todo test, and if didn't work, do though post notification (send notificaiton with id, and in notif listener remove posted notif and notif by contained id)
+        notificationManager.cancel(Integer.parseInt(notification.getId()));
+        // todo test, and if didn't work, do though post notification (send notificaiton with id, and in notif listener remove posted notif and notif by contained id)
     }
 
     private void setMessageIgnored(Sms sms) {

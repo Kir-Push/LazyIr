@@ -98,7 +98,6 @@ public class ShareModule extends Module {
         }
         else if (cmd.getId().equals(device.getId()) && cmd.getCommand().equals(ModuleCmds.sendSetupServerCommand)) {
             setupSftp(messageFactory,settingService,device.getId(),context);
-            System.out.println("SEND TO DEVICE SETUP SFTP!!!!");
         }
     }
 

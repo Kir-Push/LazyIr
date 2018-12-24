@@ -31,8 +31,7 @@ public class MessageFactory {
     }
 
     public NetworkPackage parseMessage(String msg){
-        NetworkPackage np = gson.fromJson(msg,NetworkPackage.class);
-        return np;
+        return gson.fromJson(msg,NetworkPackage.class);
     }
 
     private String serialize(NetworkPackage np){

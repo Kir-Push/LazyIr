@@ -1,7 +1,5 @@
 package com.example.buhalo.lazyir.api;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**

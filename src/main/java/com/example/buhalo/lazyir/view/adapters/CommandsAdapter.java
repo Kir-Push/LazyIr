@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,7 +18,6 @@ import com.example.buhalo.lazyir.view.activity.CommandEditActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 

@@ -29,7 +29,7 @@ public class KeyboardControl extends Module {
 
     @Override
     public void execute(NetworkPackage np) {
-
+//don't need
     }
 
     @Override
@@ -41,7 +41,6 @@ public class KeyboardControl extends Module {
     public void sendToServer(KeyboardDto dto){
         if(dto.getId().equals(device.getId())) {
             String message = messageFactory.createMessage(this.getClass().getSimpleName(), true, dto);
-            System.out.println("send message : " + dto);
             sendMsg(message);
         }
     }

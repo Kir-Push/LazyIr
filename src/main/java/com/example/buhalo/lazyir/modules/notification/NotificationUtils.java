@@ -67,7 +67,8 @@ import static com.example.buhalo.lazyir.service.listeners.NotificationListener.S
     }
 
     private String extractType(StatusBarNotification sbn,String pack,String title,String text){
-        if(pack != null && (pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2) || pack.equals(Telephony.Sms.getDefaultSmsPackage(context)))) { //todo проверь, если скажем fb messenger стоит стандартным sms, не считает ли он все его сообщение смс, если да то свенряйся с smsbroadcast, если туда приходило значит sms, если нет, то нет
+        if(pack != null && (pack.equals(SMS_TYPE) || pack.equals(SMS_TYPE_2) || pack.equals(Telephony.Sms.getDefaultSmsPackage(context)))) {
+            //todo проверь, если скажем fb messenger стоит стандартным sms, не считает ли он все его сообщение смс, если да то свенряйся с smsbroadcast, если туда приходило значит sms, если нет, то нет
             return NotificationTypes.SMS.name();
         }
         else if(pack != null && messengersMessage(sbn,pack,title,text)) {

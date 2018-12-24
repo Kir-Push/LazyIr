@@ -3,7 +3,6 @@ package com.example.buhalo.lazyir.modules.clipboard;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.os.Looper;
 
 import com.example.buhalo.lazyir.api.MessageFactory;
 import com.example.buhalo.lazyir.api.NetworkPackage;
@@ -11,7 +10,6 @@ import com.example.buhalo.lazyir.modules.Module;
 import com.example.buhalo.lazyir.service.BackgroundServiceCmds;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
 
-import org.greenrobot.eventbus.EventBus;
 
 
 import javax.inject.Inject;

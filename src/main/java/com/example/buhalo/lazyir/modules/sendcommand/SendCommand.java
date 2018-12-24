@@ -1,7 +1,6 @@
 package com.example.buhalo.lazyir.modules.sendcommand;
 
 import android.content.Context;
-import android.widget.Button;
 
 import com.annimon.stream.Stream;
 import com.example.buhalo.lazyir.api.MessageFactory;
@@ -13,9 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;

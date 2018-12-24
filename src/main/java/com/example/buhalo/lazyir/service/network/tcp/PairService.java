@@ -59,7 +59,6 @@ public class PairService {
         }
         dbHelper.savePairedDevice(id, data);
         EventBus.getDefault().post(new MainActivityCommand(UiCmds.UPDATE_ACTIVITY,null));
-//        EventBus.getDefault().post(new ShareModuleCommand(ModuleCmds.sendSetupServerCommand,id));
     }
 
     public void setPairStatus(String id, String data, String result){
