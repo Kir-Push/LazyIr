@@ -1,4 +1,5 @@
-# Lazyir - is a project that allow to linux/win pc communicate with android phone
+# Lazyir - android app
+## Is a project that allow to linux/win pc communicate with android phone
 What he can do:
 
 * Share Files - phone filesystem will be a regular folder in linux, and\
