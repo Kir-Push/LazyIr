@@ -6,7 +6,8 @@ like separate partition in windows
 * Show notifications - you receive your phone notifications and see them on pc
 * Answer messages from sms and messengers
 * Control media playback - you can control play/pause/rewind your media playback on pc from phone,
-(windows version supports only vlc, linux most popular players), also you can install browser extension https://github.com/Kir-Push/LazyIr-Browser to
+(windows version supports only vlc, linux most popular players),
+also you can install browser extension https://github.com/Kir-Push/LazyIr-Browser to
 control media from browser (youtube and most others sites with html5 video)
 * Use phone as touchPad and keyboard
 * Shared clipboard
