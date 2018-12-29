@@ -60,21 +60,28 @@ public class ClipboardAdapter extends BaseAdapter {
         clipboardText.setClickable(true);
         clipboardText.setOnClickListener(v ->{
             EventBus.getDefault().post(new ClipBoardDto(ClipBoard.api.RECEIVE.name(), (String) v.getTag()));
+            notifyChanged();
         });
         ImageView deleteView = (ImageView) view.findViewById(R.id.delete_clipboard_btn);
         deleteView.setTag(clipboard);
         deleteView.setClickable(true);
         deleteView.setOnClickListener(v->{
             dbHelper.deleteClipboard((ClipboardDB) v.getTag());
-            notifyDataSetChanged();
+            notifyChanged();
         });
+        TextView clipboardOwner = (TextView)view.findViewById(R.id.clibpoard_owner);
+        clipboardOwner.setText(clipboard.getOwner());
 
         return view;
     }
 
+    public void notifyChanged(){
+        clipboard = dbHelper.getClipboardFull();
+        notifyDataSetChanged();
+    }
+
     @Override
     public void notifyDataSetChanged() {
-        clipboard = dbHelper.getClipboardFull();
         super.notifyDataSetChanged();
     }
 }

@@ -63,7 +63,9 @@ public class ClipBoard extends Module {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void commandFromActivity(ClipBoardDto dto) {
      if(device.getId().equalsIgnoreCase(BackgroundUtil.getSelectedId()) && dto.getCommand().equalsIgnoreCase(RECEIVE.name())){
-         onReceive(dto);
+         onReceive(new ClipboardDB(dto.getText(),BackgroundUtil.getMyName(),-1));
+         String message = messageFactory.createMessage(ClipBoard.class.getSimpleName(), true, dto);
+         BackgroundUtil.sendToAll(message,context);
      }
     }
 
@@ -75,6 +77,16 @@ public class ClipBoard extends Module {
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
             }
+    }
+
+    private void onReceive(ClipboardDB dto) {
+        setInserted(true);
+        ClipboardManager clipboard = (ClipboardManager) context.getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", dto.getText());
+        dbHelper.saveClipboard(dto);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
     }
 
     @Synchronized

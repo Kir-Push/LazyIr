@@ -19,7 +19,7 @@ import dagger.android.AndroidInjection;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ClipboardAcitivity extends AppCompatActivity {
+public class ClipboardActivity extends AppCompatActivity {
 
     @Inject @Setter @Getter
     DBHelper dbHelper;
@@ -36,16 +36,18 @@ public class ClipboardAcitivity extends AppCompatActivity {
             finish();
             return;
         }
-        setContentView(R.layout.commands_layout);
+        setContentView(R.layout.clipboard_layout);
         ListView commandListView = findViewById(R.id.clipboard_list);
         clipboardAdater = new ClipboardAdapter(this,dbHelper,dbHelper.getClipboardFull());
         commandListView.setAdapter(clipboardAdater);
         Button clearAllBtn = findViewById(R.id.eraseClipboardBtn);
         clearAllBtn.setOnClickListener(v ->{
          dbHelper.clearAllClipboard();
+         clipboardAdater.notifyChanged();
         });
     }
 
+    //todo timer which reccurent update datasetChanged
     @Override
     protected void onResume() {
         super.onResume();

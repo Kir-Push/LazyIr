@@ -2,6 +2,7 @@ package com.example.buhalo.lazyir.di;
 
 
 import com.example.buhalo.lazyir.di.scope.ActivityScope;
+import com.example.buhalo.lazyir.view.activity.ClipboardActivity;
 import com.example.buhalo.lazyir.view.activity.CommandActivity;
 import com.example.buhalo.lazyir.view.activity.CommandEditActivity;
 import com.example.buhalo.lazyir.view.activity.MainActivity;
@@ -30,5 +31,9 @@ public interface MainActivityModule {
     @ActivityScope
     @ContributesAndroidInjector()
     ModulesActivity modulesActivityInjector();
+
+    @ActivityScope
+    @ContributesAndroidInjector
+    ClipboardActivity clipboardActivityInjector();
 
 }

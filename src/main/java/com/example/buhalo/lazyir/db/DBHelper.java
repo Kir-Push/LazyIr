@@ -138,6 +138,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
     }
     //************************************************************************************************************
     // Clipboard Commands
+    @Synchronized
     public List<ClipboardDB> getClipboardFull() {
         List<ClipboardDB> clipboards = new ArrayList<>();
         try (SQLiteDatabase db = getReadableDatabase()) {
@@ -156,16 +157,19 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         return clipboards;
     }
 
+    @Synchronized
     public void clearAllClipboard(){
         try (SQLiteDatabase db = getWritableDatabase()) {
             db.delete(TABLE_NAME_CLIPBOARD, null, null);
         }
     }
 
+    @Synchronized
     public void deleteClipboard(ClipboardDB clipboardDB){
         deleteClipboard(clipboardDB.getId());
     }
 
+    @Synchronized
     private void deleteClipboard(int id){
         try (SQLiteDatabase db = getWritableDatabase()) {
             String selection = _ID + LIKE;
@@ -174,6 +178,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
     }
 
+    @Synchronized
     public void saveClipboard(ClipboardDB clipboardDB){
         try (SQLiteDatabase db = getWritableDatabase()) {
             ContentValues values = new ContentValues();
@@ -192,11 +197,12 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
     }
 
+    @Synchronized
     public long getCliboardCount() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME_CLIPBOARD);
-        db.close();
-        return count;
+        try(SQLiteDatabase db = this.getReadableDatabase()) {
+            long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME_CLIPBOARD);
+            return count;
+        }
     }
 
     //************************************************************************************************************
@@ -210,6 +216,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
     }
 
+    @Synchronized
     public List<Command> getCommand(String commandName) {
         List<Command> commands = new ArrayList<>();
         try (SQLiteDatabase db = getReadableDatabase()) {
@@ -234,6 +241,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         return commands;
     }
 
+    @Synchronized
     public int updateCommand(Command command){
         try(SQLiteDatabase db = getWritableDatabase()){
             ContentValues values = new ContentValues();
@@ -246,6 +254,7 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
     }
 
+    @Synchronized
     public List<Command> getCommandFull() {
         List<Command> commands = new ArrayList<>();
         try (SQLiteDatabase db = getReadableDatabase()) {

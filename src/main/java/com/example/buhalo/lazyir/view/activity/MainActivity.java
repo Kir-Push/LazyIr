@@ -122,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
         contentFrame.findViewById(R.id.clipboard_start_btn).setOnClickListener(v -> {
-
+            Intent intent = new Intent(this, ClipboardActivity.class);
+            startActivity(intent);
         });
     }
 
