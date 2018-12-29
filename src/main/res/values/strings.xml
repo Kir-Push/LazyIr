@@ -31,4 +31,5 @@
     <string name="edit">edit</string>
     <string name="run">run</string>
     <string name="save">Save</string>
+    <string name="clear_all">Clear All</string>
 </resources>

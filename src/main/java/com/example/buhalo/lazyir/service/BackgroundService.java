@@ -424,7 +424,7 @@ public class BackgroundService extends Service {
     }
 
     private void startClipboardListener() {
-        ClipBoard.setListener(getApplicationContext(),messageFactory);
+        ClipBoard.setListener(getApplicationContext(),messageFactory,dbHelper);
     }
 
     private void cacheConnect() {

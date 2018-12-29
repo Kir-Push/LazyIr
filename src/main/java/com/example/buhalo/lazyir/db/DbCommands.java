@@ -10,8 +10,10 @@ public interface DbCommands extends BaseColumns {
      String TABLE_NAME_COMMANDS_BTN = "commandsbtn";
      String TABLE_NAME_PAIRED_DEVICES = "pairedDevices";
      String TABLE_NAME_MODULE = "module";
+     String TABLE_NAME_CLIPBOARD = "clipboard";
      String COLUMN_NAME_ENTRY_ID = "entryid";
      String COLUMN_NAME_COMMAND = "command";
+     String COLUMN_NAME_OWNER = "owner";
      String COLUMN_NAME_COMMAND_ID = "id";
      String COLUMN_NAME_COMMAND_TYPE = "type";
      String COLUMN_NAME_TEXT = "text";

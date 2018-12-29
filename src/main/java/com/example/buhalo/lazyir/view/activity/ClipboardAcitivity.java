@@ -1,6 +1,5 @@
 package com.example.buhalo.lazyir.view.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +11,7 @@ import com.example.buhalo.lazyir.R;
 import com.example.buhalo.lazyir.db.DBHelper;
 import com.example.buhalo.lazyir.device.Device;
 import com.example.buhalo.lazyir.service.BackgroundUtil;
-import com.example.buhalo.lazyir.view.adapters.CommandsAdapter;
+import com.example.buhalo.lazyir.view.adapters.ClipboardAdapter;
 
 import javax.inject.Inject;
 
@@ -20,12 +19,11 @@ import dagger.android.AndroidInjection;
 import lombok.Getter;
 import lombok.Setter;
 
-
-public class CommandActivity extends AppCompatActivity{
+public class ClipboardAcitivity extends AppCompatActivity {
 
     @Inject @Setter @Getter
     DBHelper dbHelper;
-    CommandsAdapter commandsAdapter;
+    ClipboardAdapter clipboardAdater;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,19 +37,18 @@ public class CommandActivity extends AppCompatActivity{
             return;
         }
         setContentView(R.layout.commands_layout);
-        ListView commandListView = findViewById(R.id.command_list_view);
-        commandsAdapter = new CommandsAdapter(this,dbHelper,dbHelper.getCommandFull(), selectedId);
-        commandListView.setAdapter(commandsAdapter);
-        Button addCmdButton = findViewById(R.id.addNewCommandBtn);
-        addCmdButton.setOnClickListener(v ->{
-            Intent intent = new Intent(this, CommandEditActivity.class);
-            startActivity(intent);
+        ListView commandListView = findViewById(R.id.clipboard_list);
+        clipboardAdater = new ClipboardAdapter(this,dbHelper,dbHelper.getClipboardFull());
+        commandListView.setAdapter(clipboardAdater);
+        Button clearAllBtn = findViewById(R.id.eraseClipboardBtn);
+        clearAllBtn.setOnClickListener(v ->{
+         dbHelper.clearAllClipboard();
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        commandsAdapter.notifyDataSetChanged();
+        clipboardAdater.notifyDataSetChanged();
     }
 }

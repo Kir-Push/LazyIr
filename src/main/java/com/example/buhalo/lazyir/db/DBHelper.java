@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.provider.CallLog;
 import android.provider.Telephony;
 import android.util.Log;
 
+import com.example.buhalo.lazyir.modules.clipboard.ClipboardDB;
 import com.example.buhalo.lazyir.modules.notification.CallSmsUtils;
 import com.example.buhalo.lazyir.modules.sendcommand.Command;
 import com.example.buhalo.lazyir.modules.ModuleFactory;
@@ -134,6 +136,69 @@ public class DBHelper extends SQLiteOpenHelper implements DbCommands {
         }
         return null;
     }
+    //************************************************************************************************************
+    // Clipboard Commands
+    public List<ClipboardDB> getClipboardFull() {
+        List<ClipboardDB> clipboards = new ArrayList<>();
+        try (SQLiteDatabase db = getReadableDatabase()) {
+            String[] projection = {
+                    _ID,
+                    COLUMN_NAME_TEXT,
+                    COLUMN_NAME_OWNER
+            };
+            try (Cursor c = db.query(TABLE_NAME_CLIPBOARD, projection, null, null, null, null, null)) {
+                while (c.moveToNext()) {
+                    ClipboardDB clipboard = new ClipboardDB(c.getString(c.getColumnIndex(COLUMN_NAME_TEXT)), c.getString(c.getColumnIndex(COLUMN_NAME_OWNER)), c.getInt(c.getColumnIndex(_ID)));
+                    clipboards.add(clipboard);
+                }
+            }
+        }
+        return clipboards;
+    }
+
+    public void clearAllClipboard(){
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            db.delete(TABLE_NAME_CLIPBOARD, null, null);
+        }
+    }
+
+    public void deleteClipboard(ClipboardDB clipboardDB){
+        deleteClipboard(clipboardDB.getId());
+    }
+
+    private void deleteClipboard(int id){
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            String selection = _ID + LIKE;
+            String[] selectionArgs = {String.valueOf(id)};
+            db.delete(TABLE_NAME_CLIPBOARD, selection, selectionArgs);
+        }
+    }
+
+    public void saveClipboard(ClipboardDB clipboardDB){
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NAME_TEXT, clipboardDB.getText());
+            values.put(COLUMN_NAME_OWNER, clipboardDB.getOwner());
+            db.insert(TABLE_NAME_CLIPBOARD, null, values);
+        }
+        while(getCliboardCount() > 20){
+            try (SQLiteDatabase db = getWritableDatabase()) {
+                Cursor c = db.query(TABLE_NAME_CLIPBOARD, new String[] { "min(" + _ID + ")" }, null, null,
+                        null, null, null);
+                c.moveToFirst();
+                int rowID = c.getInt(0);
+                deleteClipboard(rowID);
+            }
+        }
+    }
+
+    public long getCliboardCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME_CLIPBOARD);
+        db.close();
+        return count;
+    }
+
     //************************************************************************************************************
     // Global commands CRUD action's and
     public void saveCommand(Command command) {
